@@ -45,7 +45,7 @@ function makePlayer(id, name) {
   return {
     id, name: String(name || 'Player').slice(0, 18), score: 0,
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
-    second: false, roundScore: 0, lastSeen: Date.now()
+    second: false, sevenBonus: false, roundScore: 0, lastSeen: Date.now()
   };
 }
 
@@ -221,7 +221,9 @@ function resolveNumber(room, target, card, resume = null) {
   }
   room.log.push(`${target.name} flipped ${card.value}.`);
   if (target.cards.length >= 7) {
-    finishRound(room, `${target.name} flipped seven unique Number cards and ended the round!`);
+    target.sevenBonus = true;
+    room.bonusEvent = { playerId: target.id, playerName: target.name, points: 15, id: uid() };
+    finishRound(room, `${target.name} flipped seven unique Number cards, earned +15, and ended the round!`);
     return 'flip7';
   }
   return 'safe';
@@ -344,9 +346,10 @@ function startRound(room) {
   room.pendingResolution = null;
   room.flow = { type: 'deal' };
   room.winner = null;
+  room.bonusEvent = null;
   room.players.forEach(player => Object.assign(player, {
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
-    second: false, roundScore: 0
+    second: false, sevenBonus: false, roundScore: 0
   }));
   room.heldSecondCards.clear();
   if (!room.deck.length) room.deck = makeDeck();
@@ -367,7 +370,7 @@ function publicState(room) {
     pendingAction: pending,
     pendingResolution: room.pendingResolution ? { ...room.pendingResolution } : null,
     players: room.players.map(player => ({ ...player, connected: Date.now() - player.lastSeen < 12000 })),
-    log: room.log.slice(-18), winner: room.winner
+    log: room.log.slice(-18), winner: room.winner, bonusEvent: room.bonusEvent
   };
 }
 
@@ -386,7 +389,7 @@ const server = http.createServer(async (req, res) => {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
         players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
         heldSecondCards: new Map(), pendingAction: null, pendingResolution: null, flow: null,
-        log: ['Room created.'], winner: null
+        log: ['Room created.'], winner: null, bonusEvent: null
       };
       rooms.set(code, room);
       return send(res, 200, { ok: true, room: code, playerId, state: publicState(room) });
@@ -449,6 +452,7 @@ const server = http.createServer(async (req, res) => {
       room.deck = makeDeck();
       room.discard = [];
       room.winner = null;
+      room.bonusEvent = null;
       room.log = ['A new game begins.'];
       startRound(room);
     } else {
@@ -458,8 +462,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, file);
-  if (!file.startsWith(path.join(__dirname))) return send(res, 403, 'Forbidden', 'text/plain');
+  file = path.join(__dirname, 'public', file);
+  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
