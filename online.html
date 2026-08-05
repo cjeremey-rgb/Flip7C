@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Flip Rush 7</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="online.css">
+  <link rel="stylesheet" href="online.css?v=3">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -50,11 +50,15 @@
 
     <div id="table" class="table">
       <div class="felt-mark">FLIP RUSH</div>
+      <div id="opponentHands" class="opponent-hands"></div>
       <div class="deck-zone">
         <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
         <small><b id="deckCount">94</b> LEFT</small>
       </div>
-      <div id="myArea" class="my-area"></div>
+      <section id="myHandZone" class="hand-zone my-hand-zone">
+        <div class="hand-heading"><b>YOUR CARDS</b><small id="myHandStatus"></small></div>
+        <div id="myArea" class="my-area"></div>
+      </section>
       <div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div>
     </div>
 
