@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Flip Rush 7</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="online.css?v=3">
+  <link rel="stylesheet" href="online.css?v=20260804-parity-1">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -57,7 +57,7 @@
       </div>
       <section id="myHandZone" class="hand-zone my-hand-zone">
         <div class="hand-heading"><b>YOUR CARDS</b><small id="myHandStatus"></small></div>
-        <div id="myArea" class="my-area"></div>
+        <div id="myArea" class="my-area"></div><div id="myResultOverlay" class="result-overlay hidden"></div>
       </section>
       <div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div>
     </div>
@@ -67,7 +67,7 @@
     <div id="actions" class="actions">
       <button id="react" class="react-btn">☺</button>
       <button id="hit" class="primary decision"><span>FLIP</span><small>Draw one card</small></button>
-      <button id="stay" class="decision"><span>STAY</span><small>Bank your points</small></button>
+      <button id="stay" class="decision"><span>HOLD</span><small>Bank your points</small></button>
       <button id="start" class="primary decision hidden"><span>START GAME</span><small>Let the rush begin</small></button>
       <button id="next" class="primary decision hidden"><span>NEXT ROUND</span><small>Deal again</small></button>
     </div>
@@ -94,7 +94,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260804-room-sync-fix';
+  script.src = 'online.js?v=20260804-parity-1';
   document.body.appendChild(script);
 }
 </script>

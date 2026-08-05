@@ -26,3 +26,15 @@
 .card.new-card{animation:deal .42s cubic-bezier(.17,.84,.31,1.23)}
 .empty-hand{width:100%;text-align:center;color:rgba(255,255,255,.35);font-size:9px;letter-spacing:.12em;padding:23px 4px}
 @media(max-width:520px){.opponent-hands{grid-template-columns:repeat(2,minmax(0,1fr))}.table{min-height:500px}.opponent-card-row .card{width:46px;height:67px;font-size:24px}.hand-heading{font-size:9px}}
+
+
+/* Match the single-player status presentation */
+.hand-zone{overflow:hidden}
+.hand-zone.frozen{opacity:1;border-color:#74dfff;box-shadow:inset 0 0 22px rgba(116,223,255,.18),0 0 0 2px rgba(116,223,255,.12)}
+.result-overlay{position:absolute;z-index:12;left:50%;top:58%;transform:translate(-50%,-50%) rotate(-7deg);font:900 clamp(28px,8vw,52px) 'Archivo Black',Inter,sans-serif;letter-spacing:.08em;white-space:nowrap;pointer-events:none;-webkit-text-stroke:2px rgba(5,10,16,.75);text-shadow:0 3px 0 rgba(0,0,0,.7),0 0 12px currentColor;animation:statusStamp .22s cubic-bezier(.18,.9,.3,1.25)}
+.result-overlay.bust{color:#ff405f;opacity:.76;transform:translate(-50%,-50%) rotate(-10deg);filter:drop-shadow(0 4px 4px rgba(0,0,0,.55))}
+.result-overlay.hold{color:#ffdd42;opacity:.76;transform:translate(-50%,-50%) rotate(7deg);filter:drop-shadow(0 4px 4px rgba(0,0,0,.55))}
+.result-overlay.frozen{color:#74dfff;opacity:.58;transform:translate(-50%,-50%) rotate(-5deg);filter:drop-shadow(0 4px 4px rgba(0,0,0,.45))}
+@keyframes statusStamp{from{opacity:0;scale:1.45}to{scale:1}}
+.opponent-hand-zone .result-overlay{top:62%;font-size:clamp(24px,6vw,42px)}
+.my-hand-zone .result-overlay{top:62%}

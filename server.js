@@ -44,7 +44,7 @@ function makeDeck() {
 function makePlayer(id, name) {
   return {
     id, name: String(name || 'Player').slice(0, 18), score: 0,
-    cards: [], mods: [], active: true, stayed: false, busted: false,
+    cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
     second: false, roundScore: 0, lastSeen: Date.now()
   };
 }
@@ -76,7 +76,7 @@ function takeCard(room) {
 }
 
 function discardPlayerCards(room, player) {
-  room.discard.push(...player.cards, ...player.mods);
+  room.discard.push(...player.cards, ...player.mods, ...(player.statusCards || []));
   if (player.second) {
     const sc = room.heldSecondCards.get(player.id);
     if (sc) room.discard.push(sc);
@@ -144,7 +144,13 @@ function resumeFlow(room, resume) {
 }
 
 function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
-  const eligible = activePlayers(room).filter(player => !restrictedTargets || restrictedTargets.includes(player.id));
+  let eligible = activePlayers(room).filter(player => !restrictedTargets || restrictedTargets.includes(player.id));
+  // Freeze must be given to another active player whenever one exists.
+  // The drawer only keeps it when every other player is inactive.
+  if (card.name === 'freeze') {
+    const others = eligible.filter(player => player.id !== chooserId);
+    eligible = others.length ? others : eligible.filter(player => player.id === chooserId);
+  }
   if (!eligible.length) {
     room.discard.push(card);
     resumeFlow(room, resume);
@@ -231,6 +237,20 @@ function applyAction(room, chooser, target, card, resume) {
     return;
   }
   if (card.name === 'freeze') {
+    // Second Chance blocks an incoming Freeze and both action cards are discarded.
+    if (target.second) {
+      target.second = false;
+      const held = room.heldSecondCards.get(target.id);
+      if (held) room.discard.push(held);
+      room.heldSecondCards.delete(target.id);
+      room.log.push(`${target.name}'s Second Chance blocked Freeze.`);
+      resumeFlow(room, resume);
+      return;
+    }
+    // Keep the Freeze card visibly in the recipient's card row.
+    room.discard.pop();
+    target.statusCards.push(card);
+    target.frozen = true;
     target.stayed = true;
     target.active = false;
     target.roundScore = calculateScore(target);
@@ -287,7 +307,7 @@ function startRound(room) {
   room.flow = { type: 'deal' };
   room.winner = null;
   room.players.forEach(player => Object.assign(player, {
-    cards: [], mods: [], active: true, stayed: false, busted: false,
+    cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
     second: false, roundScore: 0
   }));
   room.heldSecondCards.clear();
@@ -387,8 +407,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, file);
-  if (!file.startsWith(path.join(__dirname))) return send(res, 403, 'Forbidden', 'text/plain');
+  file = path.join(__dirname, 'public', file);
+  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
