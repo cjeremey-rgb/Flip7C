@@ -143,7 +143,29 @@ function resumeFlow(room, resume) {
   }
 }
 
+function grantSecondChance(room, player, card, resume) {
+  if (!player || !player.active) {
+    room.discard.push(card);
+    resumeFlow(room, resume);
+    return;
+  }
+  if (player.second) {
+    room.discard.push(card);
+    room.log.push(`${player.name} already has a Second Chance, so the new card was discarded.`);
+  } else {
+    player.second = true;
+    room.heldSecondCards.set(player.id, card);
+    room.log.push(`${player.name} drew and kept a Second Chance.`);
+  }
+  resumeFlow(room, resume);
+}
+
 function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
+  // Second Chance always belongs to the player who drew it. It is never targeted.
+  if (card.name === 'second') {
+    grantSecondChance(room, playerById(room, chooserId), card, resume);
+    return;
+  }
   let eligible = activePlayers(room).filter(player => !restrictedTargets || restrictedTargets.includes(player.id));
   // Freeze must be given to another active player whenever one exists.
   // The drawer only keeps it when every other player is inactive.
@@ -163,16 +185,32 @@ function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
   room.log.push(`${playerById(room, chooserId)?.name || 'A player'} drew ${actionLabel(card.name)} and must choose a target.`);
 }
 
-function resolveNumber(room, target, card) {
+function resolveNumber(room, target, card, resume = null) {
   const duplicate = target.cards.some(existing => existing.value === card.value);
   if (duplicate && target.second) {
-    target.second = false;
-    const held = room.heldSecondCards.get(target.id);
-    if (held) room.discard.push(held);
-    room.heldSecondCards.delete(target.id);
-    room.discard.push(card);
-    room.log.push(`${target.name}'s Second Chance blocked a duplicate ${card.value}.`);
-    return 'safe';
+    // Show the duplicate beside the original for about one second so every player
+    // can see why Second Chance was used. Then discard the duplicate and the
+    // Second Chance together before continuing the interrupted game flow.
+    target.cards.push(card);
+    const token = uid();
+    room.pendingResolution = {
+      type: 'secondChanceDuplicate', playerId: target.id, cardValue: card.value, token
+    };
+    room.log.push(`${target.name} revealed a duplicate ${card.value}; Second Chance activates.`);
+    setTimeout(() => {
+      if (room.pendingResolution?.token !== token) return;
+      const duplicateIndex = target.cards.lastIndexOf(card);
+      if (duplicateIndex >= 0) target.cards.splice(duplicateIndex, 1);
+      target.second = false;
+      const held = room.heldSecondCards.get(target.id);
+      if (held) room.discard.push(held);
+      room.heldSecondCards.delete(target.id);
+      room.discard.push(card);
+      room.pendingResolution = null;
+      room.log.push(`${target.name}'s Second Chance discarded the duplicate ${card.value}.`);
+      resumeFlow(room, resume);
+    }, 1000);
+    return 'delayed';
   }
   target.cards.push(card);
   if (duplicate) {
@@ -189,8 +227,8 @@ function resolveNumber(room, target, card) {
   return 'safe';
 }
 
-function resolveNonActionCard(room, target, card) {
-  if (card.type === 'number') return resolveNumber(room, target, card);
+function resolveNonActionCard(room, target, card, resume = null) {
+  if (card.type === 'number') return resolveNumber(room, target, card, resume);
   target.mods.push(card);
   room.log.push(`${target.name} gained ${card.type === 'multiplier' ? '×2' : `+${card.value}`}.`);
   return 'safe';
@@ -200,7 +238,8 @@ function drawForTurn(room, player) {
   const card = takeCard(room);
   if (!card) return finishRound(room, 'The deck was exhausted.');
   if (card.type !== 'action') {
-    resolveNonActionCard(room, player, card);
+    const result = resolveNonActionCard(room, player, card, { type: 'turn' });
+    if (result === 'delayed') return;
     if (room.phase === 'playing') advanceTurn(room);
     return;
   }
@@ -217,7 +256,8 @@ function continueInitialDeal(room, offset = 0) {
   if (card.type === 'action') {
     offerAction(room, recipient.id, card, { type: 'deal', nextOffset: offset + 1 });
   } else {
-    resolveNonActionCard(room, recipient, card);
+    const result = resolveNonActionCard(room, recipient, card, { type: 'deal', nextOffset: offset + 1 });
+    if (result === 'delayed') return;
     if (room.phase === 'playing') continueInitialDeal(room, offset + 1);
   }
 }
@@ -225,15 +265,10 @@ function continueInitialDeal(room, offset = 0) {
 function applyAction(room, chooser, target, card, resume) {
   room.discard.push(card);
   if (card.name === 'second') {
-    if (target.second) {
-      room.log.push(`${target.name} already has a Second Chance, so the card was discarded.`);
-    } else {
-      target.second = true;
-      room.heldSecondCards.set(target.id, card);
-      room.discard.pop();
-      room.log.push(`${chooser.name} gave Second Chance to ${target.name}.`);
-    }
-    resumeFlow(room, resume);
+    // Defensive fallback: even if an older client submits this as a target action,
+    // the card still belongs to the player who originally drew it.
+    room.discard.pop();
+    grantSecondChance(room, chooser, card, resume);
     return;
   }
   if (card.name === 'freeze') {
@@ -270,16 +305,18 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
   if (!card) return finishRound(room, 'The deck was exhausted.');
 
   if (card.type !== 'action') {
-    const result = resolveNonActionCard(room, target, card);
+    const delayedResume = { type: 'flip3', targetId, remaining: remaining - 1, queued, after };
+    const result = resolveNonActionCard(room, target, card, delayedResume);
+    if (result === 'delayed') return;
     if (room.phase !== 'playing' || result === 'bust' || result === 'flip7') return;
     return continueFlipThree(room, targetId, remaining - 1, queued, after);
   }
 
   if (card.name === 'second') {
-    const validTargets = activePlayers(room).filter(player => !player.second).map(player => player.id);
-    offerAction(room, targetId, card, {
+    // During Flip Three, the player receiving the flips drew this card and keeps it.
+    grantSecondChance(room, target, card, {
       type: 'flip3', targetId, remaining: remaining - 1, queued, after
-    }, validTargets);
+    });
     return;
   }
 
@@ -304,6 +341,7 @@ function startRound(room) {
   room.round += 1;
   room.phase = 'playing';
   room.pendingAction = null;
+  room.pendingResolution = null;
   room.flow = { type: 'deal' };
   room.winner = null;
   room.players.forEach(player => Object.assign(player, {
@@ -327,6 +365,7 @@ function publicState(room) {
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
     deckCount: room.deck.length, discardCount: room.discard.length,
     pendingAction: pending,
+    pendingResolution: room.pendingResolution ? { ...room.pendingResolution } : null,
     players: room.players.map(player => ({ ...player, connected: Date.now() - player.lastSeen < 12000 })),
     log: room.log.slice(-18), winner: room.winner
   };
@@ -346,7 +385,7 @@ const server = http.createServer(async (req, res) => {
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
         players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
-        heldSecondCards: new Map(), pendingAction: null, flow: null,
+        heldSecondCards: new Map(), pendingAction: null, pendingResolution: null, flow: null,
         log: ['Room created.'], winner: null
       };
       rooms.set(code, room);
@@ -378,10 +417,10 @@ const server = http.createServer(async (req, res) => {
       if (room.hostId !== playerId || room.players.length < 2) return apiError(res, 'Only the host can start with at least two players.');
       startRound(room);
     } else if (url.pathname === '/api/hit') {
-      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      if (room.phase !== 'playing' || room.pendingAction || room.pendingResolution || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
       drawForTurn(room, player);
     } else if (url.pathname === '/api/stay') {
-      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      if (room.phase !== 'playing' || room.pendingAction || room.pendingResolution || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
       if (!player.cards.length && !player.mods.length && !player.second) return apiError(res, 'You need at least one card in front of you before you can Stay.');
       player.stayed = true;
       player.active = false;
@@ -390,6 +429,7 @@ const server = http.createServer(async (req, res) => {
       advanceTurn(room);
     } else if (url.pathname === '/api/target') {
       const pending = room.pendingAction;
+      if (room.pendingResolution) return apiError(res, 'Wait for Second Chance to finish resolving.');
       if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');
       if (!pending.eligibleIds.includes(body.targetId)) return apiError(res, 'That player is not an eligible target.');
       const target = playerById(room, body.targetId);
@@ -400,6 +440,17 @@ const server = http.createServer(async (req, res) => {
     } else if (url.pathname === '/api/next') {
       if (room.hostId !== playerId || room.phase !== 'roundEnd') return apiError(res, 'Only the host can start the next round.');
       startRound(room);
+    } else if (url.pathname === '/api/restart') {
+      if (room.hostId !== playerId || room.phase !== 'gameOver') return apiError(res, 'Only the host can start a new game.');
+      room.players.forEach(player => { player.score = 0; player.roundScore = 0; });
+      room.round = 0;
+      room.dealerIndex = 0;
+      room.turnIndex = 0;
+      room.deck = makeDeck();
+      room.discard = [];
+      room.winner = null;
+      room.log = ['A new game begins.'];
+      startRound(room);
     } else {
       return apiError(res, 'Unknown action.', 404);
     }
@@ -407,8 +458,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, file);
-  if (!file.startsWith(path.join(__dirname))) return send(res, 403, 'Forbidden', 'text/plain');
+  file = path.join(__dirname, 'public', file);
+  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
