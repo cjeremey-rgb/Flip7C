@@ -161,10 +161,10 @@ for(let i=0;i<3;i++)d.push({t:'a',v:'FREEZE'},{t:'a',v:'FLIP 3'},{t:'a',v:'SECON
 if(d.length!==94)throw new Error('Deck construction error: expected 94 cards, found '+d.length);
 return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newPlayer(name,bot=false,style='balanced'){return{name,bot,style,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
+function newPlayer(name,bot=false,style='balanced'){return{name,bot,style,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:0,frozen:false,bonusAwarded:false}}
 function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;showGame();newRound()}
 function showGame(){$('home').classList.remove('active');$('game').classList.add('active');$('start').classList.add('hidden');$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');}
-function newRound(){running=true;deck=makeDeck();players.forEach(p=>{p.cards=[];p.nums=new Set();p.banked=false;p.bust=false;p.second=false;p.frozen=false;p.bonusAwarded=false});current=0;$('round').textContent=round;log('Round '+round+' begins');render();dealInitial()}
+function newRound(){running=true;deck=makeDeck();players.forEach(p=>{p.cards=[];p.nums=new Set();p.banked=false;p.bust=false;p.second=0;p.frozen=false;p.bonusAwarded=false});current=0;$('round').textContent=round;log('Round '+round+' begins');render();dealInitial()}
 async function dealInitial(){for(let i=0;i<players.length;i++){if(isRoundActive(players[i])){await drawFor(i);await wait(350)}} current=0;render();turnLoop()}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 function value(p){let sum=0,m=0,x=1;p.cards.forEach(c=>{if(c.t==='n')sum+=c.v;else if(c.t==='m'){if(c.v==='x2')x*=2;else m+=Number(c.v.slice(1))}});return sum*x+m+(p.nums.size>=7?15:0)}
@@ -211,7 +211,7 @@ async function resolveFreeze(sourceIndex,freezeCard){
   if(freezeIndex>=0)source.cards.splice(freezeIndex,1);
   log(source.name+' gives Freeze to '+target.name+'.');
   if(target.second){
-   target.second=false;
+   target.second-=1;
    const secondIndex=target.cards.findIndex(card=>card.t==='a'&&card.v==='SECOND CHANCE');
    if(secondIndex>=0)target.cards.splice(secondIndex,1);
    log(target.name+' uses Second Chance, discards the Freeze, and remains active.');
@@ -289,7 +289,7 @@ async function drawFor(i){let p=players[i]; if(!deck.length)deck=makeDeck();let 
   log(p.name+' drew a duplicate '+c.v+'. Second Chance activates!');
   render();
   await wait(1000);
-  p.second=false;
+  p.second-=1;
   const secondIndex=p.cards.findIndex(card=>card.t==='a'&&card.v==='SECOND CHANCE');
   if(secondIndex>=0)p.cards.splice(secondIndex,1);
   const duplicateIndex=p.cards.lastIndexOf(c);
@@ -297,7 +297,7 @@ async function drawFor(i){let p=players[i]; if(!deck.length)deck=makeDeck();let 
   log(p.name+' discarded Second Chance and the duplicate '+c.v+'.');
   render();
  }else{p.bust=true;log(p.name+' busted!')}}else p.nums.add(c.v)}
- if(c.t==='a'&&c.v==='SECOND CHANCE')p.second=true;
+ if(c.t==='a'&&c.v==='SECOND CHANCE')p.second+=1;
  if(c.t==='a'&&c.v==='FREEZE'){
   render();
   await resolveFreeze(i,c);

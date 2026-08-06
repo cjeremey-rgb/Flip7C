@@ -45,7 +45,7 @@ function makePlayer(id, name) {
   return {
     id, name: String(name || 'Player').slice(0, 18), score: 0,
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
-    second: false, sevenBonus: false, roundScore: 0, lastSeen: Date.now()
+    second: 0, sevenBonus: false, roundScore: 0, lastSeen: Date.now()
   };
 }
 
@@ -77,10 +77,11 @@ function takeCard(room) {
 
 function discardPlayerCards(room, player) {
   room.discard.push(...player.cards, ...player.mods, ...(player.statusCards || []));
-  if (player.second) {
-    const sc = room.heldSecondCards.get(player.id);
-    if (sc) room.discard.push(sc);
+  if (player.second > 0) {
+    const cards = room.heldSecondCards.get(player.id) || [];
+    room.discard.push(...cards);
     room.heldSecondCards.delete(player.id);
+    player.second = 0;
   }
 }
 
@@ -149,14 +150,11 @@ function grantSecondChance(room, player, card, resume) {
     resumeFlow(room, resume);
     return;
   }
-  if (player.second) {
-    room.discard.push(card);
-    room.log.push(`${player.name} already has a Second Chance, so the new card was discarded.`);
-  } else {
-    player.second = true;
-    room.heldSecondCards.set(player.id, card);
-    room.log.push(`${player.name} drew and kept a Second Chance.`);
-  }
+  player.second += 1;
+  const held = room.heldSecondCards.get(player.id) || [];
+  held.push(card);
+  room.heldSecondCards.set(player.id, held);
+  room.log.push(`${player.name} drew and kept a Second Chance (${player.second} available).`);
   resumeFlow(room, resume);
 }
 
@@ -179,7 +177,7 @@ function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
     return;
   }
   room.pendingAction = {
-    actionId: uid(), chooserId, card, resume,
+    chooserId, card, resume,
     eligibleIds: eligible.map(player => player.id)
   };
   room.log.push(`${playerById(room, chooserId)?.name || 'A player'} drew ${actionLabel(card.name)} and must choose a target.`);
@@ -187,7 +185,7 @@ function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
 
 function resolveNumber(room, target, card, resume = null) {
   const duplicate = target.cards.some(existing => existing.value === card.value);
-  if (duplicate && target.second) {
+  if (duplicate && target.second > 0) {
     // Show the duplicate beside the original for about one second so every player
     // can see why Second Chance was used. Then discard the duplicate and the
     // Second Chance together before continuing the interrupted game flow.
@@ -201,10 +199,12 @@ function resolveNumber(room, target, card, resume = null) {
       if (room.pendingResolution?.token !== token) return;
       const duplicateIndex = target.cards.lastIndexOf(card);
       if (duplicateIndex >= 0) target.cards.splice(duplicateIndex, 1);
-      target.second = false;
-      const held = room.heldSecondCards.get(target.id);
-      if (held) room.discard.push(held);
-      room.heldSecondCards.delete(target.id);
+      target.second -= 1;
+      const held = room.heldSecondCards.get(target.id) || [];
+      const usedSecond = held.shift();
+      if (usedSecond) room.discard.push(usedSecond);
+      if (held.length) room.heldSecondCards.set(target.id, held);
+      else room.heldSecondCards.delete(target.id);
       room.discard.push(card);
       room.pendingResolution = null;
       room.log.push(`${target.name}'s Second Chance discarded the duplicate ${card.value}.`);
@@ -275,11 +275,13 @@ function applyAction(room, chooser, target, card, resume) {
   }
   if (card.name === 'freeze') {
     // Second Chance blocks an incoming Freeze and both action cards are discarded.
-    if (target.second) {
-      target.second = false;
-      const held = room.heldSecondCards.get(target.id);
-      if (held) room.discard.push(held);
-      room.heldSecondCards.delete(target.id);
+    if (target.second > 0) {
+      target.second -= 1;
+      const held = room.heldSecondCards.get(target.id) || [];
+      const usedSecond = held.shift();
+      if (usedSecond) room.discard.push(usedSecond);
+      if (held.length) room.heldSecondCards.set(target.id, held);
+      else room.heldSecondCards.delete(target.id);
       room.log.push(`${target.name}'s Second Chance blocked Freeze.`);
       resumeFlow(room, resume);
       return;
@@ -349,7 +351,7 @@ function startRound(room) {
   room.bonusEvent = null;
   room.players.forEach(player => Object.assign(player, {
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
-    second: false, sevenBonus: false, roundScore: 0
+    second: 0, sevenBonus: false, roundScore: 0
   }));
   room.heldSecondCards.clear();
   if (!room.deck.length) room.deck = makeDeck();
@@ -359,7 +361,6 @@ function startRound(room) {
 
 function publicState(room) {
   const pending = room.pendingAction ? {
-    actionId: room.pendingAction.actionId,
     chooserId: room.pendingAction.chooserId,
     card: room.pendingAction.card,
     eligibleIds: room.pendingAction.eligibleIds
@@ -435,7 +436,6 @@ const server = http.createServer(async (req, res) => {
       const pending = room.pendingAction;
       if (room.pendingResolution) return apiError(res, 'Wait for Second Chance to finish resolving.');
       if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');
-      if (!body.actionId || body.actionId !== pending.actionId) return apiError(res, 'That action card is no longer awaiting a target. Refreshing the table state.');
       if (!pending.eligibleIds.includes(body.targetId)) return apiError(res, 'That player is not an eligible target.');
       const target = playerById(room, body.targetId);
       const chooser = playerById(room, playerId);
@@ -464,8 +464,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, file);
-  if (!file.startsWith(path.join(__dirname))) return send(res, 403, 'Forbidden', 'text/plain');
+  file = path.join(__dirname, 'public', file);
+  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
