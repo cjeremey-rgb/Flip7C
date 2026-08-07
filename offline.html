@@ -241,29 +241,41 @@ button#hit.primary.decision span, button#hit.primary.decision small {
 </style>
 
 <style id="physical-card-fan-fix">
-/* Buried number cards move their large value into the exposed part of the card. */
-.my-area .hand .card.number:not(:last-child) > strong,
-.bot-hand .card.number:not(:last-child) > strong {
-  z-index:0 !important;
-  transform:translateX(-15px) scale(.76) !important;
-  transform-origin:center center;
-  max-width:72%;
-  overflow:hidden;
-  white-space:nowrap;
+</style>
+
+<style id="physical-card-stacking-v3">
+/*
+  Physical-card stacking:
+  - Every card is a single isolated paint layer.
+  - The number never moves/resizes when another card is dealt.
+  - Newer cards have a larger z-index and naturally cover only the overlapping area.
+*/
+.my-area .hand .card,
+.bot-hand .card {
+  position: relative !important;
+  isolation: isolate !important;
+  contain: paint !important;
+  overflow: hidden !important;
 }
-.bot-hand .card.number:not(:last-child) > strong {
-  transform:translateX(-10px) scale(.70) !important;
+.my-area .hand .card > *,
+.bot-hand .card > * {
+  position: relative !important;
+  z-index: auto !important;
 }
-.my-area .hand .card.number:last-child > strong,
-.bot-hand .card.number:last-child > strong {
-  z-index:2 !important;
-  transform:none !important;
-}
-.my-area .hand .card, .bot-hand .card {
-  isolation:isolate !important;
-  overflow:hidden !important;
+.my-area .hand .card.number > strong,
+.bot-hand .card.number > strong {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  transform: none !important;
+  transform-origin: center center !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  position: static !important;
+  z-index: auto !important;
 }
 </style>
+
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div><div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div><div id="seasonBadge" class="season-badge"></div>

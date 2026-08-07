@@ -283,26 +283,31 @@ button#next.primary.decision span,button#next.primary.decision small {
 .card{isolation:isolate;}
 .card strong,.card .action-icon{position:relative;z-index:1;}
 
-/* Physical card fan fix: buried cards keep their large value inside the exposed slice. */
-.my-area .card.number:not(:last-child) > strong,
-.opponent-card-row .card.number:not(:last-child) > strong {
-  z-index: 0 !important;
-  transform: translateX(-15px) scale(.76) !important;
-  transform-origin: center center;
-  max-width: 72%;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.opponent-card-row .card.number:not(:last-child) > strong {
-  transform: translateX(-10px) scale(.70) !important;
-}
-.my-area .card.number:last-child > strong,
-.opponent-card-row .card.number:last-child > strong {
-  z-index: 2 !important;
-  transform: none !important;
-}
+
+
+/* === Physical card stacking v3 ===
+   Entire card paints as one layer. Values do not move or resize. */
 .my-area .card,
 .opponent-card-row .card {
+  position: relative !important;
   isolation: isolate !important;
+  contain: paint !important;
   overflow: hidden !important;
+}
+.my-area .card > *,
+.opponent-card-row .card > * {
+  position: relative !important;
+  z-index: auto !important;
+}
+.my-area .card.number > strong,
+.opponent-card-row .card.number > strong {
+  font-size: 1em !important;
+  line-height: 1 !important;
+  transform: none !important;
+  transform-origin: center center !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  position: static !important;
+  z-index: auto !important;
 }
