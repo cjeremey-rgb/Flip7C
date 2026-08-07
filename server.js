@@ -172,13 +172,18 @@ function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
     const others = eligible.filter(player => player.id !== chooserId);
     eligible = others.length ? others : eligible.filter(player => player.id === chooserId);
   }
+  // Flip Three may always target the drawer or any other active player.
+  if (card.name === 'flip3') {
+    const chooser = playerById(room, chooserId);
+    if (chooser?.active && !eligible.some(player => player.id === chooserId)) eligible.unshift(chooser);
+  }
   if (!eligible.length) {
     room.discard.push(card);
     resumeFlow(room, resume);
     return;
   }
   room.pendingAction = {
-    chooserId, card, resume,
+    actionId: uid(), chooserId, card, resume,
     eligibleIds: eligible.map(player => player.id)
   };
   room.log.push(`${playerById(room, chooserId)?.name || 'A player'} drew ${actionLabel(card.name)} and must choose a target.`);
@@ -362,6 +367,7 @@ function startRound(room) {
 
 function publicState(room) {
   const pending = room.pendingAction ? {
+    actionId: room.pendingAction.actionId,
     chooserId: room.pendingAction.chooserId,
     card: room.pendingAction.card,
     eligibleIds: room.pendingAction.eligibleIds
@@ -437,6 +443,7 @@ const server = http.createServer(async (req, res) => {
       const pending = room.pendingAction;
       if (room.pendingResolution) return apiError(res, 'Wait for Second Chance to finish resolving.');
       if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');
+      if (!body.actionId || body.actionId !== pending.actionId) return apiError(res, 'That action card is no longer awaiting a target. Refreshing the table state.');
       if (!pending.eligibleIds.includes(body.targetId)) return apiError(res, 'That player is not an eligible target.');
       const target = playerById(room, body.targetId);
       const chooser = playerById(room, playerId);
@@ -465,8 +472,10 @@ const server = http.createServer(async (req, res) => {
   }
 
   let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, file);
-  if (!file.startsWith(path.join(__dirname))) return send(res, 403, 'Forbidden', 'text/plain');
+  // Static files live beside server.js in this deployment, not in a /public subfolder.
+  const staticRoot = path.resolve(__dirname);
+  file = path.resolve(staticRoot, '.' + file);
+  if (file !== staticRoot && !file.startsWith(staticRoot + path.sep)) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
