@@ -234,6 +234,36 @@ button#hit.primary.decision span, button#hit.primary.decision small {
 @media(max-width:520px){.table{min-height:445px !important}.my-area{min-height:165px !important}.my-area .hand{min-height:138px !important}}
 </style>
 
+
+<style id="card-stack-layer-fix">
+.card{isolation:isolate;}
+.card strong,.card .action-icon{position:relative;z-index:1;}
+</style>
+
+<style id="physical-card-fan-fix">
+/* Buried number cards move their large value into the exposed part of the card. */
+.my-area .hand .card.number:not(:last-child) > strong,
+.bot-hand .card.number:not(:last-child) > strong {
+  z-index:0 !important;
+  transform:translateX(-15px) scale(.76) !important;
+  transform-origin:center center;
+  max-width:72%;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.bot-hand .card.number:not(:last-child) > strong {
+  transform:translateX(-10px) scale(.70) !important;
+}
+.my-area .hand .card.number:last-child > strong,
+.bot-hand .card.number:last-child > strong {
+  z-index:2 !important;
+  transform:none !important;
+}
+.my-area .hand .card, .bot-hand .card {
+  isolation:isolate !important;
+  overflow:hidden !important;
+}
+</style>
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div><div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div><div id="seasonBadge" class="season-badge"></div>
@@ -559,7 +589,7 @@ function endRound(){
  if(qualified.length){showWinner(qualified[0]);return;}
  $('hit').classList.add('hidden');$('stay').classList.add('hidden');$('next').classList.remove('hidden');
 }
-function cardHtml(c){let cls=c.t==='n'?'number':c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');if(c.t==='n')return `<div class="card face ${cls}" data-label="${c.v}" data-number="${c.v}"><strong>${c.v}</strong></div>`;if(c.t==='m')return `<div class="card face ${cls}" data-label="${c.v==='x2'?'BOOST':'BONUS'}"><strong>${c.v}</strong></div>`;const icon=c.v==='FREEZE'?'❄':c.v==='FLIP 3'?'⚡':'◆';return `<div class="card face ${cls}" data-label="ACTION"><span class="action-icon">${icon}</span><strong>${c.v}</strong></div>`}
+function cardHtml(c,i=0){let cls=c.t==='n'?'number':c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');if(c.t==='n')return `<div class="card face ${cls}" style="z-index:${i+1}" data-label="${c.v}" data-number="${c.v}"><strong>${c.v}</strong></div>`;if(c.t==='m')return `<div class="card face ${cls}" style="z-index:${i+1}" data-label="${c.v==='x2'?'BOOST':'BONUS'}"><strong>${c.v}</strong></div>`;const icon=c.v==='FREEZE'?'❄':c.v==='FLIP 3'?'⚡':'◆';return `<div class="card face ${cls}" style="z-index:${i+1}" data-label="ACTION"><span class="action-icon">${icon}</span><strong>${c.v}</strong></div>`}
 function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
  $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${bp.cards.map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
