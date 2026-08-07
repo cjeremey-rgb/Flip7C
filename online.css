@@ -69,3 +69,98 @@
 #bonusFlash.show{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(-4deg);animation:bonusPulse .8s ease-in-out 2}
 @keyframes bonusPulse{50%{filter:brightness(1.18);box-shadow:0 0 0 13px rgba(255,221,66,0),0 22px 60px #000c}}
 .hand-zone.seven-bonus{border-color:#ffdd42!important;box-shadow:0 0 0 2px #ffdd4240,0 0 34px #ffb62e75!important}
+
+/* === Flip Rush 7: Neon Circuit visual system === */
+:root{
+  --race-blue:#18bfff;
+  --race-cyan:#27f1ef;
+  --race-lime:#8cff67;
+  --race-yellow:#ffd53a;
+  --race-orange:#ff8a28;
+  --race-red:#ff3d57;
+  --race-pink:#ff3ca6;
+  --race-purple:#9a5cff;
+  --race-ink:#050713;
+  --race-panel:#0a1121;
+  --race-panel2:#111a31;
+  --race-line:#26365f;
+}
+html,body{background:#050713}
+body{
+  background:
+    radial-gradient(circle at 50% -8%,rgba(100,66,255,.34),transparent 28%),
+    radial-gradient(circle at 4% 35%,rgba(0,201,255,.15),transparent 28%),
+    radial-gradient(circle at 96% 45%,rgba(255,36,139,.16),transparent 28%),
+    linear-gradient(180deg,#080817 0%,#050713 42%,#02040b 100%);
+}
+body:before{content:'';position:fixed;z-index:-2;left:50%;bottom:-42vh;width:150vw;height:80vh;transform:translateX(-50%) perspective(560px) rotateX(61deg);transform-origin:50% 100%;background:repeating-linear-gradient(90deg,transparent 0 8.2%,rgba(82,85,255,.14) 8.35% 8.6%,transparent 8.75% 16.5%),repeating-linear-gradient(0deg,transparent 0 44px,rgba(39,241,239,.08) 45px 47px);mask-image:linear-gradient(to top,#000 12%,transparent 88%);pointer-events:none}
+body:after{content:'';position:fixed;z-index:-1;left:0;right:0;top:11vh;height:1px;background:linear-gradient(90deg,transparent,#2cf1ff 15%,#963dff 50%,#ff3b9c 85%,transparent);box-shadow:0 0 16px #2cf1ff88,0 0 34px #a749ff66;opacity:.72;pointer-events:none}
+.ambient{opacity:.7}.ambient i{background:#0bdcff}.ambient i:nth-child(2){background:#fa2d98}.ambient i:nth-child(3){background:#6a4cff}
+.icon-btn,.room-pill,.round-pill{background:linear-gradient(180deg,rgba(18,28,53,.94),rgba(5,11,24,.96));border-color:#2c3d68;box-shadow:inset 0 1px 0 #ffffff12,0 8px 20px #0008}
+.logo{font-style:italic;transform:skewX(-6deg);filter:drop-shadow(0 0 16px #5a49ff55)}
+.logo span{color:#fff;text-shadow:0 3px 0 #27314c,0 0 16px #25d9ff77}
+.logo strong{color:#ffe13f;text-shadow:0 4px 0 #ad5b00,0 0 18px #ff9a1a99}
+.logo b{color:#ff3d57;text-shadow:0 5px 0 #7c0c1d,0 0 20px #ff315b99}
+.kicker{color:#31ebff;text-shadow:0 0 12px #20e5ff66}
+.panel{background:linear-gradient(145deg,rgba(16,26,52,.97),rgba(5,10,24,.97));border-color:#30446f;box-shadow:inset 0 1px 0 #ffffff12,0 24px 70px #000a,0 0 34px rgba(65,70,255,.12)}
+.primary{background:linear-gradient(180deg,#ffe75d,#ffb617);color:#141018;box-shadow:0 6px 0 #9f5803,0 15px 30px #0008,0 0 24px #ffbf2660}
+.primary:active{transform:translateY(3px);box-shadow:0 3px 0 #9f5803,0 9px 20px #0008}
+.secondary,.decision,.join button{background:linear-gradient(180deg,#182a4b,#0b1429);border:1px solid #324d79;box-shadow:0 5px 0 #030712,0 0 18px #1f6eff12}
+.status{position:relative;overflow:hidden;background:linear-gradient(90deg,#071426,#111c3d 45%,#15102f 100%);border-color:#2e4373;box-shadow:inset 0 1px 0 #ffffff0e,0 10px 24px #0005}
+.status:after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 0 42%,rgba(54,239,255,.07) 49%,transparent 56%);animation:raceSweep 3.5s linear infinite;pointer-events:none}@keyframes raceSweep{from{transform:translateX(-80%)}to{transform:translateX(80%)}}
+.players{gap:8px;padding-bottom:10px}.player{min-width:112px;padding:9px 10px;border-radius:15px;background:linear-gradient(150deg,rgba(19,31,61,.96),rgba(5,11,24,.96));border-color:#293c65;box-shadow:inset 0 1px 0 #ffffff0d,0 8px 22px #0007}.player.turn{border-color:#ffd53a;box-shadow:0 0 0 2px #ffd53a22,0 0 22px #ffd53a30,0 10px 28px #0008}.avatar{border-radius:50% 50% 46% 46%;border:2px solid #dff7ff;box-shadow:inset 0 -8px 13px #0008,inset 0 3px 4px #fff6,0 0 14px currentColor;transform:skewX(-4deg)}
+.player .score{font-size:21px;color:#fff;text-shadow:0 0 10px #67d6ff44}.player small{letter-spacing:.02em}
+.table{
+  border-radius:30px;border:1px solid #2b4d78;
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(111,52,255,.18),transparent 28%),
+    radial-gradient(ellipse at center,rgba(11,49,78,.98) 0%,rgba(5,20,38,.98) 48%,rgba(2,7,17,.99) 100%);
+  box-shadow:inset 0 0 95px #000b,inset 0 1px 0 #ffffff10,0 24px 70px #000b,0 0 0 1px #1ef2ff12;
+}
+.table:before{content:'';position:absolute;z-index:0;left:-14%;right:-14%;top:31%;height:46%;transform:perspective(440px) rotateX(52deg);transform-origin:50% 100%;background:
+  linear-gradient(90deg,transparent 8%,rgba(22,220,255,.32) 8.4% 9%,transparent 9.4% 31%,rgba(255,255,255,.12) 31.3% 31.7%,transparent 32% 49.6%,rgba(255,213,58,.38) 49.8% 50.2%,transparent 50.4% 68%,rgba(255,255,255,.12) 68.3% 68.7%,transparent 69% 91%,rgba(255,44,145,.34) 91.2% 91.8%,transparent 92%),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 30px,rgba(255,255,255,.07) 31px 33px);
+  opacity:.8;filter:drop-shadow(0 0 10px #20dfff44);pointer-events:none
+}
+.table:after{inset:8px;border:1px solid #41e8ff22;box-shadow:inset 0 0 22px #113eff22}
+.felt-mark{font-style:italic;letter-spacing:-.07em;color:#8aeaff0c;text-shadow:0 0 20px #26e7ff13}
+.deck-zone{filter:drop-shadow(0 0 18px #ff3b9c33)}
+.card{border-radius:11px;border-color:#ecf8ff;background:#0a1730;color:#fff;box-shadow:0 5px 0 #01040a,0 11px 22px #000b,inset 0 0 0 1px #ffffff18;overflow:hidden}
+.card:after{opacity:.8}.card:before{opacity:.8}
+.card.number{background:linear-gradient(150deg,#0b1b36,#081329 68%,#040916);text-shadow:0 3px 0 #000,0 0 14px currentColor}
+.card.number strong{font-size:1em;font-family:'Archivo Black';line-height:1;position:relative;z-index:2}
+.card.number[data-number="0"]{color:#dce8f6;border-color:#8190a7;box-shadow:0 5px 0 #01040a,0 0 20px #7f93af38}
+.card.number[data-number="1"],.card.number[data-number="5"]{color:#e9f8ff;border-color:#13baff;background:linear-gradient(150deg,#0a3c75,#07162e 72%);box-shadow:0 5px 0 #01040a,0 0 22px #00aaff40}
+.card.number[data-number="2"],.card.number[data-number="3"]{color:#efffe9;border-color:#48ef70;background:linear-gradient(150deg,#155d35,#071c20 72%);box-shadow:0 5px 0 #01040a,0 0 22px #4cff7340}
+.card.number[data-number="4"],.card.number[data-number="9"]{color:#eaffff;border-color:#23e6e9;background:linear-gradient(150deg,#075366,#071826 72%);box-shadow:0 5px 0 #01040a,0 0 22px #1cf4f040}
+.card.number[data-number="6"]{color:#f5eaff;border-color:#a866ff;background:linear-gradient(150deg,#4b2182,#140d29 72%);box-shadow:0 5px 0 #01040a,0 0 22px #9c5cff44}
+.card.number[data-number="7"],.card.number[data-number="10"]{color:#fff5d8;border-color:#ffbd25;background:linear-gradient(150deg,#77430a,#241304 72%);box-shadow:0 5px 0 #01040a,0 0 22px #ffaf1745}
+.card.number[data-number="8"]{color:#ffe9f7;border-color:#ff43a5;background:linear-gradient(150deg,#7a1950,#24091b 72%);box-shadow:0 5px 0 #01040a,0 0 22px #ff3c9d45}
+.card.number[data-number="11"],.card.number[data-number="12"]{color:#fff0f0;border-color:#ff4152;background:linear-gradient(150deg,#7a1624,#24070d 72%);box-shadow:0 5px 0 #01040a,0 0 22px #ff334a45}
+.card.mod{color:#06221e;background:linear-gradient(150deg,#79ffe8,#18c9b5);border-color:#c5fff6;text-shadow:0 1px 0 #fff7}
+.card.mult{color:#211600;background:linear-gradient(150deg,#fff17a,#ffb717);border-color:#fff6c2;text-shadow:0 1px 0 #fff7}
+.card.action{flex-direction:column;gap:2px;line-height:1.02;text-shadow:0 2px 0 #0008}.card.action strong{font-size:.78em;letter-spacing:.02em}.action-icon{display:block;font-size:1.35em;line-height:1;margin-bottom:2px;filter:drop-shadow(0 0 6px currentColor)}
+.card.freeze{color:#effcff;background:linear-gradient(150deg,#0e66a5,#052339 75%);border-color:#33d9ff;box-shadow:0 5px 0 #01040a,0 0 26px #27d8ff4c}
+.card.flip3{color:#fff3ee;background:linear-gradient(150deg,#a52d23,#32100b 75%);border-color:#ff684c;box-shadow:0 5px 0 #01040a,0 0 26px #ff4c2d4c}
+.card.second{color:#fff3ff;background:linear-gradient(150deg,#6c2aa0,#24103b 75%);border-color:#d35cff;box-shadow:0 5px 0 #01040a,0 0 26px #bf48ff4c}
+.card.back{background:repeating-linear-gradient(135deg,#ff315d 0 7px,#9d174d 7px 14px);border-color:#ffd93d;box-shadow:0 5px 0 #3f0920,0 0 24px #ff315d55}.card.back span{font-style:italic;text-shadow:0 3px 0 #8e4300,0 0 12px #fff08a}
+.hand-zone,.bot-seat{background:linear-gradient(155deg,rgba(12,25,48,.88),rgba(3,8,19,.86));border-color:#27446e;box-shadow:inset 0 1px 0 #ffffff0b,0 8px 20px #0007}.hand-zone.turn,.bot-seat.turn{border-color:#ffd53a;box-shadow:0 0 0 2px #ffd53a18,0 0 24px #ffd53a26,inset 0 1px 0 #fff2}.hand-heading,.bot-seat-head{text-transform:uppercase;letter-spacing:.08em}
+.result-overlay{-webkit-text-stroke:2px #050713;text-shadow:0 4px 0 #000,0 0 15px currentColor}.result-overlay.bust{color:#ff3d57}.result-overlay.hold{color:#ffd53a}.result-overlay.frozen{color:#35d8ff}
+.score-preview{z-index:4;padding:7px 10px;border-radius:12px;background:#050916c9;border:1px solid #263f68;box-shadow:0 5px 16px #0008}.score-preview b{color:#ffd53a;text-shadow:0 0 12px #ffb31d55}
+.actions{border-top-color:#283d68;background:linear-gradient(180deg,rgba(4,7,17,.08),rgba(4,7,17,.96) 28%);box-shadow:0 -8px 28px #0008}.decision{border:1px solid #31496f}.decision span{font-family:'Archivo Black';font-style:italic;letter-spacing:.04em}.decision#stay{background:linear-gradient(180deg,#182945,#0a1327);border-color:#395479}.react-btn{background:linear-gradient(180deg,#14243f,#091223);border:1px solid #2d466e}
+#bonusFlash{border-color:#fff0a3;background:linear-gradient(145deg,#ffe05a,#ff7b20);box-shadow:0 0 0 7px #ffd33d22,0 0 45px #ff8a2d70,0 22px 60px #000d;transform:translate(-50%,-50%) scale(.55) rotate(-3deg);font-style:italic}.game-over-card{background:linear-gradient(155deg,#131d3c,#070c1c 60%,#030710);border-color:#ffd53a;box-shadow:0 28px 90px #000d,0 0 52px #ffbf2450}.game-over-card h1{font-style:italic}
+.target-picker{background:linear-gradient(145deg,#17274a,#060c1d);border-color:#ff3ca6}.target{background:linear-gradient(180deg,#f4fbff,#bcd9ed);box-shadow:0 5px 0 #526d84;color:#08111d}.target-title b{color:#ffd53a}
+.game-log{background:rgba(5,11,24,.88);border-color:#263a61}
+.season-badge{background:rgba(5,7,19,.82);border-color:#35456c;box-shadow:0 6px 20px #0009}
+/* Seasonal versions of the same neon race circuit */
+body[data-season="winter"] .table{background:radial-gradient(ellipse at 50% 12%,#1d4d72 0,#0a2742 48%,#04101f 100%)}
+body[data-season="christmas"] .table{background:radial-gradient(ellipse at 50% 12%,#17533b 0,#0a2b25 48%,#071016 100%)}
+body[data-season="christmas"] .table:before{filter:drop-shadow(0 0 10px #58ffbb44);background:linear-gradient(90deg,transparent 8%,#4ff8aa55 8.4% 9%,transparent 9.4% 31%,#fff3 31.3% 31.7%,transparent 32% 49.6%,#ffd53a55 49.8% 50.2%,transparent 50.4% 68%,#fff3 68.3% 68.7%,transparent 69% 91%,#ff405555 91.2% 91.8%,transparent 92%),repeating-linear-gradient(0deg,#fff0 0 30px,#ffffff10 31px 33px)}
+body[data-season="spring"] .table{background:radial-gradient(ellipse at 50% 12%,#225b57 0,#0b2f35 48%,#07121d 100%)}
+body[data-season="summer"] .table{background:radial-gradient(ellipse at 50% 12%,#0c6381 0,#072f4e 48%,#04111f 100%)}
+body[data-season="autumn"] .table{background:radial-gradient(ellipse at 50% 12%,#6a3819 0,#2f1d18 48%,#110a10 100%)}
+@media(max-width:520px){.table{border-radius:24px}.player{min-width:105px}.card{border-width:3px}.logo{filter:drop-shadow(0 0 10px #5a49ff55)}}
+
+/* Preserve the single centered number treatment. */
+.card.number:before,.card.number:after{display:none}
+.mode-back{display:grid;place-items:center;text-decoration:none}
