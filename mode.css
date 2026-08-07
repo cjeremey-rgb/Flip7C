@@ -9,3 +9,14 @@ body:after{content:'';position:fixed;z-index:-1;left:0;right:0;top:17%;height:1p
 .glow{opacity:.55}.g1{background:#12dfff}.g2{background:#ff278c}.brand{position:relative}.eyebrow{color:#32edff;text-shadow:0 0 12px #1bd8ff77}.logo{font-style:italic;transform:skewX(-6deg);filter:drop-shadow(0 0 17px #5c48ff66)}.logo span{color:#fff;text-shadow:0 4px 0 #27304c,0 0 15px #24dcff88}.logo strong{color:#ffdc3e;text-shadow:0 5px 0 #a85c00,0 0 18px #ff9c2299}.logo b{color:#ff3c55;text-shadow:0 6px 0 #780d20,0 0 20px #ff375f99}.brand p{color:#aab8d1}
 .modes{perspective:900px}.mode{position:relative;overflow:hidden;border-color:#2d3d69;background:linear-gradient(145deg,#121b38,#060b18)!important;box-shadow:inset 0 1px 0 #ffffff12,0 24px 55px #000b}.mode:before{content:'';position:absolute;left:-35%;right:-35%;bottom:-62%;height:80%;transform:perspective(260px) rotateX(65deg);background:repeating-linear-gradient(90deg,transparent 0 22%,#2ae7ff26 22.5% 23%,transparent 23.5% 47%,#ffdb3a34 47.5% 48%,transparent 48.5% 72%,#ff3e9130 72.5% 73%,transparent 73.5%);pointer-events:none}.mode:hover{border-color:#5ceaff;box-shadow:inset 0 1px 0 #ffffff18,0 24px 55px #000b,0 0 25px #25dfff22}.mode .icon{position:relative;border-radius:50% 50% 44% 44%;background:radial-gradient(circle at 50% 30%,#4a6483,#121a2b 56%,#050810 57%);border:3px solid #eaf9ff;color:#fff;box-shadow:inset 0 -12px 16px #000a,0 8px 0 #02040a,0 0 22px #2ee8ff3d}.mode.online .icon{border-color:#ff67bb;box-shadow:inset 0 -12px 16px #000a,0 8px 0 #02040a,0 0 22px #ff3e9144}.mode small{color:#34eaff}.mode h2{font-style:italic}.mode span{color:#ffdb3d}.note{color:#667895}.note b{color:#9bb0cd}
 
+
+
+/* Accessibility contrast pass: all dark-blue interface surfaces use light text. */
+body, .shell, .mode-card, .mode-card *, .hero, .hero *, .panel, .panel *,
+.lobby-card, .lobby-card *, .topbar, .topbar *, .room, .room *,
+button.secondary, button.secondary * {
+  color: #fff;
+}
+.mode-card p, .hero p, .muted, .subtitle, .eyebrow {
+  color: rgba(255,255,255,.82);
+}

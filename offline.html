@@ -149,6 +149,18 @@ body[data-season="autumn"] .table{background:radial-gradient(ellipse at 50% 12%,
 @media(max-width:520px){.table{border-radius:24px}.player{min-width:105px}.card{border-width:3px}.logo{filter:drop-shadow(0 0 10px #5a49ff55)}}
 .card.number:before,.card.number:after{display:none}.mode-back{display:grid;place-items:center;text-decoration:none}
 
+
+/* Accessibility contrast pass: dark navy/blue surfaces use white text. */
+body, .app, .topbar, .topbar *, .scoreboard, .scoreboard *,
+.player-zone, .player-zone *, .table, .table *, .panel, .panel *,
+.modal-card, .modal-card *, .game-over, .game-over *,
+.round-banner, .round-banner *, .target-panel, .target-panel * {
+  color: #fff !important;
+}
+.muted, .subtext, .hint, .caption, .small {
+  color: rgba(255,255,255,.80) !important;
+}
+
 </style>
 </head>
 <body>

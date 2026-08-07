@@ -164,3 +164,21 @@ body[data-season="autumn"] .table{background:radial-gradient(ellipse at 50% 12%,
 /* Preserve the single centered number treatment. */
 .card.number:before,.card.number:after{display:none}
 .mode-back{display:grid;place-items:center;text-decoration:none}
+
+
+/* Accessibility contrast pass: dark navy/blue panels always use light copy. */
+body, .app, .topbar, .topbar *, .statusbar, .statusbar *,
+.player-panel, .player-panel *, .player-card, .player-card *,
+.table, .table *, .game-feed, .game-feed *,
+.lobby, .lobby *, .modal-card, .modal-card *,
+.room-card, .room-card *, .score-strip, .score-strip *,
+.target-panel, .target-panel *, .waiting-card, .waiting-card *,
+.game-over-card, .game-over-card * {
+  color: #fff;
+}
+.muted, .subtext, .hint, .caption, .player-meta, .small {
+  color: rgba(255,255,255,.78);
+}
+button:not(.primary):not(.danger), button:not(.primary):not(.danger) * {
+  color: #fff;
+}
