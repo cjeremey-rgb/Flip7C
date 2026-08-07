@@ -182,3 +182,28 @@ body, .app, .topbar, .topbar *, .statusbar, .statusbar *,
 button:not(.primary):not(.danger), button:not(.primary):not(.danger) * {
   color: #fff;
 }
+
+/* FLIP control contrast fix: always bright, readable, and distinct from the dark table. */
+#hit.primary.decision {
+  background: linear-gradient(180deg, #17e6ff 0%, #087cff 58%, #0754d6 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #8af7ff !important;
+  box-shadow: 0 6px 0 #04347f, 0 12px 28px rgba(0,0,0,.58), 0 0 28px rgba(23,230,255,.62) !important;
+  text-shadow: 0 2px 3px rgba(0,0,0,.75) !important;
+}
+#hit.primary.decision span,
+#hit.primary.decision small {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+#hit.primary.decision small { color: rgba(255,255,255,.88) !important; }
+#hit.primary.decision:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #04347f, 0 7px 18px rgba(0,0,0,.55), 0 0 18px rgba(23,230,255,.5) !important;
+}
+#hit.primary.decision:disabled {
+  background: linear-gradient(180deg, #4a6070, #2b3b49) !important;
+  border-color: #6f8798 !important;
+  color: rgba(255,255,255,.72) !important;
+  box-shadow: 0 4px 0 #15222d !important;
+}
