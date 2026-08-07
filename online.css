@@ -207,3 +207,23 @@ button:not(.primary):not(.danger), button:not(.primary):not(.danger) * {
   color: rgba(255,255,255,.72) !important;
   box-shadow: 0 4px 0 #15222d !important;
 }
+
+/* FINAL FLIP BUTTON CONTRAST OVERRIDE - must remain last */
+#actions #hit,
+button#hit.primary.decision {
+  background: linear-gradient(180deg, #19dfff 0%, #087dff 58%, #0756d8 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #baf7ff !important;
+  box-shadow: 0 5px 0 #033d8c, 0 0 14px rgba(25,223,255,.9), 0 0 30px rgba(8,125,255,.55) !important;
+  text-shadow: 0 2px 3px rgba(0,0,0,.75) !important;
+}
+#actions #hit span,
+#actions #hit small,
+button#hit.primary.decision span,
+button#hit.primary.decision small {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+#actions #hit:disabled {
+  opacity: .48 !important;
+}
