@@ -1,113 +1,39 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-  <meta name="theme-color" content="#08101d">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Flip Rush 7</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="online.css?v=physical-card-stack-3">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+  <meta name="theme-color" content="#08101d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Flip Rush 7</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="online.css">
 </head>
 <body>
-<div class="ambient"><i></i><i></i><i></i></div>
-<div id="connection" class="connection hidden">RECONNECTING…</div>
+<div class="ambient"><i></i><i></i><i></i></div><div id="connection" class="connection hidden">RECONNECTING…</div>
 <main>
   <section id="home" class="screen active">
-    <nav class="topbar"><a href="index.html" class="icon-btn mode-back" aria-label="Back to mode selection">‹</a><button id="howBtn" class="icon-btn" aria-label="How to play">?</button><button id="soundBtn" class="icon-btn" aria-label="Sound">♪</button></nav>
-    <div class="hero">
-      <span class="kicker">ONLINE NEON CIRCUIT</span>
-      <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
-      <p>Race your friends through the same neon circuit, live from separate devices.</p>
-      <div class="card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
-    </div>
-    <div class="panel join-panel">
-      <label>PLAYER NAME<input id="name" maxlength="18" autocomplete="nickname" placeholder="Enter your name"></label>
-      <button id="create" class="primary big"><span>Create private room</span><small>Invite friends with a code</small></button>
-      <div class="divider"><span>OR JOIN A ROOM</span></div>
-      <div class="join"><input id="roomCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button id="join">JOIN</button></div>
-      <p id="error" role="alert"></p>
-    </div>
-    <footer>Private rooms · Play from separate phones anywhere</footer>
+    <nav class="topbar"><a href="index.html" class="icon-btn mode-back" aria-label="Back to mode selection">‹</a><span class="topbar-spacer"></span><button id="howBtn" class="icon-btn" aria-label="How to play">?</button><button id="soundBtn" class="icon-btn" aria-label="Sound">♪</button></nav>
+    <div class="hero"><span class="kicker">ONLINE MULTIPLAYER</span><div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div><p>Draw boldly. Bank wisely. Be the first to seven unique numbers.</p><div class="card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div></div>
+    <div class="panel join-panel"><label>PLAYER NAME<input id="name" maxlength="18" autocomplete="nickname" placeholder="Enter your name"></label><button id="create" class="primary big"><span>Create private room</span><small>Invite friends with a code</small></button><div class="divider"><span>OR JOIN A ROOM</span></div><div class="join"><input id="roomCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button id="join">JOIN</button></div><p id="error" role="alert"></p></div>
+    <footer>Private rooms · 3–9 players · Play from separate phones anywhere</footer>
   </section>
-
   <section id="game" class="screen">
-    <header class="game-head">
-      <button id="leave" class="icon-btn" aria-label="Leave room">‹</button>
-      <button id="copyCode" class="room-pill"><small>ROOM</small><b>------</b><span>⌁</span></button>
-      <div class="round-pill"><small>ROUND</small><b id="round">0</b></div>
-      <button id="menuBtn" class="icon-btn" aria-label="Game menu">•••</button>
-    </header>
-
-    <div id="status" class="status"><span class="pulse"></span><b>WAITING FOR PLAYERS</b><small>Share the room code to invite friends</small></div>
-    <div id="players" class="players"></div>
-
-    <div id="lobbyCard" class="lobby-card hidden">
-      <div class="lobby-icon">♣</div><h2>Your table is ready</h2><p>Invite at least one friend, then the host can start.</p>
-      <button id="share" class="secondary">SHARE INVITE</button>
-    </div>
-
-    <div id="table" class="table">
-      <div class="felt-mark">FLIP RUSH</div>
-      <div id="opponentHands" class="opponent-hands"></div>
-      <div class="deck-zone">
-        <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
-        <small><b id="deckCount">94</b> LEFT</small>
-      </div>
-      <section id="myHandZone" class="hand-zone my-hand-zone">
-        <div class="hand-heading"><b>YOUR CARDS</b><small id="myHandStatus"></small></div>
-        <div id="myArea" class="my-area"></div><div id="myResultOverlay" class="result-overlay hidden"></div>
-      </section>
-      <div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div>
-    </div>
-
+    <header class="game-head"><button id="leave" class="icon-btn" aria-label="Leave room">‹</button><button id="copyCode" class="room-pill"><small>ROOM</small><b>------</b><span>⌁</span></button><div class="round-pill"><small>ROUND</small><b id="round">0</b></div><button id="menuBtn" class="icon-btn" aria-label="Game menu">•••</button></header>
+    <div id="status" class="status"><span class="pulse"></span><b>WAITING FOR PLAYERS</b><small>Share the room code to invite friends</small></div><div id="players" class="players"></div>
+    <div id="lobbyCard" class="lobby-card hidden"><div class="lobby-icon">♣</div><h2>Your table is ready</h2><p>Invite at least two friends, then the host can start.</p><button id="share" class="secondary">SHARE INVITE</button></div>
+    <div id="table" class="table"><div class="felt-mark">FLIP RUSH</div><div class="deck-zone"><button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button><small><b id="deckCount">94</b> LEFT</small></div><div id="myArea" class="my-area"></div><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
     <div id="targetPicker" class="target-picker hidden"></div>
-    <div id="reactionTray" class="reaction-tray hidden"><button>🔥</button><button>😅</button><button>😈</button><button>👏</button><button>🤯</button></div>
-    <div id="actions" class="actions">
-      <button id="react" class="react-btn">☺</button>
-      <button id="hit" class="primary decision"><span>FLIP</span><small>Draw one card</small></button>
-      <button id="stay" class="decision"><span>HOLD</span><small>Bank your points</small></button>
-      <button id="start" class="primary decision hidden"><span>START GAME</span><small>Let the rush begin</small></button>
-      <button id="next" class="primary decision hidden"><span>NEXT ROUND</span><small>Deal again</small></button>
+    <div id="reactionTray" class="reaction-tray hidden">
+      <button data-type="emoji" data-reaction="🔥">🔥</button><button data-type="emoji" data-reaction="😅">😅</button><button data-type="emoji" data-reaction="😈">😈</button><button data-type="emoji" data-reaction="👏">👏</button><button data-type="emoji" data-reaction="🤯">🤯</button>
+      <div class="phrase-break"></div>
+      <button class="phrase-btn" data-type="phrase" data-reaction="You suck!">You suck!</button>
+      <button class="phrase-btn" data-type="phrase" data-reaction="You're a peckerhead!">You're a peckerhead!</button>
+      <button class="phrase-btn" data-type="phrase" data-reaction="You got lucky!">You got lucky!</button>
+      <button class="phrase-btn" data-type="phrase" data-reaction="So close">So close</button>
+      <button class="phrase-btn" data-type="phrase" data-reaction="Tough Break!">Tough Break!</button>
     </div>
+    <div id="actions" class="actions"><button id="react" class="react-btn">☺</button><button id="hit" class="primary decision"><span>FLIP</span><small>Draw one card</small></button><button id="stay" class="decision"><span>STAY</span><small>Bank your points</small></button><button id="start" class="primary decision hidden"><span>START GAME</span><small>Let the rush begin</small></button><button id="next" class="primary decision hidden"><span>NEXT ROUND</span><small>Deal again</small></button></div>
     <details class="game-log"><summary>GAME FEED</summary><div id="log" class="log"></div></details>
   </section>
 </main>
-
-<div id="gameOverOverlay" class="game-over-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
-  <div class="game-over-card">
-    <div class="winner-crown">♛</div>
-    <small>GAME OVER</small>
-    <h1 id="gameOverTitle">WINNER!</h1>
-    <p id="winnerName"></p>
-    <div id="finalStandings" class="final-standings"></div>
-    <button id="playAgain" class="play-again hidden"><span>PLAY AGAIN</span><small>Start a new game</small></button>
-    <p id="hostRestartNote" class="host-restart-note hidden">Waiting for the host to start a new game…</p>
-  </div>
-</div>
-<div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
-<div id="bonusFlash" aria-live="assertive"><span>7 NUMBER CARDS!</span><b>+15</b><small id="bonusPlayer"></small></div><div id="toast"></div><div id="confetti"></div>
+<div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div><div id="toast"></div><div id="confetti"></div><div id="reactionHost"></div>
 <script>
-if (location.protocol === 'file:') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const home = document.getElementById('home');
-    if (home) {
-      home.innerHTML = `
-        <nav class="topbar"><a href="index.html" class="icon-btn mode-back" aria-label="Back">‹</a></nav>
-        <div class="hero"><span class="kicker">ONLINE NEON CIRCUIT</span><div class="logo"><span>FLIP</span><strong>RUSH</strong><b>7</b></div></div>
-        <div class="panel join-panel" style="text-align:center">
-          <h2 style="margin-top:0">Open this page through the game server</h2>
-          <p style="color:#a8bbca;line-height:1.55">Online multiplayer cannot run by double-clicking this HTML file. Deploy the complete project to Render, or run <b>npm start</b> and open <b>http://localhost:3000</b>.</p>
-          <a href="offline.html" class="primary big" style="display:flex;text-decoration:none;justify-content:center"><span>PLAY SINGLE PLAYER</span></a>
-        </div>`;
-    }
-  });
-} else {
-  const script = document.createElement('script');
-  script.src = 'online.js?v=physical-card-stack-3';
-  document.body.appendChild(script);
-}
-</script>
-</body>
-</html>
+if(location.protocol==='file:'){document.addEventListener('DOMContentLoaded',()=>{const home=document.getElementById('home');if(home)home.innerHTML=`<nav class="topbar"><a href="index.html" class="icon-btn mode-back" aria-label="Back">‹</a></nav><div class="hero"><span class="kicker">ONLINE MULTIPLAYER</span><div class="logo"><span>FLIP</span><strong>RUSH</strong><b>7</b></div></div><div class="panel join-panel" style="text-align:center"><h2 style="margin-top:0">Open this page through the game server</h2><p style="color:#a8bbca;line-height:1.55">Online multiplayer cannot run by double-clicking this HTML file. Run <b>npm start</b> and open <b>http://localhost:3000</b>.</p><a href="offline.html" class="primary big" style="display:flex;text-decoration:none;justify-content:center"><span>PLAY SINGLE PLAYER</span></a></div>`})}else{const s=document.createElement('script');s.src='online.js?v=20260818-reactions-rules';document.body.appendChild(s)}
+</script></body></html>

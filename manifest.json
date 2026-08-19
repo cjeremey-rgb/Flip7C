@@ -1,18 +1,8 @@
 {
   "name": "Flip Rush 7",
-  "short_name": "Flip Rush",
-  "description": "A neon arcade push-your-luck card game for solo and online multiplayer.",
+  "short_name": "Flip Rush 7",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050713",
-  "theme_color": "#15102f",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#07101d",
+  "theme_color": "#08101d"
 }
