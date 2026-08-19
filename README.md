@@ -1,35 +1,18 @@
-# Flip Rush 7 — Checked Dual-Mode Build
+# Flip Rush 7 Multiplayer — Rules Fixed
 
-## Which HTML files can be opened directly?
-
-- `public/offline.html`: works when opened directly and runs the single-player game.
-- `public/index.html`: looks correct when the whole `public` folder stays together.
-- `public/online.html`: requires the Node server or a hosted deployment. If opened directly, it now shows an explanation instead of a broken lobby.
-
-## Local online test
+Run with Node.js 18+:
 
 ```bash
-npm install
 npm start
 ```
 
-Then open `http://localhost:3000`.
+Then open http://localhost:3000
 
-# Flip Rush 7 — Dual Mode
-
-## Modes
-- **Single Player:** current three-player offline game against Nova and Ace.
-- **Online Multiplayer:** private room codes for real players on separate devices.
-
-## Run locally
-```bash
-npm install
-npm start
-```
-Open `http://localhost:3000`.
-
-## Deploy to Render
-Create a new **Blueprint** from the GitHub repository. The included `render.yaml` supplies the commands.
-
-## Important
-The online server currently keeps active rooms in memory. A room is lost if the host service restarts. The standalone HTML preview can demonstrate the mode selector and play Single Player, but worldwide multiplayer requires the source project to be hosted.
+This build enforces:
+- 3–9 players
+- maximum one Second Chance per player
+- extra Second Chance must be given to another active player without one, otherwise discarded
+- Second Chance only blocks duplicate Number cards (not Freeze)
+- Freeze may target any active player, including the drawer
+- tied high score at/above 200 triggers another complete round
+- Flip Three counts all three revealed cards and delays Freeze/Flip Three actions until the sequence finishes
