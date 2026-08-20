@@ -38,3 +38,7 @@ For Render or another Node host, use `npm start` as the start command and keep a
 - A tie for the highest score at or above 200 continues into another full round until there is one leader.
 
 No intended visual redesign is included in this release.
+
+## Presentation theme
+
+The default presentation is **Neon Circuit** in the startup screen, single-player, and multiplayer. Seasonal variants remain in the code and can be previewed by adding `?theme=seasonal` (automatic by date) or `?theme=spring`, `summer`, `autumn`, `winter`, or `christmas` to a page URL.

@@ -125,33 +125,58 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 <script>
 const $=id=>document.getElementById(id);
 
-function applySeasonalTheme(){
- const now=new Date(),m=now.getMonth()+1,d=now.getDate();
- let season='winter',label='Winter Table',icon='❄️',particle='❄';
- if((m===12)||(m===1&&d<=6)){season='christmas';label='Christmas Table';icon='🎄';particle=Math.random()>.45?'❄':'✦'}
- else if(m>=3&&m<=5){season='spring';label='Spring Table';icon='🌸';particle=Math.random()>.5?'✿':'•'}
- else if(m>=6&&m<=8){season='summer';label='Summer Table';icon='☀️';particle=Math.random()>.5?'✦':'•'}
- else if(m>=9&&m<=11){season='autumn';label='Autumn Table';icon='🍂';particle=Math.random()>.5?'🍁':'🍂'}
- document.body.dataset.season=season;
- document.querySelector('meta[name="theme-color"]').setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
- const badge=$('seasonBadge');if(badge)badge.innerHTML=`<span>${icon}</span>${label}`;
- const layer=$('seasonalLayer');if(!layer)return;layer.innerHTML='';
- const counts={christmas:24,winter:22,spring:16,summer:10,autumn:18};
- for(let i=0;i<counts[season];i++){
+function applyFlipRushTheme(){
+ const params=new URLSearchParams(location.search);
+ let theme=(params.get('theme')||'neon').toLowerCase();
+ if(theme==='seasonal'||theme==='auto'){
+  const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+  if((m===12)||(m===1&&d<=6))theme='christmas';
+  else if(m>=3&&m<=5)theme='spring';
+  else if(m>=6&&m<=8)theme='summer';
+  else if(m>=9&&m<=11)theme='autumn';
+  else theme='winter';
+ }
+ const allowed=['neon','spring','summer','autumn','winter','christmas'];
+ if(!allowed.includes(theme))theme='neon';
+ const info={
+  neon:{label:'Neon Circuit',icon:'\u26a1',count:20},
+  spring:{label:'Spring Table',icon:'\ud83c\udf38',count:16},
+  summer:{label:'Summer Table',icon:'\u2600\ufe0f',count:10},
+  autumn:{label:'Autumn Table',icon:'\ud83c\udf42',count:18},
+  winter:{label:'Winter Table',icon:'\u2744\ufe0f',count:22},
+  christmas:{label:'Christmas Table',icon:'\ud83c\udf84',count:24}
+ }[theme];
+ document.body.dataset.season=theme;
+ const meta=document.querySelector('meta[name="theme-color"]');
+ if(meta)meta.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
+ const badge=document.getElementById('seasonBadge');
+ if(badge)badge.innerHTML='<span>'+info.icon+'</span>'+info.label;
+ const layer=document.getElementById('seasonalLayer');
+ if(!layer)return;
+ layer.innerHTML='';
+ for(let i=0;i<info.count;i++){
   const el=document.createElement('i');
-  let glyph=particle;
-  if(season==='christmas')glyph=Math.random()>.35?'❄':'✦';
-  if(season==='spring')glyph=Math.random()>.35?'✿':'•';
-  if(season==='summer')glyph=Math.random()>.55?'✦':'•';
-  if(season==='autumn')glyph=Math.random()>.5?'🍁':'🍂';
-  el.textContent=glyph;el.style.left=Math.random()*100+'vw';el.style.fontSize=(season==='summer'?5+Math.random()*7:9+Math.random()*13)+'px';el.style.animationDuration=(8+Math.random()*12)+'s';el.style.animationDelay=(-Math.random()*18)+'s';el.style.setProperty('--drift',(-45+Math.random()*90)+'px');
-  if(season==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';
-  if(season==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';
-  if(season==='winter'||season==='christmas')el.style.color='#fff';
+  let glyph='\u2022';
+  if(theme==='neon')glyph=Math.random()>.42?'\u2726':'\u2022';
+  if(theme==='christmas')glyph=Math.random()>.35?'\u2744':'\u2726';
+  if(theme==='spring')glyph=Math.random()>.35?'\u273f':'\u2022';
+  if(theme==='summer')glyph=Math.random()>.55?'\u2726':'\u2022';
+  if(theme==='autumn')glyph=Math.random()>.5?'\ud83c\udf41':'\ud83c\udf42';
+  if(theme==='winter')glyph='\u2744';
+  el.textContent=glyph;
+  el.style.left=Math.random()*100+'vw';
+  el.style.fontSize=(theme==='summer'?5+Math.random()*7:theme==='neon'?6+Math.random()*10:9+Math.random()*13)+'px';
+  el.style.animationDuration=(theme==='neon'?7+Math.random()*10:8+Math.random()*12)+'s';
+  el.style.animationDelay=(-Math.random()*18)+'s';
+  el.style.setProperty('--drift',(-45+Math.random()*90)+'px');
+  if(theme==='neon')el.style.color=['#32e5cb','#ffdd42','#ff4f8b','#74dfff'][i%4];
+  if(theme==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';
+  if(theme==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';
+  if(theme==='winter'||theme==='christmas')el.style.color='#fff';
   layer.appendChild(el);
  }
 }
-applySeasonalTheme();
+applyFlipRushTheme();
 
 let players=[], current=0, round=1, deck=[], discard=[], running=false, me=0, gameOver=false, dealerIndex=2;
 const numCounts=[1,1,2,3,4,5,6,7,8,9,10,11,12];

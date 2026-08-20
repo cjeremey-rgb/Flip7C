@@ -12,6 +12,8 @@
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
+<div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
+<div id="seasonBadge" class="season-badge"></div>
 <div id="connection" class="connection hidden">RECONNECTING…</div>
 <main>
   <section id="home" class="screen active">
@@ -74,6 +76,65 @@
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="confetti"></div>
 <script>
+function applyFlipRushTheme(){
+ const params=new URLSearchParams(location.search);
+ let theme=(params.get('theme')||'neon').toLowerCase();
+ if(theme==='seasonal'||theme==='auto'){
+  const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+  if((m===12)||(m===1&&d<=6))theme='christmas';
+  else if(m>=3&&m<=5)theme='spring';
+  else if(m>=6&&m<=8)theme='summer';
+  else if(m>=9&&m<=11)theme='autumn';
+  else theme='winter';
+ }
+ const allowed=['neon','spring','summer','autumn','winter','christmas'];
+ if(!allowed.includes(theme))theme='neon';
+ const info={
+  neon:{label:'Neon Circuit',icon:'\u26a1',count:20},
+  spring:{label:'Spring Table',icon:'\ud83c\udf38',count:16},
+  summer:{label:'Summer Table',icon:'\u2600\ufe0f',count:10},
+  autumn:{label:'Autumn Table',icon:'\ud83c\udf42',count:18},
+  winter:{label:'Winter Table',icon:'\u2744\ufe0f',count:22},
+  christmas:{label:'Christmas Table',icon:'\ud83c\udf84',count:24}
+ }[theme];
+ document.body.dataset.season=theme;
+ const meta=document.querySelector('meta[name="theme-color"]');
+ if(meta)meta.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
+ const badge=document.getElementById('seasonBadge');
+ if(badge)badge.innerHTML='<span>'+info.icon+'</span>'+info.label;
+ const layer=document.getElementById('seasonalLayer');
+ if(!layer)return;
+ layer.innerHTML='';
+ for(let i=0;i<info.count;i++){
+  const el=document.createElement('i');
+  let glyph='\u2022';
+  if(theme==='neon')glyph=Math.random()>.42?'\u2726':'\u2022';
+  if(theme==='christmas')glyph=Math.random()>.35?'\u2744':'\u2726';
+  if(theme==='spring')glyph=Math.random()>.35?'\u273f':'\u2022';
+  if(theme==='summer')glyph=Math.random()>.55?'\u2726':'\u2022';
+  if(theme==='autumn')glyph=Math.random()>.5?'\ud83c\udf41':'\ud83c\udf42';
+  if(theme==='winter')glyph='\u2744';
+  el.textContent=glyph;
+  el.style.left=Math.random()*100+'vw';
+  el.style.fontSize=(theme==='summer'?5+Math.random()*7:theme==='neon'?6+Math.random()*10:9+Math.random()*13)+'px';
+  el.style.animationDuration=(theme==='neon'?7+Math.random()*10:8+Math.random()*12)+'s';
+  el.style.animationDelay=(-Math.random()*18)+'s';
+  el.style.setProperty('--drift',(-45+Math.random()*90)+'px');
+  if(theme==='neon')el.style.color=['#32e5cb','#ffdd42','#ff4f8b','#74dfff'][i%4];
+  if(theme==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';
+  if(theme==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';
+  if(theme==='winter'||theme==='christmas')el.style.color='#fff';
+  layer.appendChild(el);
+ }
+}
+applyFlipRushTheme();
+const activeTheme=new URLSearchParams(location.search).get('theme');
+if(activeTheme){
+ document.querySelectorAll('a[href="index.html"],a[href="offline.html"]').forEach(link=>{
+  const href=link.getAttribute('href');
+  link.setAttribute('href',href+(href.includes('?')?'&':'?')+'theme='+encodeURIComponent(activeTheme));
+ });
+}
 if (location.protocol === 'file:') {
   document.addEventListener('DOMContentLoaded', () => {
     const home = document.getElementById('home');
