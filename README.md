@@ -6,7 +6,7 @@ All game files are intentionally stored directly in this repository root. There 
 
 - `server.js` — multiplayer Node server and game rules engine
 - `package.json` — Node project configuration
-- `index.html` — multiplayer entry page
+- `index.html` — startup screen with Single Player and Multiplayer mode selection
 - `online.html` — multiplayer interface
 - `online.js` — multiplayer browser logic
 - `online.css` — approved multiplayer styling

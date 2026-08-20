@@ -2,10 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=online.html">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+  <meta name="theme-color" content="#08101d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Flip Rush 7</title>
-  <script>location.replace('online.html');</script>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="online.css">
+  <style>
+    .mode-panel{padding:20px}
+    .mode-link{display:flex;min-height:72px;align-items:center;justify-content:center;flex-direction:column;text-decoration:none;text-align:center;border-radius:17px;padding:14px;transition:transform .16s ease,filter .16s ease}
+    .mode-link:active{transform:translateY(4px)}
+    .mode-link span{display:block;font-weight:900;letter-spacing:.04em}
+    .mode-link small{display:block;margin-top:4px;opacity:.68;font-size:10px}
+    .mode-link.secondary{color:#fff;box-shadow:0 5px 0 #07101a}
+    .mode-panel .divider{margin:19px 0}
+  </style>
 </head>
-<body></body>
+<body>
+<div class="ambient"><i></i><i></i><i></i></div>
+<div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
+<div id="seasonBadge" class="season-badge"></div>
+<main>
+  <section id="home" class="screen active">
+    <nav class="topbar"><span></span><span></span></nav>
+    <div class="hero">
+      <span class="kicker">CHOOSE YOUR GAME</span>
+      <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
+      <p>Draw boldly. Bank wisely. Be the first to seven unique numbers.</p>
+      <div class="card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
+    </div>
+    <div class="panel mode-panel">
+      <a href="offline.html" class="primary mode-link" id="singlePlayer">
+        <span>SINGLE PLAYER</span>
+        <small>Play against computer players</small>
+      </a>
+      <div class="divider"><span>OR</span></div>
+      <a href="online.html" class="secondary mode-link" id="multiPlayer">
+        <span>MULTIPLAYER</span>
+        <small>Create or join a private room</small>
+      </a>
+    </div>
+    <footer>Choose a mode to start playing</footer>
+  </section>
+</main>
+<script>
+(function applySeasonalTheme(){
+  const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+  let season='winter',label='Winter Table',icon='❄️',particle='❄';
+  if((m===12)||(m===1&&d<=6)){season='christmas';label='Christmas Table';icon='🎄';particle=Math.random()>.45?'❄':'✦'}
+  else if(m>=3&&m<=5){season='spring';label='Spring Table';icon='🌸';particle=Math.random()>.5?'✿':'•'}
+  else if(m>=6&&m<=8){season='summer';label='Summer Table';icon='☀️';particle=Math.random()>.5?'✦':'•'}
+  else if(m>=9&&m<=11){season='autumn';label='Autumn Table';icon='🍂';particle=Math.random()>.5?'🍁':'🍂'}
+  document.body.dataset.season=season;
+  const badge=document.getElementById('seasonBadge');
+  if(badge)badge.innerHTML='<span>'+icon+'</span>'+label;
+  const layer=document.getElementById('seasonalLayer');
+  if(!layer)return;
+  const counts={christmas:24,winter:22,spring:16,summer:10,autumn:18};
+  for(let i=0;i<counts[season];i++){
+    const el=document.createElement('i');
+    let glyph=particle;
+    if(season==='christmas')glyph=Math.random()>.35?'❄':'✦';
+    if(season==='spring')glyph=Math.random()>.35?'✿':'•';
+    if(season==='summer')glyph=Math.random()>.55?'✦':'•';
+    if(season==='autumn')glyph=Math.random()>.5?'🍁':'🍂';
+    el.textContent=glyph;
+    el.style.left=Math.random()*100+'vw';
+    el.style.fontSize=(season==='summer'?5+Math.random()*7:9+Math.random()*13)+'px';
+    el.style.animationDuration=(8+Math.random()*12)+'s';
+    el.style.animationDelay=(-Math.random()*18)+'s';
+    el.style.setProperty('--drift',(-45+Math.random()*90)+'px');
+    if(season==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';
+    if(season==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';
+    if(season==='winter'||season==='christmas')el.style.color='#fff';
+    layer.appendChild(el);
+  }
+})();
+</script>
+</body>
 </html>
