@@ -1,8 +1,13 @@
 {
-  "name": "flip-rush-7",
-  "version": "1.0.0",
+  "name": "flip-rush-7-multiplayer",
+  "version": "2026.08.19",
+  "private": true,
   "type": "module",
+  "description": "Flip Rush 7 multiplayer server and web client",
   "scripts": {
     "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

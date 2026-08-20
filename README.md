@@ -1,43 +1,48 @@
-# Flip Rush 7
+# Flip Rush 7 — GitHub-ready full files
 
-This is the restored full game package.
+This package contains complete replacement source files, not a patch.
 
-## Files
-All game files live at the project root. There is **no `public` folder**.
+## Single player
 
-- `index.html` — original-style mode selection home screen
-- `offline.html` / `offline.js` — single-player game
-- `online.html` / `online.js` — multiplayer game
-- `online.css` — shared game styling
-- `server.js` — multiplayer server
-- `manifest.json`
+`single-player/Flip-Rush-7-Single-Player.html`
+
+This is a standalone HTML file. It keeps the approved polished visual presentation and includes the corrected rules logic.
+
+## Multiplayer
+
+Upload the contents of the `multiplayer` folder as the multiplayer app/repository root.
+
+Required layout:
+
+- `server.js`
 - `package.json`
+- `public/index.html`
+- `public/online.html`
+- `public/online.js`
+- `public/online.css`
+- `public/offline.html`
+- `public/manifest.json`
 
-## Run multiplayer
-Requires Node.js 18+.
+Run locally with:
 
 ```bash
 npm start
 ```
 
-Then open:
+Then open `http://localhost:3000`.
 
-`http://localhost:3000`
+For Render or another Node host, use `npm start` as the start command.
 
-## Requested changes preserved
-- Home screen still lets you choose Single Player or Multiplayer.
-- Existing visual/game shell restored instead of the stripped-down rebuild.
-- Maximum one Second Chance per player.
-- Extra Second Chance must be given to another active player without one; discard only if nobody is eligible.
-- Second Chance does not block Freeze.
-- Freeze may target any active player, including the drawer.
-- Multiplayer uses the official 3–9 player limit.
-- A tie for highest score at/above 200 triggers another full round.
-- Multiplayer reactions are server-synchronized.
-- Existing emoji reactions remain.
-- Preset phrases flash for all players with the sender's name:
-  - You suck!
-  - You're a peckerhead!
-  - You got lucky!
-  - So close
-  - Tough Break!
+## Rules corrections included
+
+- A player may hold only one Second Chance.
+- An extra Second Chance must be given to another active player without one; discard it only when no eligible recipient exists.
+- Second Chance protects only against duplicate Number cards and does not block Freeze.
+- Freeze and Flip Three may target any active player, including the drawer.
+- Flip Three resolves three cards unless the target busts or reaches Flip 7; Second Chance resolves immediately while other Action cards wait until the sequence finishes.
+- Seven unique Number cards end the round immediately and award +15.
+- x2 doubles only the Number-card subtotal; additive modifiers and the Flip 7 bonus are added afterward.
+- Multiplayer supports 3–9 players.
+- A tie for the highest score at or above 200 continues into another full round until there is one leader.
+
+No intended visual redesign is included in this release.

@@ -1,7 +1,7 @@
 {
   "name": "Flip Rush 7",
   "short_name": "Flip Rush 7",
-  "start_url": "/",
+  "start_url": "/online.html",
   "display": "standalone",
   "background_color": "#07101d",
   "theme_color": "#08101d"
