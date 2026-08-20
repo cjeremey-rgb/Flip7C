@@ -468,9 +468,9 @@ const server = http.createServer(async (req, res) => {
     return send(res, 200, { ok: true, state: publicState(room) });
   }
 
-  let file = url.pathname === '/' ? '/index.html' : url.pathname;
-  file = path.join(__dirname, 'public', file);
-  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
+  let file = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname).replace(/^\/+/, '');
+  file = path.resolve(__dirname, file);
+  if (file !== __dirname && !file.startsWith(__dirname + path.sep)) return send(res, 403, 'Forbidden', 'text/plain');
   fs.readFile(file, (error, data) => {
     if (error) return send(res, 404, 'Not found', 'text/plain');
     send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');

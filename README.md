@@ -1,29 +1,21 @@
-# Flip Rush 7 — GitHub-ready full files
+# Flip Rush 7 — Flat GitHub Repository
 
-This package contains complete replacement source files, not a patch.
+All game files are intentionally stored directly in this repository root. There are no nested `public`, `multiplayer`, or `single-player` folders.
 
-## Single player
+## Files
 
-`single-player/Flip-Rush-7-Single-Player.html`
+- `server.js` — multiplayer Node server and game rules engine
+- `package.json` — Node project configuration
+- `index.html` — multiplayer entry page
+- `online.html` — multiplayer interface
+- `online.js` — multiplayer browser logic
+- `online.css` — approved multiplayer styling
+- `offline.html` — approved single-player game used by the multiplayer interface's Single Player button
+- `Flip-Rush-7-Single-Player.html` — standalone copy of the approved single-player game
+- `manifest.json` — web app manifest
+- `.gitignore` — Git exclusions
 
-This is a standalone HTML file. It keeps the approved polished visual presentation and includes the corrected rules logic.
-
-## Multiplayer
-
-Upload the contents of the `multiplayer` folder as the multiplayer app/repository root.
-
-Required layout:
-
-- `server.js`
-- `package.json`
-- `public/index.html`
-- `public/online.html`
-- `public/online.js`
-- `public/online.css`
-- `public/offline.html`
-- `public/manifest.json`
-
-Run locally with:
+## Run multiplayer locally
 
 ```bash
 npm start
@@ -31,12 +23,12 @@ npm start
 
 Then open `http://localhost:3000`.
 
-For Render or another Node host, use `npm start` as the start command.
+For Render or another Node host, use `npm start` as the start command and keep all of these files in the repository root.
 
 ## Rules corrections included
 
 - A player may hold only one Second Chance.
-- An extra Second Chance must be given to another active player without one; discard it only when no eligible recipient exists.
+- An extra Second Chance must be given to another active player without one; it is discarded only when no eligible recipient exists.
 - Second Chance protects only against duplicate Number cards and does not block Freeze.
 - Freeze and Flip Three may target any active player, including the drawer.
 - Flip Three resolves three cards unless the target busts or reaches Flip 7; Second Chance resolves immediately while other Action cards wait until the sequence finishes.
