@@ -61,7 +61,8 @@
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
-    <div id="reactionTray" class="reaction-tray hidden"><button>🔥</button><button>😅</button><button>😈</button><button>👏</button><button>🤯</button></div>
+    <div id="reactionTray" class="reaction-tray hidden"><button data-emoji="🔥">🔥</button><button data-emoji="😅">😅</button><button data-emoji="😈">😈</button><button data-emoji="👏">👏</button><button data-emoji="🤯">🤯</button><button id="phraseMenuBtn" class="phrase-menu-btn" aria-label="Quick phrases">💬</button></div>
+    <div id="phraseTray" class="phrase-tray hidden" aria-label="Quick phrases"></div>
     <div id="actions" class="actions">
       <button id="react" class="react-btn">☺</button>
       <button id="hit" class="primary decision"><span>FLIP</span><small>Draw one card</small></button>
@@ -75,6 +76,7 @@
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="reactionPop" class="reaction-pop" aria-live="polite"></div>
+<div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="confetti"></div>
 <script>
 function applyFlipRushTheme(){

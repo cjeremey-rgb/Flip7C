@@ -47,3 +47,7 @@ The default presentation is **Neon Circuit** in the startup screen, single-playe
 
 - Number cards now use a distinct neon color palette instead of beige faces.
 - Multiplayer reactions (🔥 😅 😈 👏 🤯) are sent through the server and displayed to every player at the table.
+
+
+## Multiplayer quick phrases
+Use the reaction button during a multiplayer game and tap the speech-bubble option to send a premade phrase to everyone. Players named Becca also receive the additional phrase "You're a peckerhead!".

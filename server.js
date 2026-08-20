@@ -8,6 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const rooms = new Map();
 const ALLOWED_REACTIONS = new Set(['🔥','😅','😈','👏','🤯']);
+const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!']);
+const BECCA_PHRASE = "You're a peckerhead!";
 
 const send = (res, code, obj, type = 'application/json') => {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
@@ -386,6 +388,7 @@ function publicState(room) {
   } : null;
   const now = Date.now();
   room.reactions = (room.reactions || []).filter(reaction => now - reaction.at < 4500).slice(-12);
+  room.phrases = (room.phrases || []).filter(message => now - message.at < 7000).slice(-12);
   return {
     code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
@@ -393,6 +396,7 @@ function publicState(room) {
     pendingAction: pending,
     players: room.players.map(player => ({ ...player, connected: Date.now() - player.lastSeen < 12000 })),
     reactions: room.reactions,
+    phrases: room.phrases,
     log: room.log.slice(-18), winner: room.winner
   };
 }
@@ -411,7 +415,7 @@ const server = http.createServer(async (req, res) => {
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
         players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
-        heldSecondCards: new Map(), pendingAction: null, flow: null, reactions: [],
+        heldSecondCards: new Map(), pendingAction: null, flow: null, reactions: [], phrases: [],
         log: ['Room created.'], winner: null
       };
       rooms.set(code, room);
@@ -458,6 +462,12 @@ const server = http.createServer(async (req, res) => {
       if (!ALLOWED_REACTIONS.has(emoji)) return apiError(res, 'That reaction is not available.');
       room.reactions = (room.reactions || []).filter(reaction => Date.now() - reaction.at < 4500).slice(-11);
       room.reactions.push({ id: uid(), playerId, emoji, at: Date.now() });
+    } else if (url.pathname === '/api/phrase') {
+      const phrase = String(body.phrase || '');
+      const isBecca = String(player.name || '').trim().toLowerCase() === 'becca';
+      if (!ALLOWED_PHRASES.has(phrase) && !(phrase === BECCA_PHRASE && isBecca)) return apiError(res, 'That phrase is not available to this player.');
+      room.phrases = (room.phrases || []).filter(message => Date.now() - message.at < 7000).slice(-11);
+      room.phrases.push({ id: uid(), playerId, phrase, at: Date.now() });
     } else if (url.pathname === '/api/target') {
       const pending = room.pendingAction;
       if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');
