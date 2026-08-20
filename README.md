@@ -42,3 +42,8 @@ No intended visual redesign is included in this release.
 ## Presentation theme
 
 The default presentation is **Neon Circuit** in the startup screen, single-player, and multiplayer. Seasonal variants remain in the code and can be previewed by adding `?theme=seasonal` (automatic by date) or `?theme=spring`, `summer`, `autumn`, `winter`, or `christmas` to a page URL.
+
+## Latest presentation update
+
+- Number cards now use a distinct neon color palette instead of beige faces.
+- Multiplayer reactions (🔥 😅 😈 👏 🤯) are sent through the server and displayed to every player at the table.

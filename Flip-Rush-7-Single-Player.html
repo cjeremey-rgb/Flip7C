@@ -44,6 +44,26 @@
 @media (min-width:700px){#game.screen{max-width:760px;margin:auto}.table{min-height:570px}.bot-seat{min-height:165px}.bot-hand .card{width:58px;height:84px;font-size:29px}.hand .card{width:82px;height:118px}.players{gap:10px}}
 
 
+
+/* Neon number-card palette */
+.card.number{color:#fff!important;border-color:#f3ffff!important;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 11px rgba(255,255,255,.38);box-shadow:0 7px 0 #02070b,0 13px 23px #0009,0 0 18px var(--number-glow,#32e5cb66)!important}
+.card.number strong{color:inherit;text-shadow:0 2px 0 rgba(0,0,0,.58),0 0 12px rgba(255,255,255,.42)!important}
+.card.number.n0{--number-glow:#25f4ff99;background:linear-gradient(145deg,#094a68,#00bfd6 58%,#3effef)!important}
+.card.number.n1{--number-glow:#39ffd399;background:linear-gradient(145deg,#075d55,#00d8ad 58%,#61ffd7)!important}
+.card.number.n2{--number-glow:#72ff6e99;background:linear-gradient(145deg,#14633c,#2bd15b 58%,#8cff6d)!important}
+.card.number.n3{--number-glow:#d8ff3f99;background:linear-gradient(145deg,#4d6812,#a8d414 58%,#eaff4e)!important}
+.card.number.n4{--number-glow:#ffe24d99;background:linear-gradient(145deg,#7a5910,#e6aa11 58%,#ffe65b)!important}
+.card.number.n5{--number-glow:#ff9b3d99;background:linear-gradient(145deg,#7d3811,#ef6f21 58%,#ffb24b)!important}
+.card.number.n6{--number-glow:#ff5d7599;background:linear-gradient(145deg,#7c1d35,#ef3e61 58%,#ff7183)!important}
+.card.number.n7{--number-glow:#ff4fb899;background:linear-gradient(145deg,#72184f,#df258f 58%,#ff5bc4)!important}
+.card.number.n8{--number-glow:#c45cff99;background:linear-gradient(145deg,#4c217a,#8f3ee8 58%,#cc6cff)!important}
+.card.number.n9{--number-glow:#8c73ff99;background:linear-gradient(145deg,#30277d,#5b52e5 58%,#9a85ff)!important}
+.card.number.n10{--number-glow:#4f9cff99;background:linear-gradient(145deg,#123f7b,#2678df 58%,#58aeff)!important}
+.card.number.n11{--number-glow:#28d7ff99;background:linear-gradient(145deg,#075a78,#0ca6ce 58%,#3de4ff)!important}
+.card.number.n12{--number-glow:#ff4f4f99;background:linear-gradient(145deg,#741d24,#e23e45 58%,#ff725d)!important}
+.mini-card.c4{background:linear-gradient(145deg,#7a5910,#e6aa11 58%,#ffe65b);color:#fff;text-shadow:0 2px 0 #0007,0 0 9px #fff8;box-shadow:0 8px 0 #03070b,0 16px 25px #0007,0 0 16px #ffe24d66}
+.mini-card.c7{background:linear-gradient(145deg,#72184f,#df258f 58%,#ff5bc4);color:#fff;text-shadow:0 2px 0 #0007,0 0 9px #fff8;box-shadow:0 8px 0 #03070b,0 16px 25px #0007,0 0 16px #ff4fb866}
+
 /* Automatic seasonal presentation */
 body{transition:background .6s ease}.seasonal-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}.seasonal-layer i{position:absolute;top:-12vh;animation:seasonFall linear infinite;opacity:.72}.season-badge{position:fixed;z-index:25;right:10px;top:calc(8px + env(safe-area-inset-top));padding:5px 9px;border-radius:999px;background:rgba(5,12,20,.68);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(10px);font-size:9px;font-weight:900;letter-spacing:.08em;color:#fff;box-shadow:0 7px 20px #0005}.season-badge span{margin-right:4px}@keyframes seasonFall{to{transform:translate3d(var(--drift,25px),115vh,0) rotate(420deg)}}
 body[data-season="spring"]{--bg:#071a18;--panel:#102d29;--panel2:#173c36;--line:#315b50;--mint:#7af0bc;--yellow:#ffe078;--pink:#ff78aa;--orange:#ff9f69;--violet:#bf91ff}body[data-season="spring"]{background:radial-gradient(circle at 50% -10%,#3c7862 0,#0b2822 43%,#06120f 100%)}body[data-season="spring"] .table{background:radial-gradient(ellipse at center,#3b7a61 0,#1f5a48 45%,#0a2b25 100%);border-color:#70b394}body[data-season="spring"] .card.back{background:repeating-linear-gradient(135deg,#ff8db5 0 8px,#d95789 8px 16px);border-color:#fff2a5}body[data-season="spring"] .felt-mark{color:#effff00d}
@@ -377,7 +397,7 @@ function endRound(reason='Round complete.'){
  if(high>=200&&leaders.length>1)log('The game is tied at '+high+'. Everyone plays another full round.');
  $('hit').classList.add('hidden');$('stay').classList.add('hidden');$('next').classList.remove('hidden');
 }
-function cardHtml(c){let cls=c.t==='n'?'number':c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
+function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
 function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
  $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${bp.cards.map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');

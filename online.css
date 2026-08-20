@@ -46,3 +46,31 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 /* Status stamp readability pass */
 .result-overlay.bust,.result-overlay.hold{opacity:.76!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55));}
 .result-overlay.frozen{opacity:.58!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));}
+
+
+/* Neon number-card palette */
+.card.number{color:#fff!important;border-color:#f3ffff!important;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 11px rgba(255,255,255,.38);box-shadow:0 7px 0 #02070b,0 13px 23px #0009,0 0 18px var(--number-glow,#32e5cb66)!important}
+.card.number strong{color:inherit;text-shadow:0 2px 0 rgba(0,0,0,.58),0 0 12px rgba(255,255,255,.42)!important}
+.card.number.n0{--number-glow:#25f4ff99;background:linear-gradient(145deg,#094a68,#00bfd6 58%,#3effef)!important}
+.card.number.n1{--number-glow:#39ffd399;background:linear-gradient(145deg,#075d55,#00d8ad 58%,#61ffd7)!important}
+.card.number.n2{--number-glow:#72ff6e99;background:linear-gradient(145deg,#14633c,#2bd15b 58%,#8cff6d)!important}
+.card.number.n3{--number-glow:#d8ff3f99;background:linear-gradient(145deg,#4d6812,#a8d414 58%,#eaff4e)!important}
+.card.number.n4{--number-glow:#ffe24d99;background:linear-gradient(145deg,#7a5910,#e6aa11 58%,#ffe65b)!important}
+.card.number.n5{--number-glow:#ff9b3d99;background:linear-gradient(145deg,#7d3811,#ef6f21 58%,#ffb24b)!important}
+.card.number.n6{--number-glow:#ff5d7599;background:linear-gradient(145deg,#7c1d35,#ef3e61 58%,#ff7183)!important}
+.card.number.n7{--number-glow:#ff4fb899;background:linear-gradient(145deg,#72184f,#df258f 58%,#ff5bc4)!important}
+.card.number.n8{--number-glow:#c45cff99;background:linear-gradient(145deg,#4c217a,#8f3ee8 58%,#cc6cff)!important}
+.card.number.n9{--number-glow:#8c73ff99;background:linear-gradient(145deg,#30277d,#5b52e5 58%,#9a85ff)!important}
+.card.number.n10{--number-glow:#4f9cff99;background:linear-gradient(145deg,#123f7b,#2678df 58%,#58aeff)!important}
+.card.number.n11{--number-glow:#28d7ff99;background:linear-gradient(145deg,#075a78,#0ca6ce 58%,#3de4ff)!important}
+.card.number.n12{--number-glow:#ff4f4f99;background:linear-gradient(145deg,#741d24,#e23e45 58%,#ff725d)!important}
+.mini-card.c4{background:linear-gradient(145deg,#7a5910,#e6aa11 58%,#ffe65b);color:#fff;text-shadow:0 2px 0 #0007,0 0 9px #fff8;box-shadow:0 8px 0 #03070b,0 16px 25px #0007,0 0 16px #ffe24d66}
+.mini-card.c7{background:linear-gradient(145deg,#72184f,#df258f 58%,#ff5bc4);color:#fff;text-shadow:0 2px 0 #0007,0 0 9px #fff8;box-shadow:0 8px 0 #03070b,0 16px 25px #0007,0 0 16px #ff4fb866}
+
+
+/* Multiplayer table reactions */
+.player-reaction{position:absolute;z-index:6;right:7px;top:-17px;min-width:38px;height:38px;padding:2px 7px;border-radius:18px;background:#07101df2;border:1px solid #ffffff4a;display:grid;place-items:center;font-size:24px;line-height:1;box-shadow:0 8px 24px #0009,0 0 18px #32e5cb44;pointer-events:none;animation:reactionBob 1.05s ease-in-out infinite alternate}
+.reaction-pop{position:fixed;z-index:70;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translate(-50%,28px) scale(.86);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;padding:9px 15px 9px 10px;border-radius:999px;background:#07101df0;border:1px solid #ffffff42;box-shadow:0 12px 35px #000b,0 0 24px #32e5cb3d;transition:opacity .18s ease,transform .22s cubic-bezier(.2,.9,.28,1.25);white-space:nowrap}
+.reaction-pop.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.reaction-pop span{font-size:31px;line-height:1}.reaction-pop b{font-size:10px;letter-spacing:.08em;color:#fff}.reaction-pop small{display:block;margin-top:2px;color:var(--mint);font-size:7px;letter-spacing:.11em}
+@keyframes reactionBob{from{transform:translateY(0) rotate(-4deg)}to{transform:translateY(-5px) rotate(4deg)}}
