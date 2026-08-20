@@ -4,149 +4,477 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
-const __dirname=path.dirname(fileURLToPath(import.meta.url));
-const PORT=process.env.PORT||3000;
-const rooms=new Map();
-const VALID_EMOJIS=new Set(['🔥','😅','😈','👏','🤯']);
-const VALID_PHRASES=new Set(["You suck!","You're a peckerhead!","You got lucky!","So close","Tough Break!"]);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PORT = process.env.PORT || 3000;
+const rooms = new Map();
 
-const send=(res,code,obj,type='application/json')=>{res.writeHead(code,{'Content-Type':type,'Cache-Control':'no-store'});res.end(type==='application/json'?JSON.stringify(obj):obj)};
-const parse=req=>new Promise(resolve=>{let body='';req.on('data',c=>body+=c);req.on('end',()=>{try{resolve(JSON.parse(body||'{}'))}catch{resolve({})}})});
-const roomCode=()=>crypto.randomBytes(3).toString('hex').toUpperCase();
-const uid=()=>crypto.randomUUID();
-function shuffle(input){const a=[...input];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function makeDeck(){const d=[{type:'number',value:0,id:'n0'}];for(let v=1;v<=12;v++)for(let c=0;c<v;c++)d.push({type:'number',value:v,id:`n${v}-${c}`});for(const name of ['freeze','flip3','second'])for(let c=0;c<3;c++)d.push({type:'action',name,id:`${name}-${c}`});for(const v of [2,4,6,8,10])d.push({type:'modifier',value:v,id:`m${v}`});d.push({type:'multiplier',value:2,id:'x2'});if(d.length!==94)throw new Error('Deck must contain 94 cards.');return shuffle(d)}
-function makePlayer(id,name){return{id,name:String(name||'Player').slice(0,18),score:0,cards:[],mods:[],statusCards:[],active:true,stayed:false,busted:false,frozen:false,second:false,roundScore:0,lastSeen:Date.now()}}
-function score(p){if(p.busted)return 0;let total=p.cards.reduce((s,c)=>s+c.value,0);if(p.mods.some(c=>c.type==='multiplier'))total*=2;total+=p.mods.filter(c=>c.type==='modifier').reduce((s,c)=>s+c.value,0);if(p.cards.length>=7)total+=15;return total}
-const activePlayers=r=>r.players.filter(p=>p.active);
-const playerById=(r,id)=>r.players.find(p=>p.id===id);
-const currentPlayer=r=>r.players[r.turnIndex];
-const actionLabel=n=>n==='freeze'?'Freeze':n==='flip3'?'Flip Three':'Second Chance';
-function replenish(r){if(!r.deck.length&&r.discard.length){r.deck=shuffle(r.discard.splice(0));r.log.push('The discard pile was shuffled into a new draw pile.')}}
-function take(r){replenish(r);return r.deck.pop()||null}
-function discardPlayerCards(r,p){r.discard.push(...p.cards,...p.mods,...(p.statusCards||[]));if(p.second){const c=r.heldSecondCards.get(p.id);if(c)r.discard.push(c)}r.heldSecondCards.delete(p.id)}
-function finishRound(r,reason='Round complete.'){
-  if(r.phase!=='playing')return;
-  r.phase='roundEnd';r.pendingAction=null;r.flow=null;
-  for(const p of r.players){p.roundScore=score(p);p.score+=p.roundScore;p.active=false;discardPlayerCards(r,p)}
-  r.log.push(reason);
-  const high=Math.max(...r.players.map(p=>p.score)),leaders=r.players.filter(p=>p.score===high);
-  if(high>=200&&leaders.length===1){r.phase='gameOver';r.winner=leaders[0].name;r.log.push(`${r.winner} wins with ${high} points!`)}
-  else if(high>=200&&leaders.length>1){r.winner=null;r.log.push(`The game is tied at ${high}. Everyone plays another complete round.`)}
-  r.dealerIndex=(r.dealerIndex+1)%r.players.length;
-}
-function checkRoundEnd(r){if(r.phase!=='playing')return true;if(activePlayers(r).length===0){finishRound(r);return true}return false}
-function advanceTurn(r){if(checkRoundEnd(r))return;for(let i=0;i<r.players.length;i++){r.turnIndex=(r.turnIndex+1)%r.players.length;if(currentPlayer(r)?.active)return}}
-function startChoiceTurns(r){r.flow=null;r.turnIndex=(r.dealerIndex+1)%r.players.length;while(r.phase==='playing'&&!currentPlayer(r)?.active)advanceTurn(r);if(r.phase==='playing')r.log.push(`${currentPlayer(r).name} may Hit or Stay.`)}
-function resumeFlow(r,resume){if(r.phase!=='playing'||!resume)return;if(resume.type==='deal')continueInitialDeal(r,resume.nextOffset);else if(resume.type==='turn')advanceTurn(r);else if(resume.type==='flip3')continueFlipThree(r,resume.targetId,resume.remaining,resume.queued||[],resume.after);else if(resume.type==='resolveQueue')resolveQueuedActions(r,resume.queue||[],resume.after)}
-function grantSecondChance(r,p,card,resume){
-  if(!p||!p.active){r.discard.push(card);resumeFlow(r,resume);return}
-  if(!p.second){p.second=true;r.heldSecondCards.set(p.id,card);r.log.push(`${p.name} drew and kept a Second Chance.`);resumeFlow(r,resume);return}
-  const eligible=activePlayers(r).filter(x=>x.id!==p.id&&!x.second);
-  if(!eligible.length){r.discard.push(card);r.log.push(`${p.name} drew an extra Second Chance. Every other active player already has one, so it was discarded.`);resumeFlow(r,resume);return}
-  r.pendingAction={kind:'secondTransfer',chooserId:p.id,card,resume,eligibleIds:eligible.map(x=>x.id)};
-  r.log.push(`${p.name} drew an extra Second Chance and must give it to an active player who does not have one.`);
-}
-function offerAction(r,chooserId,card,resume,restrictedTargets=null){
-  if(card.name==='second'){grantSecondChance(r,playerById(r,chooserId),card,resume);return}
-  const eligible=activePlayers(r).filter(p=>!restrictedTargets||restrictedTargets.includes(p.id));
-  if(!eligible.length){r.discard.push(card);resumeFlow(r,resume);return}
-  r.pendingAction={kind:card.name,chooserId,card,resume,eligibleIds:eligible.map(p=>p.id)};
-  r.log.push(`${playerById(r,chooserId)?.name||'A player'} drew ${actionLabel(card.name)} and must choose a target.`);
-}
-function resolveNumber(r,p,c){
-  const dup=p.cards.some(x=>x.value===c.value);
-  if(dup&&p.second){p.second=false;const held=r.heldSecondCards.get(p.id);if(held)r.discard.push(held);r.heldSecondCards.delete(p.id);r.discard.push(c);r.log.push(`${p.name}'s Second Chance prevented duplicate ${c.value}.`);return'safe'}
-  p.cards.push(c);
-  if(dup){p.busted=true;p.active=false;r.log.push(`${p.name} busted on ${c.value}!`);return'bust'}
-  r.log.push(`${p.name} flipped ${c.value}.`);
-  if(p.cards.length>=7){finishRound(r,`${p.name} flipped seven unique Number cards and ended the round!`);return'flip7'}
-  return'safe';
-}
-function resolveNonAction(r,p,c){if(c.type==='number')return resolveNumber(r,p,c);p.mods.push(c);r.log.push(`${p.name} gained ${c.type==='multiplier'?'×2':'+'+c.value}.`);return'safe'}
-function drawForTurn(r,p){const c=take(r);if(!c)return finishRound(r,'The deck was exhausted.');if(c.type!=='action'){resolveNonAction(r,p,c);if(r.phase==='playing')advanceTurn(r)}else offerAction(r,p.id,c,{type:'turn'})}
-function continueInitialDeal(r,offset=0){if(r.phase!=='playing')return;if(offset>=r.players.length)return startChoiceTurns(r);const index=(r.dealerIndex+1+offset)%r.players.length,p=r.players[index],c=take(r);if(!c)return finishRound(r,'The deck was exhausted.');if(c.type==='action')offerAction(r,p.id,c,{type:'deal',nextOffset:offset+1});else{resolveNonAction(r,p,c);if(r.phase==='playing')continueInitialDeal(r,offset+1)}}
-function applyAction(r,chooser,target,card,resume){
-  if(card.name==='freeze'){
-    target.statusCards.push(card);target.frozen=true;target.stayed=true;target.active=false;target.roundScore=score(target);
-    r.log.push(`${chooser.name} froze ${target.name} at ${target.roundScore} points.`);
-    if(!checkRoundEnd(r))resumeFlow(r,resume);return;
-  }
-  r.discard.push(card);
-  if(card.name==='flip3'){r.log.push(`${chooser.name} played Flip Three on ${target.name}.`);continueFlipThree(r,target.id,3,[],resume)}
-}
-function continueFlipThree(r,targetId,remaining,queued,after){
-  if(r.phase!=='playing')return;
-  const target=playerById(r,targetId);
-  if(!target?.active||remaining<=0)return resolveQueuedActions(r,queued,after);
-  const c=take(r);if(!c)return finishRound(r,'The deck was exhausted.');
-  if(c.type!=='action'){const result=resolveNonAction(r,target,c);if(r.phase!=='playing'||result!=='safe')return;return continueFlipThree(r,targetId,remaining-1,queued,after)}
-  if(c.name==='second'){grantSecondChance(r,target,c,{type:'flip3',targetId,remaining:remaining-1,queued,after});return}
-  queued.push({chooserId:targetId,card:c});
-  r.log.push(`${target.name} revealed ${actionLabel(c.name)} during Flip Three; it will resolve after the remaining flips.`);
-  continueFlipThree(r,targetId,remaining-1,queued,after);
-}
-function resolveQueuedActions(r,queue,after){if(r.phase!=='playing')return;if(!queue.length)return resumeFlow(r,after);const [next,...rest]=queue,chooser=playerById(r,next.chooserId);if(!chooser?.active){r.discard.push(next.card);return resolveQueuedActions(r,rest,after)}offerAction(r,chooser.id,next.card,{type:'resolveQueue',queue:rest,after})}
-function startRound(r){r.round++;r.phase='playing';r.pendingAction=null;r.flow={type:'deal'};r.winner=null;r.players.forEach(p=>Object.assign(p,{cards:[],mods:[],statusCards:[],active:true,stayed:false,busted:false,frozen:false,second:false,roundScore:0}));r.heldSecondCards.clear();r.deck=makeDeck();r.discard=[];r.log=[`Round ${r.round} begins. ${r.players[r.dealerIndex].name} is the dealer.`];continueInitialDeal(r,0)}
-function publicState(r){
-  const pending=r.pendingAction?{kind:r.pendingAction.kind,chooserId:r.pendingAction.chooserId,card:r.pendingAction.card,eligibleIds:r.pendingAction.eligibleIds}:null;
-  return{code:r.code,hostId:r.hostId,phase:r.phase,round:r.round,turnIndex:r.turnIndex,dealerIndex:r.dealerIndex,deckCount:r.deck.length,discardCount:r.discard.length,pendingAction:pending,players:r.players.map(p=>({...p,connected:Date.now()-p.lastSeen<12000})),log:r.log.slice(-18),winner:r.winner,reaction:r.reaction};
-}
-function apiError(res,message,status=400){send(res,status,{ok:false,error:message})}
-const mime={'.html':'text/html','.css':'text/css','.js':'application/javascript','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp'};
-
-const server=http.createServer(async(req,res)=>{
-  const url=new URL(req.url,`http://${req.headers.host}`);
-  if(url.pathname==='/health')return send(res,200,{ok:true,service:'flip-rush-7'});
-  if(url.pathname.startsWith('/api/')){
-    const body=req.method==='POST'?await parse(req):{};
-    if(url.pathname==='/api/create'){
-      let code=roomCode();while(rooms.has(code))code=roomCode();
-      const playerId=uid(),r={code,hostId:playerId,phase:'lobby',round:0,turnIndex:0,dealerIndex:0,players:[makePlayer(playerId,body.name||'Host')],deck:makeDeck(),discard:[],heldSecondCards:new Map(),pendingAction:null,flow:null,log:['Room created.'],winner:null,reaction:null};
-      rooms.set(code,r);return send(res,200,{ok:true,room:code,playerId,state:publicState(r)});
-    }
-    if(url.pathname==='/api/join'){
-      const code=String(body.room||'').toUpperCase(),r=rooms.get(code);
-      if(!r)return apiError(res,'Room not found.',404);if(r.phase!=='lobby')return apiError(res,'Game already started.');if(r.players.length>=9)return apiError(res,'This room is full. Flip Rush 7 supports 3–9 players.');
-      const playerId=uid(),joined=makePlayer(playerId,body.name);r.players.push(joined);r.log.push(`${joined.name} joined.`);return send(res,200,{ok:true,room:code,playerId,state:publicState(r)});
-    }
-    const code=String(body.room||url.searchParams.get('room')||'').toUpperCase(),r=rooms.get(code);
-    if(!r)return apiError(res,'Room not found.',404);
-    const playerId=body.playerId||url.searchParams.get('playerId'),p=playerById(r,playerId);if(p)p.lastSeen=Date.now();
-    if(url.pathname==='/api/state')return send(res,200,{ok:true,state:publicState(r)});
-    if(!p)return apiError(res,'Player not found.',403);
-
-    if(url.pathname==='/api/start'){
-      if(r.hostId!==playerId)return apiError(res,'Only the host can start the game.');
-      if(r.players.length<3||r.players.length>9)return apiError(res,'Flip Rush 7 requires 3–9 players.');
-      startRound(r);
-    }else if(url.pathname==='/api/hit'){
-      if(r.phase!=='playing'||r.pendingAction||currentPlayer(r)?.id!==playerId)return apiError(res,'It is not your Hit/Stay decision.');
-      drawForTurn(r,p);
-    }else if(url.pathname==='/api/stay'){
-      if(r.phase!=='playing'||r.pendingAction||currentPlayer(r)?.id!==playerId)return apiError(res,'It is not your Hit/Stay decision.');
-      if(!p.cards.length&&!p.mods.length&&!p.second)return apiError(res,'You need at least one card in front of you before you can Stay.');
-      p.stayed=true;p.active=false;p.roundScore=score(p);r.log.push(`${p.name} stayed with ${p.roundScore} points.`);advanceTurn(r);
-    }else if(url.pathname==='/api/target'){
-      const a=r.pendingAction;if(!a||a.chooserId!==playerId)return apiError(res,'You do not have an action card to resolve.');if(!a.eligibleIds.includes(body.targetId))return apiError(res,'That player is not an eligible target.');
-      const target=playerById(r,body.targetId),chooser=playerById(r,playerId),{card,resume}=a;r.pendingAction=null;
-      if(a.kind==='secondTransfer'){target.second=true;r.heldSecondCards.set(target.id,card);r.log.push(`${chooser.name} gave the extra Second Chance to ${target.name}.`);resumeFlow(r,resume)}
-      else applyAction(r,chooser,target,card,resume);
-    }else if(url.pathname==='/api/next'){
-      if(r.hostId!==playerId||r.phase!=='roundEnd')return apiError(res,'Only the host can start the next round.');startRound(r);
-    }else if(url.pathname==='/api/reaction'){
-      const type=body.type,text=String(body.text||'');
-      if(type==='emoji'&&!VALID_EMOJIS.has(text))return apiError(res,'Invalid reaction.');
-      if(type==='phrase'&&!VALID_PHRASES.has(text))return apiError(res,'Invalid phrase.');
-      if(type!=='emoji'&&type!=='phrase')return apiError(res,'Invalid reaction type.');
-      r.reaction={id:uid(),playerId:p.id,playerName:p.name,type,text,at:Date.now()};
-    }else return apiError(res,'Unknown action.',404);
-    return send(res,200,{ok:true,state:publicState(r)});
-  }
-
-  let rel=decodeURIComponent(url.pathname==='/'?'index.html':url.pathname.replace(/^\/+/,''));
-  const file=path.resolve(__dirname,rel);
-  if(file!==__dirname&&!file.startsWith(__dirname+path.sep))return send(res,403,'Forbidden','text/plain');
-  fs.readFile(file,(e,d)=>e?send(res,404,'Not found','text/plain'):send(res,200,d,mime[path.extname(file)]||'application/octet-stream'));
+const send = (res, code, obj, type = 'application/json') => {
+  res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
+  res.end(type === 'application/json' ? JSON.stringify(obj) : obj);
+};
+const parse = req => new Promise(resolve => {
+  let body = '';
+  req.on('data', chunk => body += chunk);
+  req.on('end', () => { try { resolve(JSON.parse(body || '{}')); } catch { resolve({}); } });
 });
-server.listen(PORT,'0.0.0.0',()=>console.log(`Flip Rush 7 running on port ${PORT}`));
+const roomCode = () => crypto.randomBytes(3).toString('hex').toUpperCase();
+const uid = () => crypto.randomUUID();
+const shuffle = input => {
+  const a = [...input];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+function makeDeck() {
+  const deck = [{ type: 'number', value: 0, id: 'n0' }];
+  for (let value = 1; value <= 12; value++) {
+    for (let copy = 0; copy < value; copy++) deck.push({ type: 'number', value, id: `n${value}-${copy}` });
+  }
+  for (const name of ['freeze', 'flip3', 'second']) {
+    for (let copy = 0; copy < 3; copy++) deck.push({ type: 'action', name, id: `${name}-${copy}` });
+  }
+  for (const value of [2, 4, 6, 8, 10]) deck.push({ type: 'modifier', value, id: `m${value}` });
+  deck.push({ type: 'multiplier', value: 2, id: 'x2' });
+  return shuffle(deck);
+}
+
+function makePlayer(id, name) {
+  return {
+    id, name: String(name || 'Player').slice(0, 18), score: 0,
+    cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
+    second: false, roundScore: 0, lastSeen: Date.now()
+  };
+}
+
+function calculateScore(player) {
+  if (player.busted) return 0;
+  let total = player.cards.reduce((sum, card) => sum + card.value, 0);
+  if (player.mods.some(card => card.type === 'multiplier')) total *= 2;
+  total += player.mods.filter(card => card.type === 'modifier').reduce((sum, card) => sum + card.value, 0);
+  if (player.cards.length >= 7) total += 15;
+  return total;
+}
+
+function activePlayers(room) { return room.players.filter(player => player.active); }
+function playerById(room, id) { return room.players.find(player => player.id === id); }
+function currentPlayer(room) { return room.players[room.turnIndex]; }
+function actionLabel(name) { return name === 'freeze' ? 'Freeze' : name === 'flip3' ? 'Flip Three' : 'Second Chance'; }
+
+function replenishDeck(room) {
+  if (!room.deck.length && room.discard.length) {
+    room.deck = shuffle(room.discard.splice(0));
+    room.log.push('The discard pile was shuffled into a new draw pile.');
+  }
+}
+
+function takeCard(room) {
+  replenishDeck(room);
+  return room.deck.pop() || null;
+}
+
+function discardPlayerCards(room, player) {
+  room.discard.push(...player.cards, ...player.mods, ...(player.statusCards || []));
+  if (player.second) {
+    const sc = room.heldSecondCards.get(player.id);
+    if (sc) room.discard.push(sc);
+  }
+  room.heldSecondCards.delete(player.id);
+  player.second = false;
+}
+
+function finishRound(room, reason = 'Round complete.') {
+  if (room.phase !== 'playing') return;
+  room.phase = 'roundEnd';
+  room.pendingAction = null;
+  room.flow = null;
+  for (const player of room.players) {
+    player.roundScore = calculateScore(player);
+    player.score += player.roundScore;
+    player.active = false;
+    discardPlayerCards(room, player);
+  }
+  room.log.push(reason);
+  const high = Math.max(...room.players.map(player => player.score));
+  const leaders = room.players.filter(player => player.score === high);
+  if (high >= 200 && leaders.length === 1) {
+    room.phase = 'gameOver';
+    room.winner = leaders[0].name;
+    room.log.push(`${room.winner} wins with ${high} points!`);
+  } else if (high >= 200 && leaders.length > 1) {
+    room.winner = null;
+    room.log.push(`Game is tied at ${high}. Everyone plays another full round.`);
+  }
+  room.dealerIndex = (room.dealerIndex + 1) % room.players.length;
+}
+
+function checkRoundEnd(room) {
+  if (room.phase !== 'playing') return true;
+  if (activePlayers(room).length === 0) {
+    finishRound(room);
+    return true;
+  }
+  return false;
+}
+
+function advanceTurn(room) {
+  if (checkRoundEnd(room)) return;
+  for (let i = 0; i < room.players.length; i++) {
+    room.turnIndex = (room.turnIndex + 1) % room.players.length;
+    if (currentPlayer(room)?.active) return;
+  }
+}
+
+function startChoiceTurns(room) {
+  room.flow = null;
+  room.turnIndex = (room.dealerIndex + 1) % room.players.length;
+  while (room.phase === 'playing' && !currentPlayer(room)?.active) advanceTurn(room);
+  if (room.phase === 'playing') room.log.push(`${currentPlayer(room).name} may Hit or Stay.`);
+}
+
+function resumeFlow(room, resume) {
+  if (room.phase !== 'playing') return;
+  if (!resume) return;
+  if (resume.type === 'deal') {
+    continueInitialDeal(room, resume.nextOffset);
+  } else if (resume.type === 'turn') {
+    advanceTurn(room);
+  } else if (resume.type === 'flip3') {
+    continueFlipThree(room, resume.targetId, resume.remaining, resume.queued || [], resume.after);
+  } else if (resume.type === 'resolveQueue') {
+    resolveQueuedActions(room, resume.queue || [], resume.after);
+  }
+}
+
+function grantSecondChance(room, player, card, resume) {
+  if (!player || !player.active) {
+    room.discard.push(card);
+    resumeFlow(room, resume);
+    return;
+  }
+  if (!player.second) {
+    player.second = true;
+    room.heldSecondCards.set(player.id, card);
+    room.log.push(`${player.name} drew and kept a Second Chance.`);
+    resumeFlow(room, resume);
+    return;
+  }
+
+  const eligible = activePlayers(room).filter(candidate => candidate.id !== player.id && !candidate.second);
+  if (!eligible.length) {
+    room.discard.push(card);
+    room.log.push(`${player.name} already has a Second Chance and no other active player can receive the new one, so it was discarded.`);
+    resumeFlow(room, resume);
+    return;
+  }
+
+  room.pendingAction = {
+    chooserId: player.id,
+    card,
+    resume,
+    eligibleIds: eligible.map(candidate => candidate.id)
+  };
+  room.log.push(`${player.name} already has a Second Chance and must give the new one to another active player.`);
+}
+
+function offerAction(room, chooserId, card, resume, restrictedTargets = null) {
+  if (card.name === 'second') {
+    grantSecondChance(room, playerById(room, chooserId), card, resume);
+    return;
+  }
+  const eligible = activePlayers(room).filter(player => !restrictedTargets || restrictedTargets.includes(player.id));
+  if (!eligible.length) {
+    room.discard.push(card);
+    resumeFlow(room, resume);
+    return;
+  }
+  room.pendingAction = {
+    chooserId, card, resume,
+    eligibleIds: eligible.map(player => player.id)
+  };
+  room.log.push(`${playerById(room, chooserId)?.name || 'A player'} drew ${actionLabel(card.name)} and must choose a target.`);
+}
+
+function resolveNumber(room, target, card) {
+  const duplicate = target.cards.some(existing => existing.value === card.value);
+  if (duplicate && target.second) {
+    target.second = false;
+    const held = room.heldSecondCards.get(target.id);
+    if (held) room.discard.push(held);
+    room.heldSecondCards.delete(target.id);
+    room.discard.push(card);
+    room.log.push(`${target.name}'s Second Chance blocked a duplicate ${card.value}.`);
+    return 'safe';
+  }
+  target.cards.push(card);
+  if (duplicate) {
+    target.busted = true;
+    target.active = false;
+    room.log.push(`${target.name} busted on ${card.value}!`);
+    return 'bust';
+  }
+  room.log.push(`${target.name} flipped ${card.value}.`);
+  if (target.cards.length >= 7) {
+    finishRound(room, `${target.name} flipped seven unique Number cards and ended the round!`);
+    return 'flip7';
+  }
+  return 'safe';
+}
+
+function resolveNonActionCard(room, target, card) {
+  if (card.type === 'number') return resolveNumber(room, target, card);
+  target.mods.push(card);
+  room.log.push(`${target.name} gained ${card.type === 'multiplier' ? '×2' : `+${card.value}`}.`);
+  return 'safe';
+}
+
+function drawForTurn(room, player) {
+  const card = takeCard(room);
+  if (!card) return finishRound(room, 'The deck was exhausted.');
+  if (card.type !== 'action') {
+    resolveNonActionCard(room, player, card);
+    if (room.phase === 'playing') advanceTurn(room);
+    return;
+  }
+  offerAction(room, player.id, card, { type: 'turn' });
+}
+
+function continueInitialDeal(room, offset = 0) {
+  if (room.phase !== 'playing') return;
+  if (offset >= room.players.length) return startChoiceTurns(room);
+  const index = (room.dealerIndex + 1 + offset) % room.players.length;
+  const recipient = room.players[index];
+  const card = takeCard(room);
+  if (!card) return finishRound(room, 'The deck was exhausted.');
+  if (card.type === 'action') {
+    offerAction(room, recipient.id, card, { type: 'deal', nextOffset: offset + 1 });
+  } else {
+    resolveNonActionCard(room, recipient, card);
+    if (room.phase === 'playing') continueInitialDeal(room, offset + 1);
+  }
+}
+
+function applyAction(room, chooser, target, card, resume) {
+  if (card.name === 'second') {
+    if (!target || !target.active || target.id === chooser.id || target.second) {
+      room.discard.push(card);
+      room.log.push('The extra Second Chance no longer had an eligible recipient, so it was discarded.');
+      resumeFlow(room, resume);
+      return;
+    }
+    target.second = true;
+    room.heldSecondCards.set(target.id, card);
+    room.log.push(`${chooser.name} gave the extra Second Chance to ${target.name}.`);
+    resumeFlow(room, resume);
+    return;
+  }
+
+  room.discard.push(card);
+  if (card.name === 'freeze') {
+    room.discard.pop();
+    target.statusCards.push(card);
+    target.frozen = true;
+    target.stayed = true;
+    target.active = false;
+    target.roundScore = calculateScore(target);
+    room.log.push(`${chooser.name} froze ${target.name} at ${target.roundScore} points.`);
+    if (!checkRoundEnd(room)) resumeFlow(room, resume);
+    return;
+  }
+
+  room.log.push(`${chooser.name} played Flip Three on ${target.name}.`);
+  continueFlipThree(room, target.id, 3, [], resume);
+}
+
+function discardQueuedActions(room, queued) {
+  for (const item of queued) room.discard.push(item.card);
+}
+
+function continueFlipThree(room, targetId, remaining, queued, after) {
+  if (room.phase !== 'playing') {
+    discardQueuedActions(room, queued);
+    return;
+  }
+  const target = playerById(room, targetId);
+  if (!target) {
+    discardQueuedActions(room, queued);
+    return resumeFlow(room, after);
+  }
+  if (remaining <= 0) return resolveQueuedActions(room, queued, after);
+  if (!target.active) {
+    if (target.busted) {
+      discardQueuedActions(room, queued);
+      if (room.phase === 'playing') checkRoundEnd(room);
+      return;
+    }
+    return resolveQueuedActions(room, queued, after);
+  }
+
+  const card = takeCard(room);
+  if (!card) {
+    discardQueuedActions(room, queued);
+    return finishRound(room, 'The deck was exhausted.');
+  }
+
+  if (card.type !== 'action') {
+    const result = resolveNonActionCard(room, target, card);
+    if (result === 'bust') {
+      discardQueuedActions(room, queued);
+      if (room.phase === 'playing') checkRoundEnd(room);
+      return;
+    }
+    if (result === 'flip7' || room.phase !== 'playing') {
+      discardQueuedActions(room, queued);
+      return;
+    }
+    return continueFlipThree(room, targetId, remaining - 1, queued, after);
+  }
+
+  if (card.name === 'second') {
+    grantSecondChance(room, target, card, {
+      type: 'flip3', targetId, remaining: remaining - 1, queued, after
+    });
+    return;
+  }
+
+  queued.push({ chooserId: targetId, card });
+  room.log.push(`${target.name} revealed ${actionLabel(card.name)} during Flip Three; it will resolve after the remaining flips.`);
+  continueFlipThree(room, targetId, remaining - 1, queued, after);
+}
+
+function resolveQueuedActions(room, queue, after) {
+  if (room.phase !== 'playing') {
+    discardQueuedActions(room, queue);
+    return;
+  }
+  if (!queue.length) return resumeFlow(room, after);
+  const [next, ...rest] = queue;
+  const chooser = playerById(room, next.chooserId);
+  if (!chooser) {
+    room.discard.push(next.card);
+    return resolveQueuedActions(room, rest, after);
+  }
+  offerAction(room, chooser.id, next.card, { type: 'resolveQueue', queue: rest, after });
+}
+
+function startRound(room) {
+  room.round += 1;
+  room.phase = 'playing';
+  room.pendingAction = null;
+  room.flow = { type: 'deal' };
+  room.winner = null;
+  room.players.forEach(player => Object.assign(player, {
+    cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
+    second: false, roundScore: 0
+  }));
+  room.heldSecondCards.clear();
+  room.log = [`Round ${room.round} begins. ${room.players[room.dealerIndex].name} is the dealer.`];
+  if (!room.deck.length) replenishDeck(room);
+  if (!room.deck.length) room.deck = makeDeck();
+  continueInitialDeal(room, 0);
+}
+
+function publicState(room) {
+  const pending = room.pendingAction ? {
+    chooserId: room.pendingAction.chooserId,
+    card: room.pendingAction.card,
+    eligibleIds: room.pendingAction.eligibleIds
+  } : null;
+  return {
+    code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,
+    turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
+    deckCount: room.deck.length, discardCount: room.discard.length,
+    pendingAction: pending,
+    players: room.players.map(player => ({ ...player, connected: Date.now() - player.lastSeen < 12000 })),
+    log: room.log.slice(-18), winner: room.winner
+  };
+}
+
+function apiError(res, message, status = 400) { send(res, status, { ok: false, error: message }); }
+const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.json': 'application/json', '.svg': 'image/svg+xml' };
+
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  if (url.pathname === '/health') return send(res, 200, { ok: true, service: 'flip-rush-7' });
+  if (url.pathname.startsWith('/api/')) {
+    const body = req.method === 'POST' ? await parse(req) : {};
+    if (url.pathname === '/api/create') {
+      let code = roomCode(); while (rooms.has(code)) code = roomCode();
+      const playerId = uid();
+      const room = {
+        code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
+        players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
+        heldSecondCards: new Map(), pendingAction: null, flow: null,
+        log: ['Room created.'], winner: null
+      };
+      rooms.set(code, room);
+      return send(res, 200, { ok: true, room: code, playerId, state: publicState(room) });
+    }
+    if (url.pathname === '/api/join') {
+      const code = String(body.room || '').toUpperCase();
+      const room = rooms.get(code);
+      if (!room) return apiError(res, 'Room not found.', 404);
+      if (room.phase !== 'lobby') return apiError(res, 'Game already started.');
+      if (room.players.length >= 9) return apiError(res, 'This room is full. Flip 7 supports up to 9 players.');
+      const playerId = uid();
+      const joined = makePlayer(playerId, body.name);
+      room.players.push(joined);
+      room.log.push(`${joined.name} joined.`);
+      return send(res, 200, { ok: true, room: code, playerId, state: publicState(room) });
+    }
+
+    const code = String(body.room || url.searchParams.get('room') || '').toUpperCase();
+    const room = rooms.get(code);
+    if (!room) return apiError(res, 'Room not found.', 404);
+    const playerId = body.playerId || url.searchParams.get('playerId');
+    const player = room.players.find(item => item.id === playerId);
+    if (player) player.lastSeen = Date.now();
+    if (url.pathname === '/api/state') return send(res, 200, { ok: true, state: publicState(room) });
+    if (!player) return apiError(res, 'Player not found.', 403);
+
+    if (url.pathname === '/api/start') {
+      if (room.hostId !== playerId || room.players.length < 3) return apiError(res, 'Only the host can start with at least three players.');
+      startRound(room);
+    } else if (url.pathname === '/api/hit') {
+      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      drawForTurn(room, player);
+    } else if (url.pathname === '/api/stay') {
+      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      if (!player.cards.length && !player.mods.length && !player.second) return apiError(res, 'You need at least one card in front of you before you can Stay.');
+      player.stayed = true;
+      player.active = false;
+      player.roundScore = calculateScore(player);
+      room.log.push(`${player.name} stayed with ${player.roundScore} points.`);
+      advanceTurn(room);
+    } else if (url.pathname === '/api/target') {
+      const pending = room.pendingAction;
+      if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');
+      if (!pending.eligibleIds.includes(body.targetId)) return apiError(res, 'That player is not an eligible target.');
+      const target = playerById(room, body.targetId);
+      const chooser = playerById(room, playerId);
+      const { card, resume } = pending;
+      if (!target?.active) return apiError(res, 'That player is no longer active.');
+      if (card.name === 'second' && (target.id === chooser.id || target.second)) return apiError(res, 'That player cannot receive another Second Chance.');
+      room.pendingAction = null;
+      applyAction(room, chooser, target, card, resume);
+    } else if (url.pathname === '/api/next') {
+      if (room.hostId !== playerId || room.phase !== 'roundEnd') return apiError(res, 'Only the host can start the next round.');
+      startRound(room);
+    } else {
+      return apiError(res, 'Unknown action.', 404);
+    }
+    return send(res, 200, { ok: true, state: publicState(room) });
+  }
+
+  let file = url.pathname === '/' ? '/index.html' : url.pathname;
+  file = path.join(__dirname, 'public', file);
+  if (!file.startsWith(path.join(__dirname, 'public'))) return send(res, 403, 'Forbidden', 'text/plain');
+  fs.readFile(file, (error, data) => {
+    if (error) return send(res, 404, 'Not found', 'text/plain');
+    send(res, 200, data, mime[path.extname(file)] || 'application/octet-stream');
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => console.log(`Flip Rush 7 running on port ${PORT}`));
