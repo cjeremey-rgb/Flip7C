@@ -87,3 +87,63 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .phrase-pop b{display:block;color:var(--mint);font-size:10px;letter-spacing:.13em;margin-bottom:7px;text-transform:uppercase}
 .phrase-pop strong{display:block;color:#fff;font:900 clamp(22px,6vw,38px) 'Archivo Black',Inter,system-ui,sans-serif;line-height:1.08;text-shadow:0 2px 0 #0009,0 0 16px #ffffff28}
 @keyframes phraseFlash{0%,100%{filter:brightness(1);box-shadow:0 18px 55px #000d,0 0 28px #32e5cb3d}50%{filter:brightness(1.25);box-shadow:0 18px 55px #000d,0 0 46px #ffdd4270}}
+
+
+/* Current-build hand layout: two rows that always fit the viewport.
+   Non-number cards are on top; numbered cards are below, sorted low to high. */
+.my-area{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-end;
+  gap:5px;
+  overflow:hidden;
+  padding:8px;
+}
+.player-hand-row{
+  --hand-scale:1;
+  display:flex;
+  flex-direction:row;
+  align-items:flex-end;
+  justify-content:flex-start;
+  gap:0;
+  width:100%;
+  overflow:hidden;
+  min-height:0;
+}
+.player-hand-row:empty{display:none}
+.player-hand-row > .card{
+  width:calc(72px * var(--hand-scale));
+  height:calc(104px * var(--hand-scale));
+  min-width:0;
+  margin-left:calc(-15.84px * var(--hand-scale));
+  border-width:max(1px,calc(4px * var(--hand-scale)));
+  border-radius:calc(13px * var(--hand-scale));
+  font-size:calc(40px * var(--hand-scale));
+  transform:none!important;
+  transform-origin:center center;
+  flex:0 0 auto;
+}
+.player-hand-row > .card:first-child{margin-left:0}
+.player-hand-row > .card:before,.player-hand-row > .card:after{
+  font-size:max(5px,calc(9px * var(--hand-scale)));
+  left:calc(6px * var(--hand-scale));
+  top:calc(5px * var(--hand-scale));
+}
+.player-hand-row > .card:after{
+  left:auto;
+  top:auto;
+  right:calc(6px * var(--hand-scale));
+  bottom:calc(5px * var(--hand-scale));
+}
+.player-hand-row > .card.action{font-size:max(6px,calc(13px * var(--hand-scale)));padding:calc(6px * var(--hand-scale))}
+.player-hand-row > .card.mod{font-size:calc(27px * var(--hand-scale))}
+.player-hand-row > .card.mult{font-size:calc(31px * var(--hand-scale))}
+@media(min-width:700px){
+  .player-hand-row > .card{
+    width:calc(84px * var(--hand-scale));
+    height:calc(121px * var(--hand-scale));
+    margin-left:calc(-18.48px * var(--hand-scale));
+    font-size:calc(46.67px * var(--hand-scale));
+  }
+}

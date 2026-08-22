@@ -76,6 +76,57 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 /* Status stamp readability pass */
 .result-overlay.bust,.result-overlay.hold{opacity:.76!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55));}
 .result-overlay.frozen{opacity:.58!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));}
+
+/* Current-build hand layout: two rows that always fit the viewport.
+   Non-number cards are on top; numbered cards are below, sorted low to high. */
+.my-area .hand{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-end;
+  gap:5px;
+  width:100%;
+  overflow:hidden;
+  padding:8px;
+  scroll-snap-type:none;
+}
+.my-area .hand-row{
+  --hand-scale:1;
+  display:flex;
+  flex-direction:row;
+  align-items:flex-end;
+  justify-content:flex-start;
+  gap:0;
+  width:100%;
+  overflow:hidden;
+  min-height:0;
+}
+.my-area .hand-row:empty{display:none}
+.my-area .hand-row .card{
+  width:calc(72px * var(--hand-scale));
+  height:calc(104px * var(--hand-scale));
+  min-width:0;
+  margin-left:calc(-15.84px * var(--hand-scale));
+  border-width:max(1px,calc(4px * var(--hand-scale)));
+  border-radius:calc(13px * var(--hand-scale));
+  font-size:calc(40px * var(--hand-scale));
+  transform:none!important;
+  flex:0 0 auto;
+  scroll-snap-align:none;
+}
+.my-area .hand-row .card:first-child{margin-left:0}
+.my-area .hand-row .card.action{font-size:max(6px,calc(13px * var(--hand-scale)));padding:calc(6px * var(--hand-scale))}
+.my-area .hand-row .card.mod{font-size:calc(27px * var(--hand-scale))}
+.my-area .hand-row .card.mult{font-size:calc(31px * var(--hand-scale))}
+.my-area .hand-row .card:last-child{transform:none!important;filter:none}
+@media(min-width:700px){
+  .my-area .hand-row .card{
+    width:calc(84px * var(--hand-scale));
+    height:calc(121px * var(--hand-scale));
+    margin-left:calc(-18.48px * var(--hand-scale));
+    font-size:calc(46.67px * var(--hand-scale));
+  }
+}
 </style>
 </head>
 <body>
@@ -397,17 +448,23 @@ function endRound(reason='Round complete.'){
  if(high>=200&&leaders.length>1)log('The game is tied at '+high+'. Everyone plays another full round.');
  $('hit').classList.add('hidden');$('stay').classList.add('hidden');$('next').classList.remove('hidden');
 }
+function displayCardRank(c){if(c.t==='n')return c.v;if(c.t==='m'&&c.v!=='x2')return 100+Number(c.v.slice(1));if(c.t==='m')return 200;if(c.t==='a'&&c.v==='SECOND CHANCE')return 300;return 400}
+function displayCards(cards){return [...cards].sort((a,b)=>displayCardRank(a)-displayCardRank(b))}
+function splitDisplayCards(cards){const sorted=displayCards(cards);return{numbers:sorted.filter(c=>c.t==='n'),other:sorted.filter(c=>c.t!=='n')}}
+function fitOfflineRow(row,reservePreview=false){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
+function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;fitOfflineRow(hand.querySelector('.hand-other'),false);fitOfflineRow(hand.querySelector('.hand-numbers'),true)}
 function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
 function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
- $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${bp.cards.map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
- const p=players[me];$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand">${p.cards.map(cardHtml).join('')}</div>${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:'';$('scorePreview').innerHTML=`<small>ROUND VALUE</small><b>${p?value(p):0}</b>`;
- const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;
+ $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
+ const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]};$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:'';$('scorePreview').innerHTML=`<small>ROUND VALUE</small><b>${p?value(p):0}</b>`;
+ const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}
 $('create').onclick=startOffline;$('join').onclick=startOffline;$('hit').onclick=hit;$('stay').onclick=stay;$('next').onclick=()=>{if(gameOver)return;round++;$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');newRound()};$('leave').onclick=()=>location.reload();
 $('howBtn').onclick=()=>alert('Offline practice uses the official Flip 7 rules. Draw unique number cards, stay to bank your points, and avoid duplicates. A Second Chance only protects against a duplicate number; you may hold only one, and an extra must be given to another active player without one or discarded if nobody is eligible. Freeze and Flip 3 may target any active player, including yourself. During Flip 3, all three revealed cards count; Second Chance resolves immediately, while Freeze and Flip 3 cards wait until the sequence is complete. Seven unique number cards immediately end the round and earn +15. If the highest score at 200 or more is tied, everyone plays another full round.');
 $('soundBtn').onclick=()=>alert('Sound is available in the hosted multiplayer build.');$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
+window.addEventListener('resize',fitOfflineHand);
 </script>
 </body>
 </html>
