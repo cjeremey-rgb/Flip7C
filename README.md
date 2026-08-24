@@ -51,3 +51,16 @@ The default presentation is **Neon Circuit** in the startup screen, single-playe
 
 ## Multiplayer quick phrases
 Use the reaction button during a multiplayer game and tap the speech-bubble option to send a premade phrase to everyone. Players named Becca also receive the additional phrase "You're a peckerhead!".
+
+## Install as a phone app (PWA)
+
+This repository is now an installable Progressive Web App while keeping the existing game UI unchanged.
+
+- Deploy the complete repository to an HTTPS Node host as before.
+- Android/Chrome: open the deployed Flip Rush 7 URL, then choose **Install app** from the browser menu (or accept the browser's install prompt).
+- iPhone/iPad/Safari: open the deployed URL, use **Share → Add to Home Screen**.
+- The installed app launches at the existing Single Player / Multiplayer startup screen.
+- Static game files use a network-first service worker, so new website versions are fetched whenever possible while the last successful build remains available as an offline fallback.
+- Multiplayer API calls are never cached and still require an internet connection.
+
+The service worker is intentionally invisible; it does not alter the game's visuals.

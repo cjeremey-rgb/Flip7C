@@ -147,3 +147,18 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
     font-size:calc(46.67px * var(--hand-scale));
   }
 }
+
+
+/* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */
+.game-head-tools{display:flex;align-items:center;gap:6px}
+.mic-btn{position:relative;overflow:visible;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.mic-btn svg{width:20px;height:20px;fill:none;stroke:#dcecff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;margin:auto}
+.mic-btn:after{content:'';position:absolute;width:2px;height:27px;left:20px;top:7px;border-radius:2px;background:#ff6f91;transform:rotate(-43deg);box-shadow:0 0 7px #ff4f8b88}
+.mic-btn.voice-on{border-color:#32e5cb;background:#0d2830;box-shadow:0 0 0 2px #32e5cb22,0 0 18px #32e5cb24}
+.mic-btn.voice-on:after{display:none}
+.mic-btn.voice-speaking{box-shadow:0 0 0 2px #32e5cb44,0 0 26px #32e5cb88;animation:voiceMicPulse .7s ease-in-out infinite alternate}
+@keyframes voiceMicPulse{from{transform:scale(1)}to{transform:scale(1.055)}}
+.player.voice-on .name:after,.bot-seat.voice-on .bot-seat-head b:after{content:' · MIC';color:#71dfff;font-size:.68em;letter-spacing:.04em;text-shadow:0 0 8px #32e5cb66}
+.player.voice-speaking .name:after,.bot-seat.voice-speaking .bot-seat-head b:after{content:' · TALKING';color:#32e5cb;text-shadow:0 0 10px #32e5cbaa}
+.voice-audio-rack{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(100%)}
+@media(max-width:390px){.game-head-tools{gap:4px}.mic-btn,.game-head-tools .icon-btn{width:39px;height:39px}.room-pill{padding-left:9px;padding-right:9px}.round-pill{padding-left:10px;padding-right:10px}}

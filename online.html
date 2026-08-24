@@ -7,6 +7,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Flip Rush 7</title>
+  <meta name="application-name" content="Flip Rush 7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Flip Rush 7">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="online.css">
 </head>
@@ -39,7 +44,12 @@
       <button id="leave" class="icon-btn" aria-label="Leave room">‹</button>
       <button id="copyCode" class="room-pill"><small>ROOM</small><b>------</b><span>⌁</span></button>
       <div class="round-pill"><small>ROUND</small><b id="round">0</b></div>
-      <button id="menuBtn" class="icon-btn" aria-label="Game menu">•••</button>
+      <div class="game-head-tools">
+        <button id="micBtn" class="icon-btn mic-btn" aria-label="Turn microphone on" title="Microphone off">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M5.5 10.5V11a6.5 6.5 0 0 0 13 0v-.5M12 17.5V21M9 21h6"/></svg>
+        </button>
+        <button id="menuBtn" class="icon-btn" aria-label="Game menu">•••</button>
+      </div>
     </header>
 
     <div id="status" class="status"><span class="pulse"></span><b>WAITING FOR PLAYERS</b><small>Share the room code to invite friends</small></div>
@@ -78,6 +88,7 @@
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="reactionPop" class="reaction-pop" aria-live="polite"></div>
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
+<div id="voiceAudioRack" class="voice-audio-rack" aria-hidden="true"></div>
 <div id="toast"></div><div id="confetti"></div>
 <script>
 function applyFlipRushTheme(){
@@ -159,5 +170,7 @@ if (location.protocol === 'file:') {
   document.body.appendChild(script);
 }
 </script>
+
+<script src="pwa-register.js"></script>
 </body>
 </html>

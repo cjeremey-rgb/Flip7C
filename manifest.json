@@ -1,8 +1,65 @@
 {
+  "id": "./",
   "name": "Flip Rush 7",
   "short_name": "Flip Rush 7",
-  "start_url": "/online.html",
+  "description": "Flip Rush 7 \u2014 single-player and online multiplayer card game.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "fullscreen"
+  ],
+  "orientation": "portrait",
   "background_color": "#07101d",
-  "theme_color": "#08101d"
+  "theme_color": "#08101d",
+  "categories": [
+    "games"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Single Player",
+      "short_name": "Single Player",
+      "url": "./offline.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Multiplayer",
+      "short_name": "Multiplayer",
+      "url": "./online.html",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
 }

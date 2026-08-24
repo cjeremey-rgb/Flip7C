@@ -10,6 +10,7 @@ const rooms = new Map();
 const ALLOWED_REACTIONS = new Set(['🔥','😅','😈','👏','🤯']);
 const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!']);
 const BECCA_PHRASE = "You're a peckerhead!";
+const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
 
 const send = (res, code, obj, type = 'application/json') => {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
@@ -48,7 +49,8 @@ function makePlayer(id, name) {
   return {
     id, name: String(name || 'Player').slice(0, 18), score: 0,
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
-    second: false, roundScore: 0, lastSeen: Date.now()
+    second: false, roundScore: 0, lastSeen: Date.now(),
+    voiceEnabled: false, voiceSpeaking: false
   };
 }
 
@@ -402,7 +404,7 @@ function publicState(room) {
 }
 
 function apiError(res, message, status = 400) { send(res, status, { ok: false, error: message }); }
-const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.json': 'application/json', '.svg': 'image/svg+xml' };
+const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -415,7 +417,7 @@ const server = http.createServer(async (req, res) => {
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
         players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
-        heldSecondCards: new Map(), pendingAction: null, flow: null, reactions: [], phrases: [],
+        heldSecondCards: new Map(), pendingAction: null, flow: null, reactions: [], phrases: [], voiceSignals: new Map(),
         log: ['Room created.'], winner: null
       };
       rooms.set(code, room);
@@ -443,6 +445,12 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === '/api/state') return send(res, 200, { ok: true, state: publicState(room) });
     if (!player) return apiError(res, 'Player not found.', 403);
 
+    if (url.pathname === '/api/voice-signals') {
+      const queued = room.voiceSignals.get(playerId) || [];
+      room.voiceSignals.set(playerId, []);
+      return send(res, 200, { ok: true, signals: queued.slice(-120) });
+    }
+
     if (url.pathname === '/api/start') {
       if (room.hostId !== playerId || room.players.length < 3) return apiError(res, 'Only the host can start with at least three players.');
       startRound(room);
@@ -468,6 +476,22 @@ const server = http.createServer(async (req, res) => {
       if (!ALLOWED_PHRASES.has(phrase) && !(phrase === BECCA_PHRASE && isBecca)) return apiError(res, 'That phrase is not available to this player.');
       room.phrases = (room.phrases || []).filter(message => Date.now() - message.at < 7000).slice(-11);
       room.phrases.push({ id: uid(), playerId, phrase, at: Date.now() });
+    } else if (url.pathname === '/api/voice-status') {
+      player.voiceEnabled = Boolean(body.enabled);
+      player.voiceSpeaking = player.voiceEnabled && Boolean(body.speaking);
+      if (!player.voiceEnabled) room.voiceSignals.set(playerId, []);
+    } else if (url.pathname === '/api/voice-signal') {
+      const targetId = String(body.targetId || '');
+      const target = playerById(room, targetId);
+      const signal = body.signal;
+      if (!target || target.id === playerId) return apiError(res, 'Voice target is not available.');
+      if (!player.voiceEnabled || !target.voiceEnabled) return apiError(res, 'Both players must enable voice chat first.');
+      if (!signal || typeof signal !== 'object' || !VOICE_SIGNAL_TYPES.has(signal.type)) return apiError(res, 'Invalid voice signal.');
+      if (JSON.stringify(signal).length > 50000) return apiError(res, 'Voice signal is too large.');
+      const queue = room.voiceSignals.get(targetId) || [];
+      queue.push({ id: uid(), fromId: playerId, signal, at: Date.now() });
+      room.voiceSignals.set(targetId, queue.slice(-120));
+      return send(res, 200, { ok: true });
     } else if (url.pathname === '/api/target') {
       const pending = room.pendingAction;
       if (!pending || pending.chooserId !== playerId) return apiError(res, 'You do not have an action card to resolve.');

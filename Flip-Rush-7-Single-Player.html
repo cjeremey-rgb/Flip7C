@@ -7,6 +7,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Flip Rush 7</title>
+  <meta name="application-name" content="Flip Rush 7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Flip Rush 7">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
   
   <style>@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@500;600;700;800;900&display=swap');
 :root{--bg:#07101d;--panel:#101d2d;--panel2:#14283b;--ink:#f7fbff;--muted:#8ea4b7;--line:#263d52;--mint:#32e5cb;--yellow:#ffdd42;--pink:#ff4f8b;--orange:#ff8247;--violet:#aa79ff;--danger:#ff5d6c;--shadow:0 24px 70px rgba(0,0,0,.42)}
@@ -466,5 +472,7 @@ $('howBtn').onclick=()=>alert('Offline practice uses the official Flip 7 rules. 
 $('soundBtn').onclick=()=>alert('Sound is available in the hosted multiplayer build.');$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
 window.addEventListener('resize',fitOfflineHand);
 </script>
+
+<script src="pwa-register.js"></script>
 </body>
 </html>
