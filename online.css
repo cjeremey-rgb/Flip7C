@@ -162,3 +162,32 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .player.voice-speaking .name:after,.bot-seat.voice-speaking .bot-seat-head b:after{content:' · TALKING';color:#32e5cb;text-shadow:0 0 10px #32e5cbaa}
 .voice-audio-rack{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(100%)}
 @media(max-width:390px){.game-head-tools{gap:4px}.mic-btn,.game-head-tools .icon-btn{width:39px;height:39px}.room-pill{padding-left:9px;padding-right:9px}.round-pill{padding-left:10px;padding-right:10px}}
+
+/* Round-value visibility fix: keep the complete score badge above the hand panel. */
+.table{isolation:isolate}
+.score-preview{
+  z-index:40!important;
+  right:14px!important;
+  bottom:42px!important;
+  min-width:86px;
+  padding:7px 10px 8px!important;
+  background:rgba(6,19,29,.97)!important;
+  border:1px solid #438094!important;
+  border-radius:13px!important;
+  box-shadow:0 8px 18px #000a,0 0 0 1px #07101d!important;
+  pointer-events:none;
+}
+.score-preview small{
+  color:#8faabd!important;
+  opacity:1!important;
+  font-weight:900;
+}
+.score-preview b{
+  position:relative;
+  z-index:2;
+  display:block;
+  line-height:1.05;
+  color:var(--yellow)!important;
+  text-shadow:0 2px 0 #0009,0 0 9px #ffdd4240;
+}
+@media(min-width:700px){.score-preview{bottom:48px!important}}

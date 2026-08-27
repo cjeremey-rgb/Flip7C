@@ -133,6 +133,13 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
     font-size:calc(46.67px * var(--hand-scale));
   }
 }
+
+/* Round-value visibility fix: keep the complete score badge above the hand panel. */
+.table{isolation:isolate}
+.score-preview{z-index:40!important;right:14px!important;bottom:42px!important;min-width:86px;padding:7px 10px 8px!important;background:rgba(6,19,29,.97)!important;border:1px solid #438094!important;border-radius:13px!important;box-shadow:0 8px 18px #000a,0 0 0 1px #07101d!important;pointer-events:none}
+.score-preview small{color:#8faabd!important;opacity:1!important;font-weight:900}
+.score-preview b{position:relative;z-index:2;display:block;line-height:1.05;color:var(--yellow)!important;text-shadow:0 2px 0 #0009,0 0 9px #ffdd4240}
+@media(min-width:700px){.score-preview{bottom:48px!important}}
 </style>
 </head>
 <body>
