@@ -200,3 +200,46 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .my-zone>.score-preview small{display:block!important;color:#a9c4d4!important;opacity:1!important;font-weight:900!important}
 .my-zone>.score-preview b{display:block!important;position:relative!important;z-index:2!important;line-height:1!important;color:var(--yellow)!important;text-shadow:0 2px 0 #000c,0 0 10px #ffdd4255!important}
 @media(min-width:700px){.my-zone>.score-preview{right:14px!important;bottom:14px!important}}
+
+
+/* Definitive round-value placement: score is rendered INSIDE #myArea, above its own panel background/border. */
+.my-area{position:relative!important;}
+.my-area > .score-preview{
+  position:absolute!important;
+  z-index:100!important;
+  right:12px!important;
+  bottom:18px!important;
+  top:auto!important;
+  min-width:76px!important;
+  padding:0!important;
+  margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  text-align:right!important;
+  pointer-events:none!important;
+  transform:none!important;
+  overflow:visible!important;
+}
+.my-area > .score-preview small{
+  display:block!important;
+  margin:0 0 2px 0!important;
+  color:#b9cfdd!important;
+  opacity:1!important;
+  font-size:7px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+  text-shadow:0 1px 2px #000!important;
+}
+.my-area > .score-preview b{
+  display:block!important;
+  position:relative!important;
+  z-index:101!important;
+  margin:0!important;
+  padding:0!important;
+  color:var(--yellow)!important;
+  font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;
+  text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important;
+}
