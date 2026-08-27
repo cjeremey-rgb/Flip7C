@@ -344,9 +344,29 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
     return;
   }
 
-  queued.push({ chooserId: targetId, card });
-  room.log.push(`${target.name} revealed ${actionLabel(card.name)} during Flip Three; it will resolve after the remaining flips.`);
+  queued.push({ chooserId: target.id, card });
+  room.log.push(`${target.name} revealed ${actionLabel(card.name)} during Flip Three; it is set aside. ${target.name} will choose its target after all three flips finish.`);
   continueFlipThree(room, targetId, remaining - 1, queued, after);
+}
+
+function offerQueuedFlipThreeAction(room, chooserId, card, resume) {
+  const chooser = playerById(room, chooserId);
+  if (!chooser || room.phase !== 'playing') {
+    room.discard.push(card);
+    return resumeFlow(room, resume);
+  }
+  const eligible = activePlayers(room);
+  if (!eligible.length) {
+    room.discard.push(card);
+    return resumeFlow(room, resume);
+  }
+  room.pendingAction = {
+    chooserId: chooser.id,
+    card,
+    resume,
+    eligibleIds: eligible.map(player => player.id)
+  };
+  room.log.push(`${chooser.name} completed Flip Three and must now choose who receives the queued ${actionLabel(card.name)}.`);
 }
 
 function resolveQueuedActions(room, queue, after) {
@@ -361,7 +381,9 @@ function resolveQueuedActions(room, queue, after) {
     room.discard.push(next.card);
     return resolveQueuedActions(room, rest, after);
   }
-  offerAction(room, chooser.id, next.card, { type: 'resolveQueue', queue: rest, after });
+  // Freeze and Flip Three cards revealed inside a Flip Three are never auto-applied.
+  // The player who received the Flip Three always chooses the target after all three flips finish.
+  offerQueuedFlipThreeAction(room, chooser.id, next.card, { type: 'resolveQueue', queue: rest, after });
 }
 
 function startRound(room) {

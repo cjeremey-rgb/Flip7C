@@ -357,11 +357,28 @@ async function chooseFlip3Target(sourceIndex){
  });
 }
 function discardQueuedActions(target,queued){for(const q of queued){removeCard(target,q.card);discardCard(q.card)}}
+async function resolveQueuedFreeze(q){
+ const chooserIndex=q.chooserIndex;
+ const chooser=players[chooserIndex];
+ if(!chooser){discardCard(q.card);return}
+ log(chooser.name+' now chooses who receives the queued Freeze.');render();
+ const targetIndex=await chooseFreezeTarget(chooserIndex);
+ if(targetIndex===null){discardCard(q.card);log('No active player could receive Freeze, so it was discarded.');return}
+ const target=players[targetIndex];
+ target.cards.push(q.card);target.banked=true;target.frozen=true;
+ log(chooser.name+' froze '+target.name+' for the rest of the round.');render();
+ if(active().length===0)endRound('All players are out of the round.');
+}
 async function resolveQueuedActions(queued){
  for(const q of queued){
   if(!running)return;
-  if(q.card.v==='FREEZE')await resolveFreeze(q.sourceIndex,q.card);
-  else if(q.card.v==='FLIP 3')await resolveFlip3(q.sourceIndex,q.card);
+  if(q.card.v==='FREEZE')await resolveQueuedFreeze(q);
+  else if(q.card.v==='FLIP 3'){
+   const chooser=players[q.chooserIndex];
+   if(!chooser){discardCard(q.card);continue}
+   log(chooser.name+' now chooses who receives the queued Flip 3.');render();
+   await resolveFlip3(q.chooserIndex,q.card);
+  }
  }
 }
 async function resolveFlip3(sourceIndex,flipCard){
@@ -380,7 +397,9 @@ async function resolveFlip3(sourceIndex,flipCard){
   }else if(c.t==='a'&&c.v==='SECOND CHANCE'){
    await resolveSecondChance(targetIndex,c);
   }else if(c.t==='a'){
-   queued.push({sourceIndex:targetIndex,card:c});log(c.v+' is set aside until Flip 3 finishes.');
+   removeCard(target,c);
+   queued.push({chooserIndex:targetIndex,card:c});
+   log(c.v+' is set aside until Flip 3 finishes. '+target.name+' will choose its target afterward.');render();
   }
  }
  if(!running)return;
