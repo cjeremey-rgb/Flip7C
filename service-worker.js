@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flip-rush-7-v2026-08-27-score-inside-hand-final';
+const CACHE_NAME = 'flip-rush-7-v2026-08-27-score-verified-gap';
 const APP_SHELL = [
   './',
   './index.html',
