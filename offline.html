@@ -133,6 +133,44 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
     font-size:calc(46.67px * var(--hand-scale));
   }
 }
+
+/* ROUND VALUE: actual single-player route fix. The score lives inside #myArea so the hand panel cannot cross over it. */
+.my-area{position:relative!important;}
+.my-area > .score-preview{
+  position:absolute!important;
+  z-index:80!important;
+  right:14px!important;
+  bottom:18px!important;
+  top:auto!important;
+  min-width:78px!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  text-align:right!important;
+  pointer-events:none!important;
+  transform:none!important;
+}
+.my-area > .score-preview small{
+  display:block!important;
+  margin:0 0 3px!important;
+  color:#b9cfdd!important;
+  opacity:1!important;
+  font-size:7px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+  text-shadow:0 1px 2px #000!important;
+}
+.my-area > .score-preview b{
+  display:block!important;
+  margin:0!important;
+  padding:0!important;
+  color:var(--yellow)!important;
+  font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;
+  text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important;
+}
 </style>
 </head>
 <body>
@@ -180,8 +218,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
         <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
         <small><b id="deckCount">94</b> LEFT</small>
       </div>
-      <div id="myArea" class="my-area"></div>
-      <div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div>
+      <div id="myArea" class="my-area"><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
@@ -465,7 +502,7 @@ function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'m
 function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
  $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
- const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]};$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:'';$('scorePreview').innerHTML=`<small>ROUND VALUE</small><b>${p?value(p):0}</b>`;
+ const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]},scoreHtml=`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${p?value(p):0}</b></div>`;$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${scoreHtml}${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:scoreHtml;
  const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}

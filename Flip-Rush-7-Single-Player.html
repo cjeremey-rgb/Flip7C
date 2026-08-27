@@ -42,7 +42,7 @@
 .bot-table{gap:9px;margin-bottom:12px}.bot-seat{min-height:132px;padding:8px;border-radius:18px;background:linear-gradient(160deg,#071c28e8,#06131de8);border-color:#397086;box-shadow:inset 0 1px 0 #ffffff08,0 8px 16px #0005}.bot-seat.turn{border-color:var(--yellow);box-shadow:0 0 0 2px #ffdd4228,0 0 24px #ffdd4226,0 10px 20px #0006}.bot-seat-head{margin-bottom:7px}.bot-seat-head b{font-size:10px}.bot-seat-head small{font-size:8px;padding:3px 6px;border-radius:999px;background:#102a38;color:#b8d2df}.bot-hand{min-height:84px;justify-content:flex-start;overflow-x:auto;overflow-y:hidden;padding:3px 10px 8px 13px;scrollbar-width:none}.bot-hand::-webkit-scrollbar,.hand::-webkit-scrollbar{display:none}.bot-hand .card{width:48px;height:69px;border-radius:9px;font-size:24px;margin-left:-16px;box-shadow:0 5px 0 #020609,0 9px 14px #0008}.bot-hand .card:first-child{margin-left:0}.bot-hand .card.action{font-size:7px;line-height:1.05}.bot-hand .card.mod{font-size:14px}.bot-hand .card.mult{font-size:18px}
 .deck-zone{margin-top:0}.deck{width:69px;height:98px;filter:drop-shadow(0 12px 15px #0009)}.deck .card{width:64px;height:92px}.deck-zone small{margin-top:4px;background:#06141ddd;border:1px solid #315f72;border-radius:999px;padding:4px 8px;display:inline-block}.player.turn~* .deck-zone .card.back,.table:has(.player.turn) .card.back{animation:none}
 .my-area{width:100%;min-height:132px;margin-top:auto;padding:10px 3px 3px;border-radius:19px;background:linear-gradient(180deg,#0617225e,#061019d9);border:1px solid #326477;box-shadow:inset 0 1px 0 #ffffff08}.hand{justify-content:flex-start;overflow-x:auto;overflow-y:hidden;padding:5px 18px 13px;min-height:115px;scroll-snap-type:x proximity}.hand .card{scroll-snap-align:start;margin-left:-25px;transition:transform .18s ease,filter .18s ease}.hand .card:first-child{margin-left:0}.hand .card:last-child{transform:translateY(-4px);filter:drop-shadow(0 0 9px #ffdd4244)}
-.score-preview{right:10px;bottom:9px;padding:7px 10px;border-radius:13px;background:#06131dea;border-color:#438094;box-shadow:0 7px 16px #0007;z-index:8;pointer-events:none}.score-preview small{font-size:6.5px}.score-preview b{font-size:22px;color:var(--yellow)}
+.score-preview{right:10px;bottom:9px;padding:7px 10px;border-radius:13px;background:#06131dea;border-color:#438094;box-shadow:0 7px 16px #0007}.score-preview small{font-size:6.5px}.score-preview b{font-size:22px;color:var(--yellow)}
 .result-overlay{font-size:clamp(32px,10vw,54px)!important;letter-spacing:.08em!important;text-shadow:0 3px 0 #0008,0 0 12px currentColor!important;backdrop-filter:none!important}.result-overlay.bust{transform:translate(-50%,-50%) rotate(-10deg)!important}.result-overlay.hold{transform:translate(-50%,-50%) rotate(7deg)!important}.result-overlay.frozen{transform:translate(-50%,-50%) rotate(-5deg)!important}
 .actions{gap:7px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#07101d00,#07101df2 25%);backdrop-filter:blur(8px)}.decision{min-height:57px;border-radius:17px}.decision span{font-size:14px}.decision small{font-size:8px}.react-btn{width:47px;height:57px;border-radius:16px}.game-log{margin-top:8px;border-radius:13px}.game-log summary{padding:8px 11px;font-size:8px}
 .target-picker{border-radius:19px;box-shadow:0 18px 45px #000b}.target{min-height:54px}.card{background:linear-gradient(145deg,#fffdf1,#e8dfc6);border-color:#fff;box-shadow:0 7px 0 #02070b,0 13px 23px #0009}.card.number strong{text-shadow:0 2px 0 #fff8}.card.freeze{background:linear-gradient(145deg,#b7efff,#53c7f1)}.card.flip3{background:linear-gradient(145deg,#d1b7ff,#8e58ef)}.card.second{background:linear-gradient(145deg,#ffb7d2,#f04f91)}.card.mod{background:linear-gradient(145deg,#7cf4df,#20cbb4)}.card.mult{background:linear-gradient(145deg,#fff078,#ffc72f)}
@@ -134,18 +134,15 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   }
 }
 
-.my-zone{position:relative;z-index:6;width:100%;margin-top:auto;overflow:visible}
-.my-zone > .my-area{margin-top:0!important;width:100%!important}
-
-/* Canonical ROUND VALUE placement: keep the entire score safely inside the hand panel. */
+/* ROUND VALUE: actual single-player route fix. The score lives inside #myArea so the hand panel cannot cross over it. */
 .my-area{position:relative!important;}
 .my-area > .score-preview{
   position:absolute!important;
-  z-index:100!important;
+  z-index:80!important;
   right:14px!important;
-  bottom:44px!important;
+  bottom:18px!important;
   top:auto!important;
-  min-width:76px!important;
+  min-width:78px!important;
   margin:0!important;
   padding:0!important;
   background:transparent!important;
@@ -157,7 +154,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 }
 .my-area > .score-preview small{
   display:block!important;
-  margin:0 0 3px 0!important;
+  margin:0 0 3px!important;
   color:#b9cfdd!important;
   opacity:1!important;
   font-size:7px!important;
@@ -174,7 +171,6 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;
   text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important;
 }
-@media(max-height:740px){.my-area > .score-preview{bottom:38px!important}}
 </style>
 </head>
 <body>
@@ -222,9 +218,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
         <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
         <small><b id="deckCount">94</b> LEFT</small>
       </div>
-      <div class="my-zone">
-        <div id="myArea" class="my-area"></div>
-      </div>
+      <div id="myArea" class="my-area"><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
@@ -527,7 +521,7 @@ function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'m
 function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
  $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
- const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]};$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${value(p)}</b></div>${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div>`;
+ const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]},scoreHtml=`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${p?value(p):0}</b></div>`;$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${scoreHtml}${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:scoreHtml;
  const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}
