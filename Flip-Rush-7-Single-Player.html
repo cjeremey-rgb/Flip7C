@@ -372,9 +372,9 @@ async function resolveFlip3(sourceIndex,flipCard){
  const queued=[];
  for(let n=1;n<=3&&running&&isRoundActive(target);n++){
   const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return}
-  target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();await wait(350);
+  target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();await wait(c.t==='a'?1000:350);
   if(c.t==='n'){
-   const result=resolveNumberCard(targetIndex,c);
+   const result=await resolveNumberCard(targetIndex,c);
    if(result==='bust'){discardQueuedActions(target,queued);if(active().length===0)endRound('All players are out of the round.');return}
    if(result==='flip7')return;
   }else if(c.t==='a'&&c.v==='SECOND CHANCE'){
@@ -388,10 +388,11 @@ async function resolveFlip3(sourceIndex,flipCard){
  await resolveQueuedActions(queued);
 }
 
-function resolveNumberCard(i,c){
+async function resolveNumberCard(i,c){
  const p=players[i];
  if(p.nums.has(c.v)){
   if(p.second){
+   await wait(1000);
    log(p.name+' drew a duplicate '+c.v+'. Second Chance activates!');
    p.second=false;
    const secondIndex=p.cards.findIndex(card=>card.t==='a'&&card.v==='SECOND CHANCE');
@@ -409,7 +410,8 @@ async function drawFor(i){
  const p=players[i];if(!running||!isRoundActive(p))return null;
  const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return null}
  p.cards.push(c);log(p.name+' drew '+c.v);render();
- if(c.t==='n')resolveNumberCard(i,c);
+ if(c.t==='a')await wait(1000);
+ if(c.t==='n')await resolveNumberCard(i,c);
  else if(c.t==='a'&&c.v==='SECOND CHANCE')await resolveSecondChance(i,c);
  else if(c.t==='a'&&c.v==='FREEZE')await resolveFreeze(i,c);
  else if(c.t==='a'&&c.v==='FLIP 3')await resolveFlip3(i,c);
