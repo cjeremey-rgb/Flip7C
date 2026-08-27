@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flip-rush-7-v2026-08-27-score-visibility-fix2';
+const CACHE_NAME = 'flip-rush-7-v2026-08-27-score-structural-fix';
 const APP_SHELL = [
   './',
   './index.html',
