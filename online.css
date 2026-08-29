@@ -100,6 +100,8 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   gap:5px;
   overflow:hidden;
   padding:8px;
+  width:100%;
+  scroll-snap-type:none;
 }
 .my-zone{width:100%;min-width:0}
 .player-hand-row{
@@ -125,6 +127,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   transform:none!important;
   transform-origin:center center;
   flex:0 0 auto;
+  scroll-snap-align:none;
 }
 .player-hand-row > .card:first-child{margin-left:0}
 .player-hand-row > .card:before,.player-hand-row > .card:after{
@@ -141,6 +144,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .player-hand-row > .card.action{font-size:max(6px,calc(13px * var(--hand-scale)));padding:calc(6px * var(--hand-scale))}
 .player-hand-row > .card.mod{font-size:calc(27px * var(--hand-scale))}
 .player-hand-row > .card.mult{font-size:calc(31px * var(--hand-scale))}
+.player-hand-row > .card:last-child{transform:none!important;filter:none}
 @media(min-width:700px){
   .player-hand-row > .card{
     width:calc(84px * var(--hand-scale));
@@ -149,6 +153,12 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
     font-size:calc(46.67px * var(--hand-scale));
   }
 }
+
+/* Match the single-player round-value placement exactly. */
+.my-area{position:relative!important}
+.my-area > .score-preview{position:absolute!important;z-index:80!important;right:14px!important;bottom:18px!important;top:auto!important;min-width:78px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;text-align:right!important;pointer-events:none!important;transform:none!important}
+.my-area > .score-preview small{display:block!important;margin:0 0 3px!important;color:#b9cfdd!important;opacity:1!important;font-size:7px!important;line-height:1!important;font-weight:900!important;letter-spacing:.12em!important;text-shadow:0 1px 2px #000!important}
+.my-area > .score-preview b{display:block!important;margin:0!important;padding:0!important;color:var(--yellow)!important;font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important}
 
 
 /* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */

@@ -11,6 +11,9 @@ const ALLOWED_REACTIONS = new Set(['🔥','😅','😈','👏','🤯']);
 const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!']);
 const BECCA_PHRASE = "You're a peckerhead!";
 const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
+const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const INITIAL_DEAL_MS = 900;
+const FLIP_THREE_STEP_MS = 900;
 const COMPUTER_TURN_MIN_MS = 850;
 const COMPUTER_TURN_JITTER_MS = 650;
 const COMPUTER_ACTION_MS = 1100;
@@ -57,9 +60,10 @@ function makePlayer(id, name) {
   };
 }
 
-function addComputerPlayer(room, name = 'Computer') {
+function addComputerPlayer(room, name = 'Computer', style = 'balanced') {
   const computer = makePlayer(`computer-${uid()}`, name);
   computer.computer = true;
+  computer.computerStyle = style;
   room.players.push(computer);
   room.log.push(`${computer.name} joined to complete the three-player table.`);
   return computer;
@@ -79,6 +83,14 @@ function playerById(room, id) { return room.players.find(player => player.id ===
 function currentPlayer(room) { return room.players[room.turnIndex]; }
 function actionLabel(name) { return name === 'freeze' ? 'Freeze' : name === 'flip3' ? 'Flip Three' : 'Second Chance'; }
 
+function duplicateRisk(player) {
+  const unseenNumbers = 78 - player.cards.length;
+  if (unseenNumbers <= 0) return 1;
+  let danger = 0;
+  for (const card of player.cards) danger += Math.max(0, NUMBER_CARD_COUNTS[card.value] - 1);
+  return Math.min(0.92, danger / unseenNumbers);
+}
+
 function chooseComputerTarget(room, pending) {
   const chooser = playerById(room, pending.chooserId);
   const eligible = pending.eligibleIds
@@ -86,19 +98,50 @@ function chooseComputerTarget(room, pending) {
     .filter(player => player?.active);
   if (!eligible.length) return null;
 
-  const people = eligible.filter(player => !player.computer && player.id !== chooser?.id);
   const opponents = eligible.filter(player => player.id !== chooser?.id);
-  const choices = people.length ? people : opponents.length ? opponents : eligible;
-
   if (pending.card.name === 'second') {
-    return [...choices].sort((a, b) => calculateScore(a) - calculateScore(b))[0];
+    return eligible[Math.floor(Math.random() * eligible.length)];
   }
-  return [...choices].sort((a, b) => calculateScore(b) - calculateScore(a))[0];
+
+  if (pending.card.name === 'freeze') {
+    const choices = opponents.length ? opponents : eligible;
+    const ranked = [...choices].sort((a, b) => {
+      const bValue = calculateScore(b) * 1.4 + b.score * 0.35 + b.cards.length * 2;
+      const aValue = calculateScore(a) * 1.4 + a.score * 0.35 + a.cards.length * 2;
+      return bValue - aValue;
+    });
+    return ranked.length > 1 && Math.random() < 0.16 ? ranked[1] : ranked[0];
+  }
+
+  const self = eligible.find(player => player.id === chooser?.id);
+  const selfRisk = chooser ? duplicateRisk(chooser) : 1;
+  if (self && (chooser.cards.length >= 5 || selfRisk < 0.16 || calculateScore(chooser) < 10) && Math.random() < 0.72) return self;
+  if (opponents.length) {
+    return [...opponents].sort((a, b) => (
+      calculateScore(b) + b.score * 0.18 + duplicateRisk(b) * 18
+    ) - (
+      calculateScore(a) + a.score * 0.18 + duplicateRisk(a) * 18
+    ))[0];
+  }
+  return self || eligible[0];
 }
 
-function computerShouldHit(player) {
+function computerShouldHit(room, player) {
   if (!player.cards.length && !player.mods.length && !player.second) return true;
-  return calculateScore(player) < 20;
+  const value = calculateScore(player);
+  const risk = duplicateRisk(player);
+  const leader = Math.max(...room.players.map(candidate => candidate.score));
+  const gap = leader - player.score;
+  const style = player.computerStyle || 'balanced';
+  let target = style === 'cautious' ? 19 : style === 'bold' ? 34 : 26;
+  if (gap > 35) target += 6;
+  if (player.score === leader && player.score > 0) target -= 3;
+  if (player.cards.length >= 6) return true;
+  if (value >= target) return false;
+  const tolerance = style === 'cautious' ? 0.16 : style === 'bold' ? 0.34 : 0.24;
+  if (value >= 14 && risk > tolerance) return !(Math.random() < (style === 'cautious' ? 0.9 : 0.68));
+  if (value >= 10 && risk > 0.38) return !(Math.random() < 0.55);
+  return true;
 }
 
 function stayPlayer(room, player) {
@@ -131,7 +174,7 @@ function takeComputerStep(room) {
 
   const computer = currentPlayer(room);
   if (!computer?.computer || !computer.active) return;
-  if (computerShouldHit(computer)) {
+  if (computerShouldHit(room, computer)) {
     room.log.push(`${computer.name} chose to Flip.`);
     drawForTurn(room, computer);
   } else {
@@ -142,6 +185,7 @@ function takeComputerStep(room) {
 
 function scheduleComputerPlayer(room) {
   if (room.computerTimer || room.phase !== 'playing') return;
+  if ((room.flow?.type === 'deal' || room.flow?.type === 'flip3') && !room.pendingAction) return;
   const pendingChooser = room.pendingAction ? playerById(room, room.pendingAction.chooserId) : null;
   const computer = room.pendingAction ? pendingChooser : currentPlayer(room);
   if (!computer?.computer) return;
@@ -178,6 +222,18 @@ function discardPlayerCards(room, player) {
 
 function finishRound(room, reason = 'Round complete.') {
   if (room.phase !== 'playing') return;
+  if (room.dealTimer) {
+    clearTimeout(room.dealTimer);
+    room.dealTimer = null;
+  }
+  if (room.flipTimer) {
+    clearTimeout(room.flipTimer);
+    room.flipTimer = null;
+  }
+  if (room.computerTimer) {
+    clearTimeout(room.computerTimer);
+    room.computerTimer = null;
+  }
   room.phase = 'roundEnd';
   room.pendingAction = null;
   room.flow = null;
@@ -222,18 +278,42 @@ function startChoiceTurns(room) {
   room.flow = null;
   room.turnIndex = (room.dealerIndex + 1) % room.players.length;
   while (room.phase === 'playing' && !currentPlayer(room)?.active) advanceTurn(room);
-  if (room.phase === 'playing') room.log.push(`${currentPlayer(room).name} may Hit or Stay.`);
+  if (room.phase === 'playing') {
+    room.log.push(`${currentPlayer(room).name} may Hit or Stay.`);
+    scheduleComputerPlayer(room);
+  }
+}
+
+function scheduleInitialDeal(room, nextOffset) {
+  if (room.dealTimer || room.phase !== 'playing') return;
+  room.dealTimer = setTimeout(() => {
+    room.dealTimer = null;
+    continueInitialDeal(room, nextOffset);
+    scheduleComputerPlayer(room);
+  }, INITIAL_DEAL_MS);
+}
+
+function scheduleFlipThree(room, targetId, remaining, queued, after) {
+  if (room.flipTimer || room.phase !== 'playing') return;
+  room.flow = { type: 'flip3' };
+  room.flipTimer = setTimeout(() => {
+    room.flipTimer = null;
+    continueFlipThree(room, targetId, remaining, queued, after);
+    scheduleComputerPlayer(room);
+  }, FLIP_THREE_STEP_MS);
 }
 
 function resumeFlow(room, resume) {
   if (room.phase !== 'playing') return;
   if (!resume) return;
   if (resume.type === 'deal') {
-    continueInitialDeal(room, resume.nextOffset);
+    room.flow = { type: 'deal' };
+    scheduleInitialDeal(room, resume.nextOffset);
   } else if (resume.type === 'turn') {
+    room.flow = null;
     advanceTurn(room);
   } else if (resume.type === 'flip3') {
-    continueFlipThree(room, resume.targetId, resume.remaining, resume.queued || [], resume.after);
+    scheduleFlipThree(room, resume.targetId, resume.remaining, resume.queued || [], resume.after);
   } else if (resume.type === 'resolveQueue') {
     resolveQueuedActions(room, resume.queue || [], resume.after);
   }
@@ -343,7 +423,7 @@ function continueInitialDeal(room, offset = 0) {
     offerAction(room, recipient.id, card, { type: 'deal', nextOffset: offset + 1 });
   } else {
     resolveNonActionCard(room, recipient, card);
-    if (room.phase === 'playing') continueInitialDeal(room, offset + 1);
+    if (room.phase === 'playing') scheduleInitialDeal(room, offset + 1);
   }
 }
 
@@ -376,6 +456,7 @@ function applyAction(room, chooser, target, card, resume) {
   }
 
   room.log.push(`${chooser.name} played Flip Three on ${target.name}.`);
+  room.flow = { type: 'flip3' };
   continueFlipThree(room, target.id, 3, [], resume);
 }
 
@@ -397,7 +478,7 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
   if (!target.active) {
     if (target.busted) {
       discardQueuedActions(room, queued);
-      if (room.phase === 'playing') checkRoundEnd(room);
+      if (room.phase === 'playing' && !checkRoundEnd(room)) resumeFlow(room, after);
       return;
     }
     return resolveQueuedActions(room, queued, after);
@@ -413,14 +494,14 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
     const result = resolveNonActionCard(room, target, card);
     if (result === 'bust') {
       discardQueuedActions(room, queued);
-      if (room.phase === 'playing') checkRoundEnd(room);
+      if (room.phase === 'playing' && !checkRoundEnd(room)) resumeFlow(room, after);
       return;
     }
     if (result === 'flip7' || room.phase !== 'playing') {
       discardQueuedActions(room, queued);
       return;
     }
-    return continueFlipThree(room, targetId, remaining - 1, queued, after);
+    return scheduleFlipThree(room, targetId, remaining - 1, queued, after);
   }
 
   if (card.name === 'second') {
@@ -432,7 +513,7 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
 
   queued.push({ chooserId: target.id, card });
   room.log.push(`${target.name} revealed ${actionLabel(card.name)} during Flip Three; it is set aside. ${target.name} will choose its target after all three flips finish.`);
-  continueFlipThree(room, targetId, remaining - 1, queued, after);
+  scheduleFlipThree(room, targetId, remaining - 1, queued, after);
 }
 
 function offerQueuedFlipThreeAction(room, chooserId, card, resume) {
@@ -490,6 +571,33 @@ function startRound(room) {
   continueInitialDeal(room, 0);
 }
 
+function restartGame(room) {
+  if (room.computerTimer) {
+    clearTimeout(room.computerTimer);
+    room.computerTimer = null;
+  }
+  if (room.dealTimer) {
+    clearTimeout(room.dealTimer);
+    room.dealTimer = null;
+  }
+  if (room.flipTimer) {
+    clearTimeout(room.flipTimer);
+    room.flipTimer = null;
+  }
+  room.round = 0;
+  room.turnIndex = 0;
+  room.dealerIndex = room.players.length - 1;
+  room.deck = makeDeck();
+  room.discard = [];
+  room.pendingAction = null;
+  room.flow = null;
+  room.winner = null;
+  room.phrases = [];
+  room.voiceSignals = new Map();
+  room.players.forEach(player => { player.score = 0; });
+  startRound(room);
+}
+
 function publicState(room) {
   const pending = room.pendingAction ? {
     chooserId: room.pendingAction.chooserId,
@@ -503,6 +611,8 @@ function publicState(room) {
     code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
     deckCount: room.deck.length, discardCount: room.discard.length,
+    dealing: room.flow?.type === 'deal',
+    resolvingAction: room.flow?.type === 'flip3',
     pendingAction: pending,
     players: room.players.map(player => ({ ...player, connected: player.computer || Date.now() - player.lastSeen < 12000 })),
     reactions: room.reactions,
@@ -563,15 +673,19 @@ const server = http.createServer(async (req, res) => {
       const humanCount = room.players.filter(candidate => !candidate.computer).length;
       if (room.hostId !== playerId || room.phase !== 'lobby') return apiError(res, 'Only the host can start the game from the lobby.');
       const computersNeeded = Math.max(0, 3 - humanCount);
+      const computerProfiles = computersNeeded === 2
+        ? [{ name: 'Nova', style: 'cautious' }, { name: 'Ace', style: 'bold' }]
+        : [{ name: 'Nova', style: 'cautious' }];
       for (let index = 0; index < computersNeeded; index++) {
-        addComputerPlayer(room, computersNeeded === 1 ? 'Computer' : `Computer ${index + 1}`);
+        addComputerPlayer(room, computerProfiles[index].name, computerProfiles[index].style);
       }
+      room.dealerIndex = room.players.length - 1;
       startRound(room);
     } else if (url.pathname === '/api/hit') {
-      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      if (room.phase !== 'playing' || room.flow || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
       drawForTurn(room, player);
     } else if (url.pathname === '/api/stay') {
-      if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
+      if (room.phase !== 'playing' || room.flow || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
       if (!player.cards.length && !player.mods.length && !player.second) return apiError(res, 'You need at least one card in front of you before you can Stay.');
       stayPlayer(room, player);
     } else if (url.pathname === '/api/react') {
@@ -615,6 +729,9 @@ const server = http.createServer(async (req, res) => {
     } else if (url.pathname === '/api/next') {
       if (room.hostId !== playerId || room.phase !== 'roundEnd') return apiError(res, 'Only the host can start the next round.');
       startRound(room);
+    } else if (url.pathname === '/api/restart') {
+      if (room.hostId !== playerId || room.phase !== 'gameOver') return apiError(res, 'Only the host can start another game after someone wins.');
+      restartGame(room);
     } else {
       return apiError(res, 'Unknown action.', 404);
     }
