@@ -11,6 +11,9 @@ const ALLOWED_REACTIONS = new Set(['🔥','😅','😈','👏','🤯']);
 const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!']);
 const BECCA_PHRASE = "You're a peckerhead!";
 const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
+const COMPUTER_TURN_MIN_MS = 850;
+const COMPUTER_TURN_JITTER_MS = 650;
+const COMPUTER_ACTION_MS = 1100;
 
 const send = (res, code, obj, type = 'application/json') => {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
@@ -106,35 +109,49 @@ function stayPlayer(room, player) {
   advanceTurn(room);
 }
 
-function runComputerPlayers(room) {
-  let steps = 0;
-  while (room.phase === 'playing' && steps++ < 250) {
-    const pending = room.pendingAction;
-    if (pending) {
-      const chooser = playerById(room, pending.chooserId);
-      if (!chooser?.computer) return;
-      const target = chooseComputerTarget(room, pending);
-      const { card, resume } = pending;
-      room.pendingAction = null;
-      if (!target) {
-        room.discard.push(card);
-        room.log.push(`${chooser.name} had no eligible target, so ${actionLabel(card.name)} was discarded.`);
-        resumeFlow(room, resume);
-      } else {
-        applyAction(room, chooser, target, card, resume);
-      }
-      continue;
-    }
-
-    const computer = currentPlayer(room);
-    if (!computer?.computer || !computer.active) return;
-    if (computerShouldHit(computer)) {
-      room.log.push(`${computer.name} chose to Flip.`);
-      drawForTurn(room, computer);
+function takeComputerStep(room) {
+  if (room.phase !== 'playing') return;
+  const pending = room.pendingAction;
+  if (pending) {
+    const chooser = playerById(room, pending.chooserId);
+    if (!chooser?.computer) return;
+    const target = chooseComputerTarget(room, pending);
+    const { card, resume } = pending;
+    room.pendingAction = null;
+    if (!target) {
+      room.discard.push(card);
+      room.log.push(`${chooser.name} had no eligible target, so ${actionLabel(card.name)} was discarded.`);
+      resumeFlow(room, resume);
     } else {
-      stayPlayer(room, computer);
+      applyAction(room, chooser, target, card, resume);
     }
+    scheduleComputerPlayer(room);
+    return;
   }
+
+  const computer = currentPlayer(room);
+  if (!computer?.computer || !computer.active) return;
+  if (computerShouldHit(computer)) {
+    room.log.push(`${computer.name} chose to Flip.`);
+    drawForTurn(room, computer);
+  } else {
+    stayPlayer(room, computer);
+  }
+  scheduleComputerPlayer(room);
+}
+
+function scheduleComputerPlayer(room) {
+  if (room.computerTimer || room.phase !== 'playing') return;
+  const pendingChooser = room.pendingAction ? playerById(room, room.pendingAction.chooserId) : null;
+  const computer = room.pendingAction ? pendingChooser : currentPlayer(room);
+  if (!computer?.computer) return;
+  const delay = room.pendingAction
+    ? COMPUTER_ACTION_MS
+    : COMPUTER_TURN_MIN_MS + Math.floor(Math.random() * COMPUTER_TURN_JITTER_MS);
+  room.computerTimer = setTimeout(() => {
+    room.computerTimer = null;
+    takeComputerStep(room);
+  }, delay);
 }
 
 function replenishDeck(room) {
@@ -601,7 +618,7 @@ const server = http.createServer(async (req, res) => {
     } else {
       return apiError(res, 'Unknown action.', 404);
     }
-    runComputerPlayers(room);
+    scheduleComputerPlayer(room);
     return send(res, 200, { ok: true, state: publicState(room) });
   }
 
