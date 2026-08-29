@@ -54,6 +54,14 @@ function makePlayer(id, name) {
   };
 }
 
+function addComputerPlayer(room) {
+  const computer = makePlayer(`computer-${uid()}`, 'Computer');
+  computer.computer = true;
+  room.players.push(computer);
+  room.log.push('Computer joined to complete the three-player table.');
+  return computer;
+}
+
 function calculateScore(player) {
   if (player.busted) return 0;
   let total = player.cards.reduce((sum, card) => sum + card.value, 0);
@@ -67,6 +75,67 @@ function activePlayers(room) { return room.players.filter(player => player.activ
 function playerById(room, id) { return room.players.find(player => player.id === id); }
 function currentPlayer(room) { return room.players[room.turnIndex]; }
 function actionLabel(name) { return name === 'freeze' ? 'Freeze' : name === 'flip3' ? 'Flip Three' : 'Second Chance'; }
+
+function chooseComputerTarget(room, pending) {
+  const chooser = playerById(room, pending.chooserId);
+  const eligible = pending.eligibleIds
+    .map(id => playerById(room, id))
+    .filter(player => player?.active);
+  if (!eligible.length) return null;
+
+  const people = eligible.filter(player => !player.computer && player.id !== chooser?.id);
+  const opponents = eligible.filter(player => player.id !== chooser?.id);
+  const choices = people.length ? people : opponents.length ? opponents : eligible;
+
+  if (pending.card.name === 'second') {
+    return [...choices].sort((a, b) => calculateScore(a) - calculateScore(b))[0];
+  }
+  return [...choices].sort((a, b) => calculateScore(b) - calculateScore(a))[0];
+}
+
+function computerShouldHit(player) {
+  if (!player.cards.length && !player.mods.length && !player.second) return true;
+  return calculateScore(player) < 20;
+}
+
+function stayPlayer(room, player) {
+  player.stayed = true;
+  player.active = false;
+  player.roundScore = calculateScore(player);
+  room.log.push(`${player.name} stayed with ${player.roundScore} points.`);
+  advanceTurn(room);
+}
+
+function runComputerPlayers(room) {
+  let steps = 0;
+  while (room.phase === 'playing' && steps++ < 250) {
+    const pending = room.pendingAction;
+    if (pending) {
+      const chooser = playerById(room, pending.chooserId);
+      if (!chooser?.computer) return;
+      const target = chooseComputerTarget(room, pending);
+      const { card, resume } = pending;
+      room.pendingAction = null;
+      if (!target) {
+        room.discard.push(card);
+        room.log.push(`${chooser.name} had no eligible target, so ${actionLabel(card.name)} was discarded.`);
+        resumeFlow(room, resume);
+      } else {
+        applyAction(room, chooser, target, card, resume);
+      }
+      continue;
+    }
+
+    const computer = currentPlayer(room);
+    if (!computer?.computer || !computer.active) return;
+    if (computerShouldHit(computer)) {
+      room.log.push(`${computer.name} chose to Flip.`);
+      drawForTurn(room, computer);
+    } else {
+      stayPlayer(room, computer);
+    }
+  }
+}
 
 function replenishDeck(room) {
   if (!room.deck.length && room.discard.length) {
@@ -418,7 +487,7 @@ function publicState(room) {
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
     deckCount: room.deck.length, discardCount: room.discard.length,
     pendingAction: pending,
-    players: room.players.map(player => ({ ...player, connected: Date.now() - player.lastSeen < 12000 })),
+    players: room.players.map(player => ({ ...player, connected: player.computer || Date.now() - player.lastSeen < 12000 })),
     reactions: room.reactions,
     phrases: room.phrases,
     log: room.log.slice(-18), winner: room.winner
@@ -474,7 +543,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/api/start') {
-      if (room.hostId !== playerId || room.players.length < 3) return apiError(res, 'Only the host can start with at least three players.');
+      if (room.hostId !== playerId || room.phase !== 'lobby' || room.players.length < 2) return apiError(res, 'Only the host can start after at least two people have joined.');
+      if (room.players.length === 2) addComputerPlayer(room);
       startRound(room);
     } else if (url.pathname === '/api/hit') {
       if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
@@ -482,11 +552,7 @@ const server = http.createServer(async (req, res) => {
     } else if (url.pathname === '/api/stay') {
       if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
       if (!player.cards.length && !player.mods.length && !player.second) return apiError(res, 'You need at least one card in front of you before you can Stay.');
-      player.stayed = true;
-      player.active = false;
-      player.roundScore = calculateScore(player);
-      room.log.push(`${player.name} stayed with ${player.roundScore} points.`);
-      advanceTurn(room);
+      stayPlayer(room, player);
     } else if (url.pathname === '/api/react') {
       const emoji = String(body.emoji || '');
       if (!ALLOWED_REACTIONS.has(emoji)) return apiError(res, 'That reaction is not available.');
@@ -531,6 +597,7 @@ const server = http.createServer(async (req, res) => {
     } else {
       return apiError(res, 'Unknown action.', 404);
     }
+    runComputerPlayers(room);
     return send(res, 200, { ok: true, state: publicState(room) });
   }
 

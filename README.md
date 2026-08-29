@@ -34,7 +34,7 @@ For Render or another Node host, use `npm start` as the start command and keep a
 - Flip Three resolves three cards unless the target busts or reaches Flip 7; Second Chance resolves immediately while other Action cards wait until the sequence finishes.
 - Seven unique Number cards end the round immediately and award +15.
 - x2 doubles only the Number-card subtotal; additive modifiers and the Flip 7 bonus are added afterward.
-- Multiplayer supports 3–9 players.
+- Multiplayer supports 2–9 people. A two-person room automatically adds one computer player; rooms with three or more people add no computer players.
 - A tie for the highest score at or above 200 continues into another full round until there is one leader.
 
 No intended visual redesign is included in this release.
