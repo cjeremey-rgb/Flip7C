@@ -129,11 +129,12 @@ function chooseComputerTarget(room, pending) {
 function computerShouldHit(room, player) {
   if (!player.cards.length && !player.mods.length && !player.second) return true;
   const value = calculateScore(player);
-  const risk = duplicateRisk(player);
+  const risk = duplicateRisk(player) * (player.second ? 0.15 : 1);
   const leader = Math.max(...room.players.map(candidate => candidate.score));
   const gap = leader - player.score;
   const style = player.computerStyle || 'balanced';
   let target = style === 'cautious' ? 19 : style === 'bold' ? 34 : 26;
+  if (player.second) target += style === 'cautious' ? 8 : style === 'bold' ? 10 : 9;
   if (gap > 35) target += 6;
   if (player.score === leader && player.score > 0) target -= 3;
   if (player.cards.length >= 6) return true;

@@ -462,8 +462,9 @@ function duplicateRisk(p){
  let danger=0;p.nums.forEach(n=>danger+=Math.max(0,numCounts[n]-1));return Math.min(.92,danger/unseenNumbers);
 }
 function botShouldStay(p){
- const v=value(p),risk=duplicateRisk(p),leader=Math.max(...players.map(x=>x.score)),gap=leader-p.score,style=p.style||'balanced';
+ const v=value(p),risk=duplicateRisk(p)*(p.second?.15:1),leader=Math.max(...players.map(x=>x.score)),gap=leader-p.score,style=p.style||'balanced';
  let target=style==='cautious'?19:style==='bold'?34:26;
+ if(p.second)target+=style==='cautious'?8:style==='bold'?10:9;
  if(gap>35)target+=6;if(p.score===leader&&p.score>0)target-=3;if(p.nums.size>=6)return false;if(v>=target)return true;
  const tolerance=style==='cautious'?.16:style==='bold'?.34:.24;
  if(v>=14&&risk>tolerance)return Math.random()<(style==='cautious'?.9:.68);if(v>=10&&risk>.38)return Math.random()<.55;return false;
