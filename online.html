@@ -63,9 +63,15 @@
     <div id="table" class="table">
       <div class="felt-mark">FLIP RUSH</div>
       <div id="botTable" class="bot-table"></div>
-      <div class="deck-zone">
-        <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
-        <small><b id="deckCount">94</b> LEFT</small>
+      <div class="card-piles">
+        <div class="deck-zone">
+          <button id="deckVisual" class="deck" aria-label="Draw pile"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
+          <small><b id="deckCount">94</b> LEFT</small>
+        </div>
+        <div class="discard-zone">
+          <div id="discardVisual" class="discard-pile" aria-label="Discard pile"><div class="discard-empty">DISCARD</div></div>
+          <small><b id="discardCount">0</b> DISCARDED</small>
+        </div>
       </div>
       <div class="my-zone">
         <div id="myArea" class="my-area"></div>

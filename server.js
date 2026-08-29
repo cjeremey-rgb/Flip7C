@@ -13,6 +13,7 @@ const BECCA_PHRASE = "You're a peckerhead!";
 const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
 const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INITIAL_DEAL_MS = 900;
+const FLIP_THREE_GIVER_MS = 1000;
 const FLIP_THREE_STEP_MS = 900;
 const COMPUTER_TURN_MIN_MS = 850;
 const COMPUTER_TURN_JITTER_MS = 650;
@@ -304,6 +305,53 @@ function scheduleFlipThree(room, targetId, remaining, queued, after) {
   }, FLIP_THREE_STEP_MS);
 }
 
+function discardActiveFlipThree(room) {
+  const visual = room.flipThreeVisual;
+  if (!visual) return;
+  if (visual.card) room.discard.push(visual.card);
+  room.flipThreeVisual = null;
+}
+
+function scheduleFlipThreeAbort(room, queued, after) {
+  discardQueuedActions(room, queued);
+  if (room.flipTimer) clearTimeout(room.flipTimer);
+  room.flow = { type: 'flip3' };
+  room.flipTimer = setTimeout(() => {
+    room.flipTimer = null;
+    discardActiveFlipThree(room);
+    if (room.phase === 'playing' && !checkRoundEnd(room)) resumeFlow(room, after);
+    scheduleComputerPlayer(room);
+  }, FLIP_THREE_STEP_MS);
+}
+
+function scheduleFlipThreeDiscardAfterRound(room) {
+  if (room.flipVisualTimer) clearTimeout(room.flipVisualTimer);
+  room.flipVisualTimer = setTimeout(() => {
+    room.flipVisualTimer = null;
+    discardActiveFlipThree(room);
+  }, FLIP_THREE_STEP_MS);
+}
+
+function beginFlipThree(room, chooser, target, card, resume) {
+  room.flow = { type: 'flip3' };
+  room.flipThreeVisual = {
+    id: card.id, fromId: chooser.id, targetId: target.id,
+    stage: 'giver', updatedAt: Date.now(), card
+  };
+  room.flipTimer = setTimeout(() => {
+    room.flipTimer = null;
+    if (room.phase !== 'playing') {
+      discardActiveFlipThree(room);
+      return;
+    }
+    if (room.flipThreeVisual?.id === card.id) {
+      room.flipThreeVisual.stage = 'target';
+      room.flipThreeVisual.updatedAt = Date.now();
+    }
+    scheduleFlipThree(room, target.id, 3, [], resume);
+  }, FLIP_THREE_GIVER_MS);
+}
+
 function resumeFlow(room, resume) {
   if (room.phase !== 'playing') return;
   if (!resume) return;
@@ -443,9 +491,7 @@ function applyAction(room, chooser, target, card, resume) {
     return;
   }
 
-  room.discard.push(card);
   if (card.name === 'freeze') {
-    room.discard.pop();
     target.statusCards.push(card);
     target.frozen = true;
     target.stayed = true;
@@ -457,8 +503,7 @@ function applyAction(room, chooser, target, card, resume) {
   }
 
   room.log.push(`${chooser.name} played Flip Three on ${target.name}.`);
-  room.flow = { type: 'flip3' };
-  continueFlipThree(room, target.id, 3, [], resume);
+  beginFlipThree(room, chooser, target, card, resume);
 }
 
 function discardQueuedActions(room, queued) {
@@ -468,6 +513,7 @@ function discardQueuedActions(room, queued) {
 function continueFlipThree(room, targetId, remaining, queued, after) {
   if (room.phase !== 'playing') {
     discardQueuedActions(room, queued);
+    discardActiveFlipThree(room);
     return;
   }
   const target = playerById(room, targetId);
@@ -475,31 +521,34 @@ function continueFlipThree(room, targetId, remaining, queued, after) {
     discardQueuedActions(room, queued);
     return resumeFlow(room, after);
   }
-  if (remaining <= 0) return resolveQueuedActions(room, queued, after);
+  if (remaining <= 0) {
+    discardActiveFlipThree(room);
+    return resolveQueuedActions(room, queued, after);
+  }
   if (!target.active) {
     if (target.busted) {
-      discardQueuedActions(room, queued);
-      if (room.phase === 'playing' && !checkRoundEnd(room)) resumeFlow(room, after);
-      return;
+      return scheduleFlipThreeAbort(room, queued, after);
     }
+    discardActiveFlipThree(room);
     return resolveQueuedActions(room, queued, after);
   }
 
   const card = takeCard(room);
   if (!card) {
     discardQueuedActions(room, queued);
-    return finishRound(room, 'The deck was exhausted.');
+    finishRound(room, 'The deck was exhausted.');
+    scheduleFlipThreeDiscardAfterRound(room);
+    return;
   }
 
   if (card.type !== 'action') {
     const result = resolveNonActionCard(room, target, card);
     if (result === 'bust') {
-      discardQueuedActions(room, queued);
-      if (room.phase === 'playing' && !checkRoundEnd(room)) resumeFlow(room, after);
-      return;
+      return scheduleFlipThreeAbort(room, queued, after);
     }
     if (result === 'flip7' || room.phase !== 'playing') {
       discardQueuedActions(room, queued);
+      scheduleFlipThreeDiscardAfterRound(room);
       return;
     }
     return scheduleFlipThree(room, targetId, remaining - 1, queued, after);
@@ -555,6 +604,11 @@ function resolveQueuedActions(room, queue, after) {
 }
 
 function startRound(room) {
+  if (room.flipVisualTimer) {
+    clearTimeout(room.flipVisualTimer);
+    room.flipVisualTimer = null;
+  }
+  discardActiveFlipThree(room);
   room.round += 1;
   room.phase = 'playing';
   room.pendingAction = null;
@@ -585,6 +639,10 @@ function restartGame(room) {
     clearTimeout(room.flipTimer);
     room.flipTimer = null;
   }
+  if (room.flipVisualTimer) {
+    clearTimeout(room.flipVisualTimer);
+    room.flipVisualTimer = null;
+  }
   room.round = 0;
   room.turnIndex = 0;
   room.dealerIndex = room.players.length - 1;
@@ -592,6 +650,7 @@ function restartGame(room) {
   room.discard = [];
   room.pendingAction = null;
   room.flow = null;
+  room.flipThreeVisual = null;
   room.winner = null;
   room.phrases = [];
   room.voiceSignals = new Map();
@@ -612,8 +671,16 @@ function publicState(room) {
     code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
     deckCount: room.deck.length, discardCount: room.discard.length,
+    discardTop: room.discard.at(-1) || null,
     dealing: room.flow?.type === 'deal',
     resolvingAction: room.flow?.type === 'flip3',
+    flipThreeVisual: room.flipThreeVisual ? {
+      id: room.flipThreeVisual.id,
+      fromId: room.flipThreeVisual.fromId,
+      targetId: room.flipThreeVisual.targetId,
+      stage: room.flipThreeVisual.stage,
+      updatedAt: room.flipThreeVisual.updatedAt
+    } : null,
     pendingAction: pending,
     players: room.players.map(player => ({ ...player, connected: player.computer || Date.now() - player.lastSeen < 12000 })),
     reactions: room.reactions,

@@ -172,6 +172,21 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;
   text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important;
 }
+
+/* Visible draw/discard piles and Flip Three transfer. */
+.card-piles{position:relative;z-index:3;display:flex;align-items:flex-end;justify-content:center;gap:24px;margin-top:0}
+.deck-zone,.discard-zone{text-align:center;min-width:72px}
+.discard-zone small{margin-top:4px;background:#06141ddd;border:1px solid #315f72;border-radius:999px;padding:4px 8px;display:inline-block;color:var(--muted);font-size:8px;letter-spacing:.08em;white-space:nowrap}
+.discard-zone small b{color:var(--pink)}
+.discard-pile{position:relative;width:69px;height:98px;margin:auto;display:grid;place-items:center}
+.discard-empty{width:64px;height:92px;border:2px dashed #50758a;border-radius:12px;display:grid;place-items:center;color:#86a5b7;font-size:7px;font-weight:900;letter-spacing:.08em;background:#06131d80}
+.discard-pile .card{position:absolute!important;inset:0!important;width:64px!important;height:92px!important;margin:auto!important;border-width:3px!important;border-radius:11px!important;font-size:31px!important;transform:rotate(3deg)!important;animation:none!important;box-shadow:0 6px 0 #02070b,0 10px 18px #0009!important}
+.discard-pile .card.action{font-size:10px!important}
+.flip-three-transfer-card.card{position:fixed!important;z-index:79!important;width:68px!important;height:98px!important;margin:0!important;border-width:4px!important;border-radius:13px!important;background:linear-gradient(145deg,#d1b7ff,#8e58ef)!important;color:#fff!important;font-size:12px!important;line-height:1.05!important;box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 28px #a66dff99!important;pointer-events:none;animation:flipThreeAttention .7s ease-in-out infinite alternate!important;transition:left .65s cubic-bezier(.2,.82,.22,1),top .65s cubic-bezier(.2,.82,.22,1),opacity .45s ease,transform .65s cubic-bezier(.2,.82,.22,1)!important;transform:rotate(-4deg) scale(1)!important}
+.flip-three-transfer-card.card:before,.flip-three-transfer-card.card:after{font-size:7px!important}
+.flip-three-transfer-card.moving{transform:rotate(6deg) scale(1.08)!important}
+.flip-three-transfer-card.discarding{opacity:.25;transform:rotate(16deg) scale(.62)!important;animation:none!important}
+@keyframes flipThreeAttention{from{filter:brightness(1);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 20px #a66dff77}to{filter:brightness(1.18);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 38px #c28cffcc}}
 </style>
 </head>
 <body>
@@ -215,9 +230,15 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
     <div id="table" class="table">
       <div class="felt-mark">FLIP RUSH</div>
       <div id="botTable" class="bot-table"></div>
-      <div class="deck-zone">
-        <button id="deckVisual" class="deck" aria-label="Deck"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
-        <small><b id="deckCount">94</b> LEFT</small>
+      <div class="card-piles">
+        <div class="deck-zone">
+          <button id="deckVisual" class="deck" aria-label="Draw pile"><div class="card back"><span>7</span></div><div class="card back ghost g1"></div><div class="card back ghost g2"></div></button>
+          <small><b id="deckCount">94</b> LEFT</small>
+        </div>
+        <div class="discard-zone">
+          <div id="discardVisual" class="discard-pile" aria-label="Discard pile"><div class="discard-empty">DISCARD</div></div>
+          <small><b id="discardCount">0</b> DISCARDED</small>
+        </div>
       </div>
       <div id="myArea" class="my-area"><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
     </div>
@@ -293,7 +314,7 @@ function applyFlipRushTheme(){
 }
 applyFlipRushTheme();
 
-let players=[], current=0, round=1, deck=[], discard=[], running=false, me=0, gameOver=false, dealerIndex=2;
+let players=[], current=0, round=1, deck=[], discard=[], running=false, me=0, gameOver=false, dealerIndex=2,activeFlipThree=null,offlineFlipTransferToken='',offlineFlipTransferStage='';
 const numCounts=[1,1,2,3,4,5,6,7,8,9,10,11,12];
 function makeDeck(){let d=[]; numCounts.forEach((c,n)=>{for(let i=0;i<c;i++)d.push({t:'n',v:n})});
 d.push({t:'m',v:'+2'},{t:'m',v:'+4'},{t:'m',v:'+6'},{t:'m',v:'+8'},{t:'m',v:'+10'},{t:'m',v:'x2'});
@@ -302,7 +323,7 @@ if(d.length!==94)throw new Error('Deck construction error: expected 94 cards, fo
 return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function newPlayer(name,bot=false,style='balanced'){return{name,bot,style,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
-function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];showGame();newRound()}
+function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;showGame();newRound()}
 function showGame(){$('home').classList.remove('active');$('game').classList.add('active');$('start').classList.add('hidden');$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');}
 function replenishDeck(){if(!deck.length&&discard.length){deck=shuffle(discard.splice(0));log('The discard pile was shuffled into a new draw pile.')}}
 function takeCard(){replenishDeck();return deck.pop()||null}
@@ -402,25 +423,32 @@ async function resolveQueuedActions(queued){
   else if(q.card.v==='FLIP 3')await resolveFlip3(q.sourceIndex,q.card);
  }
 }
+async function finishOfflineFlipThree(flipCard){
+ await wait(1000);discardCard(flipCard);activeFlipThree=null;render();await wait(180);
+}
 async function resolveFlip3(sourceIndex,flipCard){
- const source=players[sourceIndex];removeCard(source,flipCard);discardCard(flipCard);
+ const source=players[sourceIndex];
  const targetIndex=await chooseFlip3Target(sourceIndex);
- if(targetIndex===null){log('No active player could receive Flip 3.');return}
+ removeCard(source,flipCard);
+ if(targetIndex===null){discardCard(flipCard);log('No active player could receive Flip 3.');render();return}
  const target=players[targetIndex];log(source.name+' gave Flip 3 to '+target.name+'.');
+ activeFlipThree={token:String(Date.now())+Math.random(),fromIndex:sourceIndex,targetIndex,stage:'giver'};render();await wait(1000);
+ activeFlipThree.stage='target';render();await wait(700);
  const queued=[];
  for(let n=1;n<=3&&running&&isRoundActive(target);n++){
-  const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return}
+  const c=takeCard();if(!c){await finishOfflineFlipThree(flipCard);endRound('The draw pile and discard pile were exhausted.');return}
   target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();await wait(c.t==='a'?1000:350);
   if(c.t==='n'){
    const result=await resolveNumberCard(targetIndex,c);
-   if(result==='bust'){discardQueuedActions(target,queued);if(active().length===0)endRound('All players are out of the round.');return}
-   if(result==='flip7')return;
+   if(result==='bust'){discardQueuedActions(target,queued);await finishOfflineFlipThree(flipCard);if(active().length===0)endRound('All players are out of the round.');return}
+   if(result==='flip7'){await finishOfflineFlipThree(flipCard);return}
   }else if(c.t==='a'&&c.v==='SECOND CHANCE'){
    await resolveSecondChance(targetIndex,c);
   }else if(c.t==='a'){
    queued.push({sourceIndex:targetIndex,card:c});log(c.v+' is set aside until Flip 3 finishes.');
   }
  }
+ await finishOfflineFlipThree(flipCard);
  if(!running)return;
  if(target.bust){discardQueuedActions(target,queued);return}
  await resolveQueuedActions(queued);
@@ -501,17 +529,21 @@ function splitDisplayCards(cards){const sorted=displayCards(cards);return{number
 function fitOfflineRow(row,reservePreview=false){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
 function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;fitOfflineRow(hand.querySelector('.hand-other'),false);fitOfflineRow(hand.querySelector('.hand-numbers'),true)}
 function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
-function render(){$('deckCount').textContent=deck.length;$('roomCode').value='OFFLINE';$('status').innerHTML=`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
+function renderOfflineDiscardPile(){const root=$('discardVisual');if(!root)return;$('discardCount').textContent=discard.length;root.innerHTML=discard.length?cardHtml(discard[discard.length-1]):'<div class="discard-empty">DISCARD</div>'}
+function offlineFlipThreeAnchor(index){if(index===me)return $('myArea');return document.querySelector(`.bot-seat[data-player-index="${index}"]`)||$('table')}
+function placeOfflineFlipThreeCard(card,anchor){if(!card||!anchor)return;const rect=anchor.getBoundingClientRect(),width=card.offsetWidth||68,height=card.offsetHeight||98;card.style.left=Math.max(4,Math.min(innerWidth-width-4,rect.left+(rect.width-width)/2))+'px';card.style.top=Math.max(4,Math.min(innerHeight-height-4,rect.top+(rect.height-height)/2))+'px'}
+function syncOfflineFlipThreeTransfer(){let card=$('flipThreeTransferCard');if(!activeFlipThree){if(card&&!card.classList.contains('discarding')){offlineFlipTransferToken='';offlineFlipTransferStage='';card.classList.add('discarding');placeOfflineFlipThreeCard(card,$('discardVisual'));setTimeout(()=>card.remove(),520)}return}const stage=activeFlipThree.stage||'giver',anchorIndex=stage==='giver'?activeFlipThree.fromIndex:activeFlipThree.targetIndex;if(!card||offlineFlipTransferToken!==activeFlipThree.token){card?.remove();card=document.createElement('div');card.id='flipThreeTransferCard';card.className='card face action flip3 flip-three-transfer-card';card.innerHTML='<strong>FLIP 3</strong>';document.body.appendChild(card);offlineFlipTransferToken=activeFlipThree.token;offlineFlipTransferStage=stage;placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex));return}if(stage!==offlineFlipTransferStage){offlineFlipTransferStage=stage;card.classList.add('moving');requestAnimationFrame(()=>placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex)));setTimeout(()=>card.classList.remove('moving'),680)}else placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex))}
+function render(){$('deckCount').textContent=deck.length;renderOfflineDiscardPile();$('roomCode').value='OFFLINE';$('status').innerHTML=activeFlipThree?`<span class="pulse"></span><b>${activeFlipThree.stage==='giver'?players[activeFlipThree.fromIndex].name+' GIVES FLIP THREE':players[activeFlipThree.targetIndex].name+' RECEIVES FLIP THREE'}</b><small>${activeFlipThree.stage==='giver'?'Moving to '+players[activeFlipThree.targetIndex].name:'Three cards are being revealed one at a time'}</small>`:`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`;
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
- $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
+ $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}" data-player-index="${i}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
  const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]},scoreHtml=`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${p?value(p):0}</b></div>`;$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${scoreHtml}${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:scoreHtml;
- const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();
+ const mine=running&&current===me&&isRoundActive(p);$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();syncOfflineFlipThreeTransfer();
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}
 $('create').onclick=startOffline;$('join').onclick=startOffline;$('hit').onclick=hit;$('stay').onclick=stay;$('next').onclick=()=>{if(gameOver)return;round++;$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');newRound()};$('leave').onclick=()=>location.reload();
 $('howBtn').onclick=()=>alert('Offline practice uses the official Flip 7 rules. Draw unique number cards, stay to bank your points, and avoid duplicates. A Second Chance only protects against a duplicate number; you may hold only one, and an extra must be given to another active player without one or discarded if nobody is eligible. Freeze and Flip 3 may target any active player, including yourself. During Flip 3, all three revealed cards count; Second Chance resolves immediately, while Freeze and Flip 3 cards wait until the sequence is complete. Seven unique number cards immediately end the round and earn +15. If the highest score at 200 or more is tied, everyone plays another full round.');
 $('soundBtn').onclick=()=>alert('Sound is available in the hosted multiplayer build.');$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
-window.addEventListener('resize',fitOfflineHand);
+window.addEventListener('resize',()=>{fitOfflineHand();syncOfflineFlipThreeTransfer()});
 </script>
 
 <script src="pwa-register.js"></script>

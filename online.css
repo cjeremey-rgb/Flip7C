@@ -160,6 +160,21 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .my-area > .score-preview small{display:block!important;margin:0 0 3px!important;color:#b9cfdd!important;opacity:1!important;font-size:7px!important;line-height:1!important;font-weight:900!important;letter-spacing:.12em!important;text-shadow:0 1px 2px #000!important}
 .my-area > .score-preview b{display:block!important;margin:0!important;padding:0!important;color:var(--yellow)!important;font:900 27px/1 'Archivo Black',Inter,system-ui,sans-serif!important;text-shadow:0 2px 0 #000b,0 0 8px #ffdd4255!important}
 
+/* Visible draw/discard piles and Flip Three transfer. */
+.card-piles{position:relative;z-index:3;display:flex;align-items:flex-end;justify-content:center;gap:24px;margin-top:0}
+.deck-zone,.discard-zone{text-align:center;min-width:72px}
+.discard-zone small{margin-top:4px;background:#06141ddd;border:1px solid #315f72;border-radius:999px;padding:4px 8px;display:inline-block;color:var(--muted);font-size:8px;letter-spacing:.08em;white-space:nowrap}
+.discard-zone small b{color:var(--pink)}
+.discard-pile{position:relative;width:69px;height:98px;margin:auto;display:grid;place-items:center}
+.discard-empty{width:64px;height:92px;border:2px dashed #50758a;border-radius:12px;display:grid;place-items:center;color:#86a5b7;font-size:7px;font-weight:900;letter-spacing:.08em;background:#06131d80}
+.discard-pile .card{position:absolute!important;inset:0!important;width:64px!important;height:92px!important;margin:auto!important;border-width:3px!important;border-radius:11px!important;font-size:31px!important;transform:rotate(3deg)!important;animation:none!important;box-shadow:0 6px 0 #02070b,0 10px 18px #0009!important}
+.discard-pile .card.action{font-size:10px!important}
+.flip-three-transfer-card.card{position:fixed!important;z-index:79!important;width:68px!important;height:98px!important;margin:0!important;border-width:4px!important;border-radius:13px!important;background:linear-gradient(145deg,#d1b7ff,#8e58ef)!important;color:#fff!important;font-size:12px!important;line-height:1.05!important;box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 28px #a66dff99!important;pointer-events:none;animation:flipThreeAttention .7s ease-in-out infinite alternate!important;transition:left .65s cubic-bezier(.2,.82,.22,1),top .65s cubic-bezier(.2,.82,.22,1),opacity .45s ease,transform .65s cubic-bezier(.2,.82,.22,1)!important;transform:rotate(-4deg) scale(1)!important}
+.flip-three-transfer-card.card:before,.flip-three-transfer-card.card:after{font-size:7px!important}
+.flip-three-transfer-card.moving{transform:rotate(6deg) scale(1.08)!important}
+.flip-three-transfer-card.discarding{opacity:.25;transform:rotate(16deg) scale(.62)!important;animation:none!important}
+@keyframes flipThreeAttention{from{filter:brightness(1);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 20px #a66dff77}to{filter:brightness(1.18);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 38px #c28cffcc}}
+
 
 /* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */
 .game-head-tools{display:flex;align-items:center;gap:6px}
