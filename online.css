@@ -173,6 +173,12 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .flip-three-transfer-card.card:before,.flip-three-transfer-card.card:after{font-size:7px!important}
 .flip-three-transfer-card.moving{transform:rotate(6deg) scale(1.08)!important}
 .flip-three-transfer-card.discarding{opacity:.25;transform:rotate(16deg) scale(.62)!important;animation:none!important}
+.action-transfer-card.card{position:fixed!important;z-index:80!important;width:68px!important;height:98px!important;margin:0!important;border-width:4px!important;border-radius:13px!important;font-size:12px!important;line-height:1.05!important;box-shadow:0 8px 0 #081019,0 18px 38px #000c,0 0 28px #ffffff55!important;pointer-events:none;animation:actionCardAttention .7s ease-in-out infinite alternate!important;transition:left .65s cubic-bezier(.2,.82,.22,1),top .65s cubic-bezier(.2,.82,.22,1),opacity .4s ease,transform .65s cubic-bezier(.2,.82,.22,1)!important;transform:rotate(-4deg) scale(1)!important}
+.action-transfer-card.card:before,.action-transfer-card.card:after{font-size:7px!important}
+.action-transfer-card.moving{transform:rotate(6deg) scale(1.08)!important}
+.action-transfer-card.settling{opacity:0;transform:rotate(0) scale(.72)!important;animation:none!important}
+.action-transfer-card.discarding{opacity:.25;transform:rotate(16deg) scale(.62)!important;animation:none!important}
+@keyframes actionCardAttention{from{filter:brightness(1)}to{filter:brightness(1.18)}}
 @keyframes flipThreeAttention{from{filter:brightness(1);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 20px #a66dff77}to{filter:brightness(1.18);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 38px #c28cffcc}}
 
 

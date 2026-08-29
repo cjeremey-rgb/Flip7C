@@ -15,6 +15,8 @@ const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INITIAL_DEAL_MS = 900;
 const FLIP_THREE_GIVER_MS = 1000;
 const FLIP_THREE_STEP_MS = 900;
+const ACTION_CARD_GIVER_MS = 1000;
+const ACTION_CARD_TARGET_MS = 900;
 const COMPUTER_TURN_MIN_MS = 850;
 const COMPUTER_TURN_JITTER_MS = 650;
 const COMPUTER_ACTION_MS = 1100;
@@ -187,7 +189,7 @@ function takeComputerStep(room) {
 
 function scheduleComputerPlayer(room) {
   if (room.computerTimer || room.phase !== 'playing') return;
-  if ((room.flow?.type === 'deal' || room.flow?.type === 'flip3') && !room.pendingAction) return;
+  if (room.flow && !room.pendingAction) return;
   const pendingChooser = room.pendingAction ? playerById(room, room.pendingAction.chooserId) : null;
   const computer = room.pendingAction ? pendingChooser : currentPlayer(room);
   if (!computer?.computer) return;
@@ -232,6 +234,10 @@ function finishRound(room, reason = 'Round complete.') {
     clearTimeout(room.flipTimer);
     room.flipTimer = null;
   }
+  if (room.actionTimer) {
+    clearTimeout(room.actionTimer);
+    room.actionTimer = null;
+  }
   if (room.computerTimer) {
     clearTimeout(room.computerTimer);
     room.computerTimer = null;
@@ -239,6 +245,7 @@ function finishRound(room, reason = 'Round complete.') {
   room.phase = 'roundEnd';
   room.pendingAction = null;
   room.flow = null;
+  room.actionCardVisual = null;
   for (const player of room.players) {
     player.roundScore = calculateScore(player);
     player.score += player.roundScore;
@@ -352,6 +359,48 @@ function beginFlipThree(room, chooser, target, card, resume) {
   }, FLIP_THREE_GIVER_MS);
 }
 
+function beginActionCardTransfer(room, chooser, target, card, resume, options = {}) {
+  const showGiver = options.showGiver !== false;
+  const outcome = options.outcome || 'settle';
+  const complete = typeof options.complete === 'function' ? options.complete : () => resumeFlow(room, resume);
+  room.flow = { type: 'action-transfer' };
+  room.actionCardVisual = {
+    id: `${card.id}-${Date.now()}`,
+    name: card.name,
+    fromId: chooser?.id || target?.id || null,
+    targetId: target?.id || chooser?.id || null,
+    stage: showGiver ? 'giver' : 'target',
+    outcome,
+    updatedAt: Date.now(),
+    card
+  };
+
+  const settle = () => {
+    room.actionTimer = null;
+    if (room.actionCardVisual?.card === card) room.actionCardVisual = null;
+    if (room.phase !== 'playing') {
+      if (outcome === 'discard') room.discard.push(card);
+      return;
+    }
+    complete();
+    scheduleComputerPlayer(room);
+  };
+  const moveToTarget = () => {
+    room.actionTimer = null;
+    if (room.phase !== 'playing') {
+      if (room.actionCardVisual?.card === card) room.actionCardVisual = null;
+      if (outcome === 'discard') room.discard.push(card);
+      return;
+    }
+    if (room.actionCardVisual?.card === card) {
+      room.actionCardVisual.stage = 'target';
+      room.actionCardVisual.updatedAt = Date.now();
+    }
+    room.actionTimer = setTimeout(settle, ACTION_CARD_TARGET_MS);
+  };
+  room.actionTimer = setTimeout(showGiver ? moveToTarget : settle, showGiver ? ACTION_CARD_GIVER_MS : ACTION_CARD_TARGET_MS);
+}
+
 function resumeFlow(room, resume) {
   if (room.phase !== 'playing') return;
   if (!resume) return;
@@ -375,18 +424,29 @@ function grantSecondChance(room, player, card, resume) {
     return;
   }
   if (!player.second) {
-    player.second = true;
-    room.heldSecondCards.set(player.id, card);
-    room.log.push(`${player.name} drew and kept a Second Chance.`);
-    resumeFlow(room, resume);
+    beginActionCardTransfer(room, player, player, card, resume, {
+      showGiver: false,
+      complete: () => {
+        player.second = true;
+        room.heldSecondCards.set(player.id, card);
+        room.log.push(`${player.name} drew and kept a Second Chance.`);
+        resumeFlow(room, resume);
+      }
+    });
     return;
   }
 
   const eligible = activePlayers(room).filter(candidate => candidate.id !== player.id && !candidate.second);
   if (!eligible.length) {
-    room.discard.push(card);
-    room.log.push(`${player.name} already has a Second Chance and no other active player can receive the new one, so it was discarded.`);
-    resumeFlow(room, resume);
+    beginActionCardTransfer(room, player, player, card, resume, {
+      showGiver: false,
+      outcome: 'discard',
+      complete: () => {
+        room.discard.push(card);
+        room.log.push(`${player.name} already has a Second Chance and no other active player can receive the new one, so it was discarded.`);
+        resumeFlow(room, resume);
+      }
+    });
     return;
   }
 
@@ -484,21 +544,29 @@ function applyAction(room, chooser, target, card, resume) {
       resumeFlow(room, resume);
       return;
     }
-    target.second = true;
-    room.heldSecondCards.set(target.id, card);
-    room.log.push(`${chooser.name} gave the extra Second Chance to ${target.name}.`);
-    resumeFlow(room, resume);
+    beginActionCardTransfer(room, chooser, target, card, resume, {
+      complete: () => {
+        target.second = true;
+        room.heldSecondCards.set(target.id, card);
+        room.log.push(`${chooser.name} gave the extra Second Chance to ${target.name}.`);
+        resumeFlow(room, resume);
+      }
+    });
     return;
   }
 
   if (card.name === 'freeze') {
-    target.statusCards.push(card);
-    target.frozen = true;
-    target.stayed = true;
-    target.active = false;
-    target.roundScore = calculateScore(target);
-    room.log.push(`${chooser.name} froze ${target.name} at ${target.roundScore} points.`);
-    if (!checkRoundEnd(room)) resumeFlow(room, resume);
+    beginActionCardTransfer(room, chooser, target, card, resume, {
+      complete: () => {
+        target.statusCards.push(card);
+        target.frozen = true;
+        target.stayed = true;
+        target.active = false;
+        target.roundScore = calculateScore(target);
+        room.log.push(`${chooser.name} froze ${target.name} at ${target.roundScore} points.`);
+        if (!checkRoundEnd(room)) resumeFlow(room, resume);
+      }
+    });
     return;
   }
 
@@ -609,6 +677,11 @@ function startRound(room) {
     room.flipVisualTimer = null;
   }
   discardActiveFlipThree(room);
+  if (room.actionTimer) {
+    clearTimeout(room.actionTimer);
+    room.actionTimer = null;
+  }
+  room.actionCardVisual = null;
   room.round += 1;
   room.phase = 'playing';
   room.pendingAction = null;
@@ -643,6 +716,10 @@ function restartGame(room) {
     clearTimeout(room.flipVisualTimer);
     room.flipVisualTimer = null;
   }
+  if (room.actionTimer) {
+    clearTimeout(room.actionTimer);
+    room.actionTimer = null;
+  }
   room.round = 0;
   room.turnIndex = 0;
   room.dealerIndex = room.players.length - 1;
@@ -651,6 +728,7 @@ function restartGame(room) {
   room.pendingAction = null;
   room.flow = null;
   room.flipThreeVisual = null;
+  room.actionCardVisual = null;
   room.winner = null;
   room.phrases = [];
   room.voiceSignals = new Map();
@@ -673,13 +751,22 @@ function publicState(room) {
     deckCount: room.deck.length, discardCount: room.discard.length,
     discardTop: room.discard.at(-1) || null,
     dealing: room.flow?.type === 'deal',
-    resolvingAction: room.flow?.type === 'flip3',
+    resolvingAction: room.flow?.type === 'flip3' || room.flow?.type === 'action-transfer',
     flipThreeVisual: room.flipThreeVisual ? {
       id: room.flipThreeVisual.id,
       fromId: room.flipThreeVisual.fromId,
       targetId: room.flipThreeVisual.targetId,
       stage: room.flipThreeVisual.stage,
       updatedAt: room.flipThreeVisual.updatedAt
+    } : null,
+    actionCardVisual: room.actionCardVisual ? {
+      id: room.actionCardVisual.id,
+      name: room.actionCardVisual.name,
+      fromId: room.actionCardVisual.fromId,
+      targetId: room.actionCardVisual.targetId,
+      stage: room.actionCardVisual.stage,
+      outcome: room.actionCardVisual.outcome,
+      updatedAt: room.actionCardVisual.updatedAt
     } : null,
     pendingAction: pending,
     players: room.players.map(player => ({ ...player, connected: player.computer || Date.now() - player.lastSeen < 12000 })),
@@ -703,7 +790,8 @@ const server = http.createServer(async (req, res) => {
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
         players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
-        heldSecondCards: new Map(), pendingAction: null, flow: null, reactions: [], phrases: [], voiceSignals: new Map(),
+        heldSecondCards: new Map(), pendingAction: null, flow: null, flipThreeVisual: null, actionCardVisual: null,
+        reactions: [], phrases: [], voiceSignals: new Map(),
         log: ['Room created.'], winner: null
       };
       rooms.set(code, room);
