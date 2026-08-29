@@ -543,8 +543,9 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/api/start') {
-      if (room.hostId !== playerId || room.phase !== 'lobby' || room.players.length < 2) return apiError(res, 'Only the host can start after at least two people have joined.');
-      if (room.players.length === 2) addComputerPlayer(room);
+      const humanCount = room.players.filter(candidate => !candidate.computer).length;
+      if (room.hostId !== playerId || room.phase !== 'lobby' || humanCount < 2) return apiError(res, 'Only the host can start after at least two people have joined.');
+      if (humanCount < 3 && !room.players.some(candidate => candidate.computer)) addComputerPlayer(room);
       startRound(room);
     } else if (url.pathname === '/api/hit') {
       if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
