@@ -54,11 +54,11 @@ function makePlayer(id, name) {
   };
 }
 
-function addComputerPlayer(room) {
-  const computer = makePlayer(`computer-${uid()}`, 'Computer');
+function addComputerPlayer(room, name = 'Computer') {
+  const computer = makePlayer(`computer-${uid()}`, name);
   computer.computer = true;
   room.players.push(computer);
-  room.log.push('Computer joined to complete the three-player table.');
+  room.log.push(`${computer.name} joined to complete the three-player table.`);
   return computer;
 }
 
@@ -544,8 +544,11 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === '/api/start') {
       const humanCount = room.players.filter(candidate => !candidate.computer).length;
-      if (room.hostId !== playerId || room.phase !== 'lobby' || humanCount < 2) return apiError(res, 'Only the host can start after at least two people have joined.');
-      if (humanCount < 3 && !room.players.some(candidate => candidate.computer)) addComputerPlayer(room);
+      if (room.hostId !== playerId || room.phase !== 'lobby') return apiError(res, 'Only the host can start the game from the lobby.');
+      const computersNeeded = Math.max(0, 3 - humanCount);
+      for (let index = 0; index < computersNeeded; index++) {
+        addComputerPlayer(room, computersNeeded === 1 ? 'Computer' : `Computer ${index + 1}`);
+      }
       startRound(room);
     } else if (url.pathname === '/api/hit') {
       if (room.phase !== 'playing' || room.pendingAction || currentPlayer(room)?.id !== playerId) return apiError(res, 'It is not your Hit/Stay decision.');
