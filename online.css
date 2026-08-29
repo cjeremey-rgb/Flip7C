@@ -101,6 +101,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   overflow:hidden;
   padding:8px;
 }
+.my-zone{width:100%;min-width:0}
 .player-hand-row{
   --hand-scale:1;
   display:flex;
