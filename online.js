@@ -89,6 +89,7 @@ function startShatterCanvas(effect,context,width,height,random,startTime){
  };screenEffectFrame=requestAnimationFrame(draw);
 }
 function showLocalScreenEffect(type){
+ if(globalThis.RealisticScreenEffects){globalThis.RealisticScreenEffects.show(type);return}
  clearTimeout(screenEffectTimer);cancelAnimationFrame(screenEffectFrame);$('screenEffect')?.remove();
  const effect=document.createElement('div');effect.id='screenEffect';effect.className='screen-effect '+(type==='freeze'?'freeze-screen-effect':'shatter-screen-effect');effect.setAttribute('aria-hidden','true');document.body.appendChild(effect);
  const surface=createEffectCanvas(effect),random=effectRandom((Date.now()^(surface.width<<8)^surface.height)>>>0),started=performance.now();
