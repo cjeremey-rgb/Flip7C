@@ -313,7 +313,7 @@
       radius: 10 + random() * 8,
       rays: [], rings: []
     }));
-    const majorCracks = [], detailCracks = [], facets = [], dust = [];
+    const majorCracks = [], detailCracks = [], facets = [];
 
     const pointAt = (points, fraction) => {
       const position = (points.length - 1) * clamp(fraction), index = Math.floor(position), amount = position - index;
@@ -322,7 +322,7 @@
     };
 
     for (const impact of impacts) {
-      const rayCount = 15 + Math.floor(random() * 4);
+      const rayCount = 8 + Math.floor(random() * 2);
       for (let index = 0; index < rayCount; index++) {
         const angle = Math.PI * 2 * index / rayCount + (random() - .5) * .24;
         const edge = edgeDistance(impact, angle, width, height);
@@ -346,14 +346,10 @@
           impact.rings.push({ points: [a, { x: (a.x + b.x) / 2 + (random() - .5) * 6, y: (a.y + b.y) / 2 + (random() - .5) * 6 }, b] });
         }
       }
-      for (let index = 0; index < 34; index++) {
+      for (let index = 0; index < 17; index++) {
         const angle = random() * Math.PI * 2, radius = Math.pow(random(), 1.65) * 58;
         const start = { x: impact.x + Math.cos(angle) * radius, y: impact.y + Math.sin(angle) * radius };
         detailCracks.push({ points: jaggedLine(start, angle + (random() - .5) * 1.1, 8 + random() * 48, 3 + Math.floor(random() * 4), random, .36) });
-      }
-      for (let index = 0; index < 24; index++) {
-        const angle = random() * Math.PI * 2, radius = Math.pow(random(), 1.8) * 54;
-        dust.push({ x: impact.x + Math.cos(angle) * radius, y: impact.y + Math.sin(angle) * radius, radius: .25 + random() * 1.4, alpha: .2 + random() * .62 });
       }
     }
 
@@ -363,7 +359,7 @@
       if (side === 2) return { x: random() * width, y: height + 2 };
       return { x: -2, y: random() * height };
     };
-    for (let index = 0; index < 22; index++) {
+    for (let index = 0; index < 11; index++) {
       const side = index % 4;
       const start = edgePoint(side), end = edgePoint((side + 2 + (random() > .72 ? 1 : 0)) % 4);
       const points = jaggedBetween(start, end, 18 + Math.floor(random() * 9), random, 28 + random() * 38);
@@ -390,11 +386,11 @@
         if (random() > .5) {
           facets.push({ points: [a, b, d], alpha: .012 + random() * .035, shade: random() });
           facets.push({ points: [b, c, d], alpha: .012 + random() * .035, shade: random() });
-          detailCracks.push({ points: jaggedBetween(b, d, 5, random, 8) });
+          if (random() > .5) detailCracks.push({ points: jaggedBetween(b, d, 5, random, 8) });
         } else {
           facets.push({ points: [a, b, c], alpha: .012 + random() * .035, shade: random() });
           facets.push({ points: [a, c, d], alpha: .012 + random() * .035, shade: random() });
-          detailCracks.push({ points: jaggedBetween(a, c, 5, random, 8) });
+          if (random() > .5) detailCracks.push({ points: jaggedBetween(a, c, 5, random, 8) });
         }
       }
     }
@@ -422,21 +418,6 @@
     strokeCracks(layerContext, detailCracks, 1, 1.15, .27, .94);
     for (const impact of impacts) {
       strokeCracks(layerContext, impact.rings, 1, 1.35, .32, .96);
-      const chip = layerContext.createRadialGradient(impact.x, impact.y, 0, impact.x, impact.y, impact.radius * 2.4);
-      chip.addColorStop(0, 'rgba(0,1,2,.96)');
-      chip.addColorStop(.19, 'rgba(12,16,18,.9)');
-      chip.addColorStop(.29, 'rgba(255,255,255,.96)');
-      chip.addColorStop(.43, 'rgba(32,39,43,.78)');
-      chip.addColorStop(.62, 'rgba(255,255,255,.42)');
-      chip.addColorStop(1, 'rgba(255,255,255,0)');
-      layerContext.fillStyle = chip;
-      layerContext.beginPath();
-      layerContext.arc(impact.x, impact.y, impact.radius * 2.4, 0, Math.PI * 2);
-      layerContext.fill();
-    }
-    for (const particle of dust) {
-      layerContext.fillStyle = `rgba(247,251,252,${particle.alpha})`;
-      layerContext.beginPath(); layerContext.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2); layerContext.fill();
     }
 
     const draw = now => {

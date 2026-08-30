@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-two-row-bottom-frost';
+const CACHE_NAME='flip-rush-7-v2026-08-30-clean-half-bust-cracks';
 const APP_SHELL = [
   './',
   './index.html',
