@@ -443,7 +443,7 @@
     document.body.appendChild(effect);
     const stamp = document.createElement('div');
     stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : type === 'flip3' ? 'flip3-screen-stamp' : 'bust-screen-stamp'}`;
-    stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP THREE!' : 'BUST';
+    stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP 3' : 'BUST';
     effect.appendChild(stamp);
     if (type === 'flip3') {
       const cards = document.createElement('div');

@@ -201,12 +201,12 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 .screen-effect-stamp{--stamp-rotation:-4deg;position:absolute;z-index:3;left:50%;top:50%;width:max-content;min-width:min(82vw,520px);max-width:calc(100vw - 30px);padding:16px 24px;border-radius:18px;text-align:center;font:900 clamp(46px,16vw,96px)/.9 'Archivo Black',Impact,sans-serif;letter-spacing:.055em;pointer-events:none;will-change:transform,opacity;animation:screenEffectStampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
 .frozen-screen-stamp{color:#eaffff;background:linear-gradient(180deg,rgba(177,237,255,.82),rgba(36,139,202,.78));border:4px solid rgba(226,251,255,.94);text-shadow:0 4px 0 rgba(15,76,113,.78),0 0 20px #d8f9ff;box-shadow:0 14px 38px #00131fbb,inset 0 0 22px rgba(255,255,255,.46),0 0 34px rgba(107,219,255,.58)}
 .bust-screen-stamp{--stamp-rotation:5deg;color:#fff4f5;background:linear-gradient(180deg,rgba(255,71,94,.88),rgba(143,5,31,.84));border:4px solid rgba(255,224,228,.96);text-shadow:0 4px 0 rgba(91,0,15,.86),0 0 18px rgba(255,225,230,.62);box-shadow:0 14px 38px #120005cc,inset 0 0 22px rgba(255,255,255,.3),0 0 36px rgba(255,46,78,.52)}
-.flip3-screen-stamp{--stamp-rotation:0deg;top:74%;min-width:min(88vw,560px);padding:13px 18px;color:#fff7ff;background:linear-gradient(180deg,rgba(188,106,255,.94),rgba(91,35,201,.94));border:4px solid #f1d7ff;text-shadow:0 4px 0 #42117d,0 0 18px #fff;box-shadow:0 14px 38px #090016dd,inset 0 0 20px #ffffff55,0 0 42px #a85dffcc;animation:flip3StampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
+.flip3-screen-stamp{--stamp-rotation:0deg;z-index:4;top:52%;min-width:0;max-width:calc(100vw - 18px);padding:0;color:#fff7ff;background:transparent;border:0;border-radius:0;font-size:clamp(70px,24vw,138px);line-height:.82;letter-spacing:-.035em;white-space:nowrap;text-shadow:0 6px 0 #5b24bd,0 11px 20px #000d,0 0 16px #fff,0 0 42px #a85dff;box-shadow:none;animation:flip3StampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
 .freeze-screen-effect{background:rgba(236,243,245,.025);will-change:opacity;animation:frostScreenLife 2.5s linear forwards}
 .freeze-screen-effect:after{content:'';position:absolute;z-index:1;inset:0;box-shadow:inset 0 0 20px 5px rgba(249,253,253,.72),inset 0 0 74px 22px rgba(183,197,200,.34);animation:frostEdgeLife 2.5s ease-out forwards}
 .shatter-screen-effect{background:transparent;animation:shatterScreenLife 2.5s ease-out forwards}
-.flip3-screen-effect{background:radial-gradient(circle at 50% 47%,rgba(201,125,255,.82) 0,rgba(91,30,170,.76) 30%,rgba(25,4,63,.94) 70%,rgba(4,0,16,.98) 100%);animation:flip3ScreenLife 2.5s ease-out forwards}
-.flip3-screen-effect:before{content:'';position:absolute;z-index:0;inset:-35%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.16) 0 4deg,transparent 4deg 15deg);filter:blur(1px);animation:flip3Spin 2.5s cubic-bezier(.12,.7,.2,1) forwards}
+.flip3-screen-effect{background:transparent;animation:flip3ScreenLife 2.5s ease-out forwards}
+.flip3-screen-effect:before{content:'';position:absolute;z-index:0;left:50%;top:47%;width:112vmin;height:112vmin;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.14) 0 3deg,transparent 3deg 16deg);filter:blur(1px);animation:flip3Spin 2.5s cubic-bezier(.12,.7,.2,1) forwards}
 .flip3-screen-effect:after{content:'';position:absolute;z-index:1;left:50%;top:47%;width:18vmin;height:18vmin;border:5px solid #fff9;border-radius:50%;box-shadow:0 0 0 14px #c477ff55,0 0 60px 24px #e5b5ff77;animation:flip3Ring 2.5s ease-out forwards}
 .flip3-screen-cards{position:absolute;z-index:2;inset:0;perspective:900px}
 .flip3-screen-card{position:absolute;left:50%;top:43%;width:clamp(82px,25vw,126px);height:clamp(118px,36vw,180px);display:flex;flex-direction:column;align-items:center;justify-content:center;border:clamp(4px,1.2vw,7px) solid #fff;border-radius:clamp(13px,4vw,22px);color:white;background:linear-gradient(145deg,#d1b7ff,#8e58ef 58%,#5b24bd);box-shadow:0 10px 0 #32106c,0 22px 46px #000b,0 0 34px #d6a4ff99;transform-style:preserve-3d;opacity:0;animation:flip3CardArrival 2.12s cubic-bezier(.16,.88,.22,1) var(--card-delay) both}
@@ -219,7 +219,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes frostEdgeLife{0%{opacity:0}6%,84%{opacity:1}100%{opacity:0}}
 @keyframes shatterScreenLife{0%{opacity:0}1%,86%{opacity:1}100%{opacity:0}}
 @keyframes flip3ScreenLife{0%{opacity:0}5%,84%{opacity:1}100%{opacity:0}}
-@keyframes flip3Spin{0%{opacity:0;transform:rotate(-20deg) scale(.45)}16%{opacity:1}100%{opacity:.18;transform:rotate(72deg) scale(1.5)}}
+@keyframes flip3Spin{0%{opacity:0;transform:translate(-50%,-50%) rotate(-20deg) scale(.3)}16%{opacity:.72}100%{opacity:0;transform:translate(-50%,-50%) rotate(72deg) scale(1.35)}}
 @keyframes flip3Ring{0%{opacity:0;transform:translate(-50%,-50%) scale(.1)}16%{opacity:1}72%{opacity:.36;transform:translate(-50%,-50%) scale(4.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(6.2)}}
 @keyframes flip3CardArrival{0%{opacity:0;transform:translate(var(--start-x),75vh) rotateY(180deg) rotate(var(--start-r)) scale(.18)}22%{opacity:1}38%,82%{opacity:1;transform:translate(var(--card-x),-50%) rotateY(0) rotate(var(--card-r)) scale(1)}92%{opacity:1;transform:translate(var(--card-x),-52%) rotate(var(--card-r)) scale(1.05)}100%{opacity:0;transform:translate(var(--card-x),-62%) rotate(var(--card-r)) scale(.9)}}
 @keyframes flip3StampLife{0%,24%{opacity:0;transform:translate(-50%,-50%) scale(1.7)}36%,84%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.94)}}
@@ -294,7 +294,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-flip-three-screen-effect"></script>
+<script src="screen-effects.js?v=20260830-flip3-logo-no-wash"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -429,7 +429,7 @@ function startShatterCanvas(effect,context,width,height,random,startTime){
   if(progress<1&&effect.isConnected)screenEffectFrame=requestAnimationFrame(draw);
  };screenEffectFrame=requestAnimationFrame(draw);
 }
-function addFallbackFlipThreeEffect(effect){const stamp=document.createElement('div');stamp.className='screen-effect-stamp flip3-screen-stamp';stamp.textContent='FLIP THREE!';effect.appendChild(stamp);const cards=document.createElement('div');cards.className='flip3-screen-cards';for(let n=1;n<=3;n++){const card=document.createElement('div');card.className='flip3-screen-card flip3-screen-card-'+n;card.innerHTML='<small>ACTION</small><strong>'+n+'</strong><b>FLIP</b>';cards.appendChild(card)}effect.appendChild(cards);const sparks=document.createElement('div');sparks.className='flip3-screen-sparks';for(let i=0;i<18;i++){const spark=document.createElement('i');spark.style.setProperty('--spark-angle',i*20+'deg');spark.style.setProperty('--spark-delay',(i%6)*.035+'s');spark.style.setProperty('--spark-distance',42+(i%4)*9+'vmin');sparks.appendChild(spark)}effect.appendChild(sparks)}
+function addFallbackFlipThreeEffect(effect){const stamp=document.createElement('div');stamp.className='screen-effect-stamp flip3-screen-stamp';stamp.textContent='FLIP 3';effect.appendChild(stamp);const cards=document.createElement('div');cards.className='flip3-screen-cards';for(let n=1;n<=3;n++){const card=document.createElement('div');card.className='flip3-screen-card flip3-screen-card-'+n;card.innerHTML='<small>ACTION</small><strong>'+n+'</strong><b>FLIP</b>';cards.appendChild(card)}effect.appendChild(cards);const sparks=document.createElement('div');sparks.className='flip3-screen-sparks';for(let i=0;i<18;i++){const spark=document.createElement('i');spark.style.setProperty('--spark-angle',i*20+'deg');spark.style.setProperty('--spark-delay',(i%6)*.035+'s');spark.style.setProperty('--spark-distance',42+(i%4)*9+'vmin');sparks.appendChild(spark)}effect.appendChild(sparks)}
 function showLocalScreenEffect(type){
  if(globalThis.RealisticScreenEffects){globalThis.RealisticScreenEffects.show(type);return}
  clearTimeout(screenEffectTimer);cancelAnimationFrame(screenEffectFrame);$('screenEffect')?.remove();
@@ -551,7 +551,7 @@ async function resolveFlip3(sourceIndex,flipCard){
  const source=players[sourceIndex];removeCard(source,flipCard);discardCard(flipCard);
  const targetIndex=await chooseFlip3Target(sourceIndex);
  if(targetIndex===null){log('No active player could receive Flip 3.');return}
- const target=players[targetIndex];log(source.name+' gave Flip 3 to '+target.name+'.');if(targetIndex===me&&sourceIndex!==me)showLocalScreenEffect('flip3');
+ const target=players[targetIndex];log(source.name+' gave Flip 3 to '+target.name+'.');if(targetIndex===me)showLocalScreenEffect('flip3');
  const queued=[];
  for(let n=1;n<=3&&running&&isRoundActive(target);n++){
   const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return}
