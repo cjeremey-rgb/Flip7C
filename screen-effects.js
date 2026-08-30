@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const EFFECT_MS = 2000;
+  const EFFECT_MS = 3000;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;

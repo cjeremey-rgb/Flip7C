@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-full-frost-center-stamps';
+const CACHE_NAME='flip-rush-7-v2026-08-30-three-second-effects';
 const APP_SHELL = [
   './',
   './index.html',
