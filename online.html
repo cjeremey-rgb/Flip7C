@@ -18,7 +18,6 @@
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
 <div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
-<div id="seasonBadge" class="season-badge"></div>
 <div id="connection" class="connection hidden">RECONNECTING…</div>
 <main>
   <section id="home" class="screen active">
@@ -114,19 +113,10 @@ function applyFlipRushTheme(){
  }
  const allowed=['neon','spring','summer','autumn','winter','christmas'];
  if(!allowed.includes(theme))theme='neon';
- const info={
-  neon:{label:'Neon Circuit',icon:'\u26a1',count:20},
-  spring:{label:'Spring Table',icon:'\ud83c\udf38',count:16},
-  summer:{label:'Summer Table',icon:'\u2600\ufe0f',count:10},
-  autumn:{label:'Autumn Table',icon:'\ud83c\udf42',count:18},
-  winter:{label:'Winter Table',icon:'\u2744\ufe0f',count:22},
-  christmas:{label:'Christmas Table',icon:'\ud83c\udf84',count:24}
- }[theme];
+ const info={neon:{count:20},spring:{count:16},summer:{count:10},autumn:{count:18},winter:{count:22},christmas:{count:24}}[theme];
  document.body.dataset.season=theme;
  const meta=document.querySelector('meta[name="theme-color"]');
  if(meta)meta.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
- const badge=document.getElementById('seasonBadge');
- if(badge)badge.innerHTML='<span>'+info.icon+'</span>'+info.label;
  const layer=document.getElementById('seasonalLayer');
  if(!layer)return;
  layer.innerHTML='';

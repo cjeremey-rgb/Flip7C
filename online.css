@@ -189,6 +189,14 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .past-player button:disabled{opacity:.65;box-shadow:none;transform:translateY(3px)}
 .invite-note{padding:12px;border-radius:14px;background:#07111d;color:#a8bbca;font-size:12px;line-height:1.45}
 
+/* Make the local player's turn unmistakable without covering the table. */
+body.my-turn::after{content:'';position:fixed;z-index:50;inset:4px;border:3px solid var(--yellow);border-radius:23px;box-shadow:inset 0 0 18px #ffdd4277,0 0 22px #ffdd4288;pointer-events:none;animation:yourTurnFrame 1.1s ease-in-out infinite}
+body.my-turn #status{border-color:var(--yellow);box-shadow:0 0 0 2px #ffdd4238,0 0 25px #ffdd4266;animation:yourTurnBanner 1.1s ease-in-out infinite}
+body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
+@keyframes yourTurnFrame{0%,100%{opacity:.48}50%{opacity:1}}
+@keyframes yourTurnBanner{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+@media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
+
 
 /* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */
 .game-head-tools{display:flex;align-items:center;gap:6px}
