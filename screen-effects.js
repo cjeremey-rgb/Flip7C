@@ -106,22 +106,12 @@
     const maskScale = 6;
     const maskWidth = Math.ceil(width / maskScale), maskHeight = Math.ceil(height / maskScale);
     const activation = new Float32Array(maskWidth * maskHeight);
-    const frostDepth = Math.max(40, Math.min(52, minimum * .12));
     for (let y = 0; y < maskHeight; y++) {
       for (let x = 0; x < maskWidth; x++) {
         const screenX = x * maskScale, screenY = y * maskScale;
-        const edgeDistances = [screenY, width - screenX, height - screenY, screenX];
-        let side = 0;
-        for (let index = 1; index < edgeDistances.length; index++) if (edgeDistances[index] < edgeDistances[side]) side = index;
-        const distance = edgeDistances[side];
-        const along = side % 2 === 0 ? screenX : screenY;
-        const rollingEdge = (fractalNoise(along * .045, side * 19.7 + 3, seed + 211) - .5) * 15;
-        const chippedEdge = (noiseHash(Math.floor(along / 8), side * 37 + 5, seed + 347) - .5) * 17;
-        const splinterNoise = noiseHash(Math.floor(along / 17), side * 53 + 11, seed + 503);
-        const splinter = splinterNoise > .82 ? (splinterNoise - .82) / .18 * 13 : 0;
-        const localDepth = Math.max(28, frostDepth + rollingEdge + chippedEdge + splinter);
-        const surfaceNoise = (fractalNoise(screenX * .031, screenY * .031, seed + 619) - .5) * .1;
-        activation[y * maskWidth + x] = distance / localDepth + surfaceNoise;
+        const distance = Math.min(screenX, width - screenX, screenY, height - screenY);
+        const irregularity = (fractalNoise(screenX * .026, screenY * .026, seed + 211) - .5) * .34;
+        activation[y * maskWidth + x] = clamp(distance / (minimum * .5) + irregularity);
       }
     }
     const maskFrames = [];
@@ -132,7 +122,7 @@
       const maskPixels = maskContext.createImageData(maskWidth, maskHeight);
       const growth = ease(frame / 16);
       for (let index = 0; index < activation.length; index++) {
-        const reveal = ease(clamp((growth * 1.04 - activation[index]) / .14));
+        const reveal = ease(clamp((growth * 1.12 - activation[index]) / .12));
         maskPixels.data[index * 4] = 255;
         maskPixels.data[index * 4 + 1] = 255;
         maskPixels.data[index * 4 + 2] = 255;
@@ -452,6 +442,10 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     const surface = createSurface(effect, type);
+    const stamp = document.createElement('div');
+    stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : 'bust-screen-stamp'}`;
+    stamp.textContent = type === 'freeze' ? 'FROZEN' : 'BUST';
+    effect.appendChild(stamp);
     const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
     const started = performance.now();
     if (type === 'freeze') startFreeze(effect, surface.context, surface.width, surface.height, random, started);

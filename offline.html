@@ -218,17 +218,21 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
 /* Two-second, device-resolution frost and shattered-glass effects. */
 .screen-effect{position:fixed;z-index:500;inset:0 0 var(--bottom-ui-inset);overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
-.screen-effect canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.freeze-screen-effect{background:transparent;will-change:opacity;animation:frostScreenLife 2s linear forwards}
-.freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 14px 4px rgba(249,253,253,.72),inset 0 0 24px 8px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}
+.screen-effect canvas{position:absolute;z-index:0;inset:0;width:100%;height:100%;display:block}
+.screen-effect-stamp{--stamp-rotation:-4deg;position:absolute;z-index:3;left:50%;top:50%;width:max-content;min-width:min(82vw,520px);max-width:calc(100vw - 30px);padding:16px 24px;border-radius:18px;text-align:center;font:900 clamp(46px,16vw,96px)/.9 'Archivo Black',Impact,sans-serif;letter-spacing:.055em;pointer-events:none;will-change:transform,opacity;animation:screenEffectStampLife 2s cubic-bezier(.18,.86,.24,1) forwards}
+.frozen-screen-stamp{color:#eaffff;background:linear-gradient(180deg,rgba(177,237,255,.82),rgba(36,139,202,.78));border:4px solid rgba(226,251,255,.94);text-shadow:0 4px 0 rgba(15,76,113,.78),0 0 20px #d8f9ff;box-shadow:0 14px 38px #00131fbb,inset 0 0 22px rgba(255,255,255,.46),0 0 34px rgba(107,219,255,.58)}
+.bust-screen-stamp{--stamp-rotation:5deg;color:#fff4f5;background:linear-gradient(180deg,rgba(255,71,94,.88),rgba(143,5,31,.84));border:4px solid rgba(255,224,228,.96);text-shadow:0 4px 0 rgba(91,0,15,.86),0 0 18px rgba(255,225,230,.62);box-shadow:0 14px 38px #120005cc,inset 0 0 22px rgba(255,255,255,.3),0 0 36px rgba(255,46,78,.52)}
+.freeze-screen-effect{background:rgba(236,243,245,.025);will-change:opacity;animation:frostScreenLife 2s linear forwards}
+.freeze-screen-effect:after{content:'';position:absolute;z-index:1;inset:0;box-shadow:inset 0 0 20px 5px rgba(249,253,253,.72),inset 0 0 74px 22px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}
 .shatter-screen-effect{background:transparent;animation:shatterScreenLife 2s ease-out forwards}
+@keyframes screenEffectStampLife{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1.65)}8%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}82%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(.94)}}
 @keyframes screenEffectLife{0%{opacity:0}3%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostScreenLife{0%{opacity:0}8%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostEdgeLife{0%{opacity:0}6%,84%{opacity:1}100%{opacity:0}}
 @keyframes shatterScreenLife{0%{opacity:0}1%,86%{opacity:1}100%{opacity:0}}
 body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s cubic-bezier(.18,.72,.28,1)}
 @keyframes screenShock{0%{transform:translate3d(0,0,0);filter:brightness(1)}7%{transform:translate3d(-7px,4px,0) rotate(-.35deg);filter:brightness(1.7)}16%{transform:translate3d(6px,-4px,0) rotate(.28deg);filter:brightness(.72)}27%{transform:translate3d(-4px,2px,0) rotate(-.18deg);filter:brightness(1.2)}42%{transform:translate3d(3px,-1px,0);filter:brightness(.92)}65%{transform:translate3d(-1px,1px,0);filter:brightness(1.04)}100%{transform:translate3d(0,0,0);filter:brightness(1)}}
-@media(prefers-reduced-motion:reduce){.screen-effect,.freeze-screen-effect,.freeze-screen-effect:after,.shatter-screen-effect{animation-timing-function:linear!important;animation-iteration-count:1!important}}
+@media(prefers-reduced-motion:reduce){.screen-effect,.screen-effect-stamp,.freeze-screen-effect,.freeze-screen-effect:after,.shatter-screen-effect{animation-timing-function:linear!important;animation-iteration-count:1!important}}
 </style>
 </head>
 <body>
@@ -302,7 +306,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-responsive-offline-freeze"></script>
+<script src="screen-effects.js?v=20260830-full-frost-center-stamps"></script>
 <script>
 const $=id=>document.getElementById(id);
 
