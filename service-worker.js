@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-cinematic-effects';
+const CACHE_NAME='flip-rush-7-v2026-08-30-smooth-frost';
 const APP_SHELL = [
   './',
   './index.html',

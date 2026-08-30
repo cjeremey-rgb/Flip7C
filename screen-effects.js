@@ -5,6 +5,7 @@
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
+  let frostCache = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -14,11 +15,11 @@
     return seed / 4294967296;
   };
 
-  function createSurface(effect) {
+  function createSurface(effect, type) {
     const canvas = document.createElement('canvas');
     const width = Math.max(1, innerWidth);
     const height = Math.max(1, innerHeight);
-    const scale = Math.min(3, Math.max(2, devicePixelRatio || 1));
+    const scale = type === 'freeze' ? 2 : Math.min(3, Math.max(2, devicePixelRatio || 1));
     canvas.width = Math.round(width * scale);
     canvas.height = Math.round(height * scale);
     canvas.style.width = `${width}px`;
@@ -73,7 +74,7 @@
 
   function buildFrostTexture(width, height, random) {
     const texture = document.createElement('canvas');
-    const textureScale = .34;
+    const textureScale = .25;
     texture.width = Math.ceil(width * textureScale);
     texture.height = Math.ceil(height * textureScale);
     const textureContext = texture.getContext('2d');
@@ -102,40 +103,47 @@
     }
     textureContext.putImageData(pixels, 0, 0);
 
-    const mask = document.createElement('canvas');
-    const maskScale = 5;
-    mask.width = Math.ceil(width / maskScale);
-    mask.height = Math.ceil(height / maskScale);
-    const maskContext = mask.getContext('2d');
-    const maskPixels = maskContext.createImageData(mask.width, mask.height);
-    const activation = new Float32Array(mask.width * mask.height);
-    for (let y = 0; y < mask.height; y++) {
-      for (let x = 0; x < mask.width; x++) {
+    const maskScale = 6;
+    const maskWidth = Math.ceil(width / maskScale), maskHeight = Math.ceil(height / maskScale);
+    const activation = new Float32Array(maskWidth * maskHeight);
+    for (let y = 0; y < maskHeight; y++) {
+      for (let x = 0; x < maskWidth; x++) {
         const screenX = x * maskScale, screenY = y * maskScale;
         const distance = Math.min(screenX, width - screenX, screenY, height - screenY);
         const irregularity = (fractalNoise(screenX * .026, screenY * .026, seed + 211) - .5) * .34;
-        activation[y * mask.width + x] = clamp(distance / (minimum * .5) + irregularity);
-        const index = (y * mask.width + x) * 4;
-        maskPixels.data[index] = 255;
-        maskPixels.data[index + 1] = 255;
-        maskPixels.data[index + 2] = 255;
+        activation[y * maskWidth + x] = clamp(distance / (minimum * .5) + irregularity);
       }
     }
-    return { texture, mask, maskContext, maskPixels, activation };
+    const maskFrames = [];
+    for (let frame = 0; frame <= 24; frame++) {
+      const mask = document.createElement('canvas');
+      mask.width = maskWidth; mask.height = maskHeight;
+      const maskContext = mask.getContext('2d');
+      const maskPixels = maskContext.createImageData(maskWidth, maskHeight);
+      const growth = ease(frame / 24);
+      for (let index = 0; index < activation.length; index++) {
+        const reveal = ease(clamp((growth * 1.12 - activation[index]) / .12));
+        maskPixels.data[index * 4] = 255;
+        maskPixels.data[index * 4 + 1] = 255;
+        maskPixels.data[index * 4 + 2] = 255;
+        maskPixels.data[index * 4 + 3] = Math.round(reveal * 255);
+      }
+      maskContext.putImageData(maskPixels, 0, 0);
+      maskFrames.push(mask);
+    }
+    return { texture, maskFrames };
   }
 
-  function startFreeze(effect, context, width, height, random, started) {
+  function buildFrostAsset(width, height, random) {
     const minimum = Math.min(width, height);
     const frost = buildFrostTexture(width, height, random);
     const crystals = [], droplets = [], grain = [];
     for (let index = 0; index < 164; index++) {
-      const side = index % 4;
-      const across = random();
+      const side = index % 4, across = random();
       const start = side === 0 ? { x: across * width, y: -2 } : side === 1 ? { x: width + 2, y: across * height } : side === 2 ? { x: across * width, y: height + 2 } : { x: -2, y: across * height };
       const angle = (side === 0 ? Math.PI / 2 : side === 1 ? Math.PI : side === 2 ? -Math.PI / 2 : 0) + (random() - .5) * .54;
       const length = (side % 2 === 0 ? height : width) * (.18 + random() * .39);
-      const segments = 10 + Math.floor(random() * 9);
-      const points = [start], branches = [];
+      const segments = 10 + Math.floor(random() * 9), points = [start], branches = [];
       let heading = angle;
       for (let step = 1; step <= segments; step++) {
         heading += (random() - .5) * .075;
@@ -144,86 +152,85 @@
         points.push(point);
         if (step > 1 && step < segments && step % 2 === 0) {
           for (const direction of [-1, 1]) {
-            const branchAngle = heading + direction * (.62 + random() * .34);
-            const branchLength = length * (.035 + random() * .07);
+            const branchAngle = heading + direction * (.62 + random() * .34), branchLength = length * (.035 + random() * .07);
             const tip = { x: point.x + Math.cos(branchAngle) * branchLength, y: point.y + Math.sin(branchAngle) * branchLength };
-            branches.push({ at: step / segments, points: [point, tip, { x: tip.x + Math.cos(branchAngle + direction * .48) * branchLength * .4, y: tip.y + Math.sin(branchAngle + direction * .48) * branchLength * .4 }] });
+            branches.push([point, tip, { x: tip.x + Math.cos(branchAngle + direction * .48) * branchLength * .4, y: tip.y + Math.sin(branchAngle + direction * .48) * branchLength * .4 }]);
           }
         }
       }
-      crystals.push({ points, branches, delay: random() * .18, width: .34 + random() * 1.05 });
+      crystals.push({ points, branches, width: .34 + random() * 1.05 });
     }
     for (let index = 0; index < 82; index++) {
       const x = random() * width, y = random() * height;
-      droplets.push({ x, y, distance: Math.min(x, width - x, y, height - y), radius: .8 + random() * 4.1, stretch: 1.2 + random() * 2.5, alpha: .08 + random() * .24 });
+      droplets.push({ x, y, radius: .8 + random() * 4.1, stretch: 1.2 + random() * 2.5, alpha: .08 + random() * .24 });
     }
     for (let index = 0; index < 720; index++) {
-      const x = random() * width, y = random() * height;
-      grain.push({ x, y, distance: Math.min(x, width - x, y, height - y), radius: .22 + random() * 1.35, alpha: .08 + random() * .42, rotation: random() * Math.PI });
+      grain.push({ x: random() * width, y: random() * height, radius: .22 + random() * 1.35, alpha: .08 + random() * .42, rotation: random() * Math.PI });
     }
 
+    const composite = document.createElement('canvas'), compositeScale = 1.25;
+    composite.width = Math.ceil(width * compositeScale);
+    composite.height = Math.ceil(height * compositeScale);
+    const compositeContext = composite.getContext('2d', { alpha: true });
+    compositeContext.setTransform(compositeScale, 0, 0, compositeScale, 0, 0);
+    compositeContext.drawImage(frost.texture, 0, 0, width, height);
+    compositeContext.globalCompositeOperation = 'screen';
+    for (const fleck of grain) {
+      compositeContext.globalAlpha = fleck.alpha;
+      compositeContext.beginPath();
+      compositeContext.ellipse(fleck.x, fleck.y, fleck.radius * 1.8, fleck.radius * .55, fleck.rotation, 0, Math.PI * 2);
+      compositeContext.fillStyle = 'rgba(252,253,253,.94)';
+      compositeContext.fill();
+    }
+    compositeContext.lineCap = 'round';
+    compositeContext.lineJoin = 'round';
+    compositeContext.shadowColor = 'rgba(255,255,255,.78)';
+    compositeContext.shadowBlur = 1.9;
+    for (const crystal of crystals) {
+      compositeContext.globalAlpha = .95;
+      compositeContext.strokeStyle = 'rgba(249,252,252,.96)';
+      compositeContext.lineWidth = crystal.width;
+      drawPath(compositeContext, crystal.points, 1);
+      compositeContext.lineWidth = Math.max(.28, crystal.width * .55);
+      for (const branch of crystal.branches) drawPath(compositeContext, branch, 1);
+    }
+    compositeContext.shadowBlur = 0;
+    for (const droplet of droplets) {
+      compositeContext.globalAlpha = droplet.alpha;
+      compositeContext.beginPath();
+      compositeContext.ellipse(droplet.x, droplet.y, droplet.radius, droplet.radius * droplet.stretch, 0, 0, Math.PI * 2);
+      compositeContext.fillStyle = 'rgba(168,184,188,.3)';
+      compositeContext.fill();
+      compositeContext.lineWidth = .55;
+      compositeContext.strokeStyle = 'rgba(255,255,255,.8)';
+      compositeContext.stroke();
+    }
+    compositeContext.globalAlpha = 1;
+    return { key: `${Math.round(width)}x${Math.round(height)}`, composite, maskFrames: frost.maskFrames, minimum };
+  }
+
+  function getFrostAsset(width, height, random) {
+    const key = `${Math.round(width)}x${Math.round(height)}`;
+    if (frostCache?.key === key) return frostCache;
+    frostCache = buildFrostAsset(width, height, random);
+    return frostCache;
+  }
+
+  function startFreeze(effect, context, width, height, random, started) {
+    const frost = getFrostAsset(width, height, random);
+    const animationStarted = performance.now();
     const draw = now => {
-      const progress = clamp((now - started) / EFFECT_MS);
+      const progress = clamp((now - animationStarted) / EFFECT_MS);
       const growth = ease(clamp(progress / .22));
       const opacity = lifeOpacity(progress);
-      const maskData = frost.maskPixels.data;
-      for (let index = 0; index < frost.activation.length; index++) {
-        const reveal = ease(clamp((growth * 1.12 - frost.activation[index]) / .12));
-        maskData[index * 4 + 3] = Math.round(reveal * 255);
-      }
-      frost.maskContext.putImageData(frost.maskPixels, 0, 0);
-
+      const maskIndex = Math.min(frost.maskFrames.length - 1, Math.round(growth * (frost.maskFrames.length - 1)));
       context.clearRect(0, 0, width, height);
       context.save();
       context.globalAlpha = opacity;
-      context.drawImage(frost.texture, 0, 0, width, height);
+      context.drawImage(frost.composite, 0, 0, width, height);
       context.globalCompositeOperation = 'destination-in';
-      context.drawImage(frost.mask, 0, 0, width, height);
+      context.drawImage(frost.maskFrames[maskIndex], 0, 0, width, height);
       context.restore();
-
-      context.save();
-      context.globalCompositeOperation = 'screen';
-      context.lineCap = 'round';
-      context.lineJoin = 'round';
-      context.shadowBlur = 0;
-      for (const fleck of grain) {
-        const activation = fleck.distance / (minimum * .5);
-        if (growth < activation) continue;
-        const local = clamp((growth - activation) / .1);
-        context.globalAlpha = opacity * fleck.alpha * local;
-        context.beginPath();
-        context.ellipse(fleck.x, fleck.y, fleck.radius * 1.8, fleck.radius * .55, fleck.rotation, 0, Math.PI * 2);
-        context.fillStyle = 'rgba(252,253,253,.94)';
-        context.fill();
-      }
-      context.shadowColor = 'rgba(255,255,255,.78)';
-      context.shadowBlur = 1.9;
-      for (const crystal of crystals) {
-        const local = clamp((growth - crystal.delay) / (1 - crystal.delay));
-        if (!local) continue;
-        context.globalAlpha = opacity * (.48 + local * .47);
-        context.strokeStyle = 'rgba(249,252,252,.96)';
-        context.lineWidth = crystal.width;
-        drawPath(context, crystal.points, local);
-        context.lineWidth = Math.max(.28, crystal.width * .55);
-        for (const branch of crystal.branches) drawPath(context, branch.points, clamp((local - branch.at) / Math.max(.01, 1 - branch.at)));
-      }
-      context.shadowBlur = 0;
-      for (const droplet of droplets) {
-        const activation = droplet.distance / (minimum * .5);
-        if (growth < activation) continue;
-        const local = clamp((growth - activation) / .11);
-        context.globalAlpha = opacity * droplet.alpha * local;
-        context.beginPath();
-        context.ellipse(droplet.x, droplet.y, droplet.radius, droplet.radius * droplet.stretch, 0, 0, Math.PI * 2);
-        context.fillStyle = 'rgba(168,184,188,.3)';
-        context.fill();
-        context.lineWidth = .55;
-        context.strokeStyle = 'rgba(255,255,255,.8)';
-        context.stroke();
-      }
-      context.restore();
-      effect.style.filter = `grayscale(${growth * .32}) contrast(${1 + growth * .12})`;
       if (progress < 1 && effect.isConnected) effectFrame = requestAnimationFrame(draw);
     };
     effectFrame = requestAnimationFrame(draw);
@@ -444,7 +451,7 @@
     effect.className = `screen-effect ${type === 'freeze' ? 'freeze-screen-effect' : 'shatter-screen-effect'}`;
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
-    const surface = createSurface(effect);
+    const surface = createSurface(effect, type);
     const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
     const started = performance.now();
     if (type === 'freeze') startFreeze(effect, surface.context, surface.width, surface.height, random, started);
@@ -461,5 +468,14 @@
     }, EFFECT_MS);
   }
 
-  globalThis.RealisticScreenEffects = { show };
+  function prewarmFrost() {
+    if (frostCache || !document.body || innerWidth < 2 || innerHeight < 2) return;
+    const seed = ((innerWidth << 16) ^ innerHeight ^ 0x5f3759df) >>> 0;
+    getFrostAsset(innerWidth, innerHeight, seededRandom(seed));
+  }
+
+  if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });
+  else setTimeout(prewarmFrost, 900);
+
+  globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
 })();
