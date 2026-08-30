@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="online.css">
+  <link rel="stylesheet" href="online.css?v=20260830-screen-effects">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -90,7 +90,7 @@
       <button id="start" class="primary decision hidden"><span>START GAME</span><small>Let the rush begin</small></button>
       <button id="next" class="primary decision hidden"><span>NEXT ROUND</span><small>Deal again</small></button>
     </div>
-    <details class="game-log"><summary>GAME FEED</summary><div id="log" class="log"></div></details>
+    <div id="log" class="log hidden" aria-hidden="true"></div>
   </section>
 </main>
 
@@ -166,7 +166,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260830-player-invites';
+  script.src = 'online.js?v=20260830-screen-effects';
   document.body.appendChild(script);
 }
 </script>
