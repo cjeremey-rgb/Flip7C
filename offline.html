@@ -523,7 +523,7 @@ async function resolveFreeze(sourceIndex,freezeCard){
  const targetIndex=await chooseFreezeTarget(sourceIndex);
  removeCard(source,freezeCard);
  if(targetIndex===null){discardCard(freezeCard);log('No active player could receive Freeze, so it was discarded.');return null}
- const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
+ const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;if(targetIndex===me)showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
  if(active().length===0)endRound('All players are out of the round.');
  return targetIndex;
 }

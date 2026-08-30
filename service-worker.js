@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-flip-three-screen-effect';
+const CACHE_NAME='flip-rush-7-v2026-08-30-freeze-recipient-only';
 const APP_SHELL = [
   './',
   './index.html',

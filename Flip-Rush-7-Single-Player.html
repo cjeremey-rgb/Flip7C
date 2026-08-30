@@ -496,7 +496,7 @@ async function resolveFreeze(sourceIndex,freezeCard){
  const targetIndex=await chooseFreezeTarget(sourceIndex);
  removeCard(source,freezeCard);
  if(targetIndex===null){discardCard(freezeCard);log('No active player could receive Freeze, so it was discarded.');return null}
- const target=players[targetIndex];target.cards.push(freezeCard);target.banked=true;target.frozen=true;showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.');render();
+ const target=players[targetIndex];target.cards.push(freezeCard);target.banked=true;target.frozen=true;if(targetIndex===me)showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.');render();
  if(active().length===0)endRound('All players are out of the round.');
  return targetIndex;
 }
@@ -531,7 +531,7 @@ async function resolveQueuedFreeze(q){
  const targetIndex=await chooseFreezeTarget(chooserIndex);
  if(targetIndex===null){discardCard(q.card);log('No active player could receive Freeze, so it was discarded.');return}
  const target=players[targetIndex];
- target.cards.push(q.card);target.banked=true;target.frozen=true;showLocalScreenEffect('freeze');
+ target.cards.push(q.card);target.banked=true;target.frozen=true;if(targetIndex===me)showLocalScreenEffect('freeze');
  log(chooser.name+' froze '+target.name+' for the rest of the round.');render();
  if(active().length===0)endRound('All players are out of the round.');
 }
