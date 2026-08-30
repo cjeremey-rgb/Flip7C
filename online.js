@@ -24,7 +24,7 @@ function effectRandom(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return
 function effectEase(value){value=Math.max(0,Math.min(1,value));return value*value*(3-2*value)}
 function effectOpacity(progress){return Math.max(0,Math.min(1,progress<.045?progress/.045:progress>.84?(1-progress)/.16:1))}
 function createEffectCanvas(effect){
- const canvas=document.createElement('canvas'),width=Math.max(1,effect.clientWidth||innerWidth),height=Math.max(1,effect.clientHeight||innerHeight),scale=effect.classList.contains('freeze-screen-effect')?1.25:Math.min(3,Math.max(2,devicePixelRatio||1));
+ const canvas=document.createElement('canvas'),width=Math.max(1,effect.clientWidth||innerWidth),height=Math.max(1,effect.clientHeight||innerHeight),scale=effect.classList.contains('freeze-screen-effect')?1:Math.min(3,Math.max(2,devicePixelRatio||1));
  canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.width=width+'px';canvas.style.height=height+'px';effect.appendChild(canvas);
  const context=canvas.getContext('2d',{alpha:true});context.setTransform(scale,0,0,scale,0,0);return{canvas,context,width,height};
 }

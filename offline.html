@@ -302,7 +302,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-smooth-freeze"></script>
+<script src="screen-effects.js?v=20260830-responsive-offline-freeze"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -359,14 +359,14 @@ if(d.length!==94)throw new Error('Deck construction error: expected 94 cards, fo
 return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function newPlayer(name,bot=false,style='balanced'){return{name,bot,style,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
-function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;showGame();newRound()}
+function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;showGame();requestAnimationFrame(()=>setTimeout(newRound,0))}
 function showGame(){$('home').classList.remove('active');$('game').classList.add('active');$('start').classList.add('hidden');$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');}
 function replenishDeck(){if(!deck.length&&discard.length){deck=shuffle(discard.splice(0));log('The discard pile was shuffled into a new draw pile.')}}
 function takeCard(){replenishDeck();return deck.pop()||null}
 function removeCard(p,card){const i=p.cards.lastIndexOf(card);if(i>=0)p.cards.splice(i,1)}
 function discardCard(card){if(card)discard.push(card)}
 function newRound(){running=true;players.forEach(p=>{p.cards=[];p.nums=new Set();p.banked=false;p.bust=false;p.second=false;p.frozen=false;p.bonusAwarded=false});current=(dealerIndex+1)%players.length;$('round').textContent=round;log('Round '+round+' begins');render();dealInitial()}
-async function dealInitial(){for(let offset=0;offset<players.length&&running;offset++){const i=(dealerIndex+1+offset)%players.length;if(isRoundActive(players[i])){await drawFor(i,{type:'deal'});await wait(350)}}if(!running)return;current=(dealerIndex+1)%players.length;while(!isRoundActive(players[current]))current=(current+1)%players.length;render();turnLoop()}
+async function dealInitial(){for(let offset=0;offset<players.length&&running;offset++){const i=(dealerIndex+1+offset)%players.length;if(isRoundActive(players[i])){await drawFor(i,{type:'deal'});if(offset<players.length-1)await wait(140)}}if(!running)return;current=(dealerIndex+1)%players.length;while(!isRoundActive(players[current]))current=(current+1)%players.length;render();turnLoop()}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
 const SCREEN_EFFECT_MS=2000;
 let screenEffectTimer=null,screenEffectFrame=0;
@@ -374,7 +374,7 @@ function effectRandom(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return
 function effectEase(value){value=Math.max(0,Math.min(1,value));return value*value*(3-2*value)}
 function effectOpacity(progress){return Math.max(0,Math.min(1,progress<.045?progress/.045:progress>.84?(1-progress)/.16:1))}
 function createEffectCanvas(effect){
- const canvas=document.createElement('canvas'),width=Math.max(1,effect.clientWidth||innerWidth),height=Math.max(1,effect.clientHeight||innerHeight),scale=effect.classList.contains('freeze-screen-effect')?1.25:Math.min(3,Math.max(2,devicePixelRatio||1));
+ const canvas=document.createElement('canvas'),width=Math.max(1,effect.clientWidth||innerWidth),height=Math.max(1,effect.clientHeight||innerHeight),scale=effect.classList.contains('freeze-screen-effect')?1:Math.min(3,Math.max(2,devicePixelRatio||1));
  canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.width=width+'px';canvas.style.height=height+'px';effect.appendChild(canvas);
  const context=canvas.getContext('2d',{alpha:true});context.setTransform(scale,0,0,scale,0,0);return{canvas,context,width,height};
 }
@@ -502,7 +502,7 @@ async function resolveFreeze(sourceIndex,freezeCard){
  const targetIndex=await chooseFreezeTarget(sourceIndex);
  removeCard(source,freezeCard);
  if(targetIndex===null){discardCard(freezeCard);log('No active player could receive Freeze, so it was discarded.');return null}
- const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;if(targetIndex===me)showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
+ const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
  if(active().length===0)endRound('All players are out of the round.');
  return targetIndex;
 }

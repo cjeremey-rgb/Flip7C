@@ -19,7 +19,7 @@
     const canvas = document.createElement('canvas');
     const width = Math.max(1, effect.clientWidth || innerWidth);
     const height = Math.max(1, effect.clientHeight || innerHeight);
-    const scale = type === 'freeze' ? 1.25 : Math.min(3, Math.max(2, devicePixelRatio || 1));
+    const scale = type === 'freeze' ? 1 : Math.min(3, Math.max(2, devicePixelRatio || 1));
     canvas.width = Math.round(width * scale);
     canvas.height = Math.round(height * scale);
     canvas.style.width = `${width}px`;
@@ -74,7 +74,7 @@
 
   function buildFrostTexture(width, height, random) {
     const texture = document.createElement('canvas');
-    const textureScale = .25;
+    const textureScale = .16;
     texture.width = Math.ceil(width * textureScale);
     texture.height = Math.ceil(height * textureScale);
     const textureContext = texture.getContext('2d');
@@ -125,12 +125,12 @@
       }
     }
     const maskFrames = [];
-    for (let frame = 0; frame <= 24; frame++) {
+    for (let frame = 0; frame <= 16; frame++) {
       const mask = document.createElement('canvas');
       mask.width = maskWidth; mask.height = maskHeight;
       const maskContext = mask.getContext('2d');
       const maskPixels = maskContext.createImageData(maskWidth, maskHeight);
-      const growth = ease(frame / 24);
+      const growth = ease(frame / 16);
       for (let index = 0; index < activation.length; index++) {
         const reveal = ease(clamp((growth * 1.04 - activation[index]) / .14));
         maskPixels.data[index * 4] = 255;
@@ -148,7 +148,7 @@
     const minimum = Math.min(width, height);
     const frost = buildFrostTexture(width, height, random);
     const crystals = [], droplets = [], grain = [];
-    for (let index = 0; index < 164; index++) {
+    for (let index = 0; index < 64; index++) {
       const side = index % 4, across = random();
       const start = side === 0 ? { x: across * width, y: -2 } : side === 1 ? { x: width + 2, y: across * height } : side === 2 ? { x: across * width, y: height + 2 } : { x: -2, y: across * height };
       const angle = (side === 0 ? Math.PI / 2 : side === 1 ? Math.PI : side === 2 ? -Math.PI / 2 : 0) + (random() - .5) * .54;
@@ -170,15 +170,15 @@
       }
       crystals.push({ points, branches, width: .34 + random() * 1.05 });
     }
-    for (let index = 0; index < 82; index++) {
+    for (let index = 0; index < 32; index++) {
       const x = random() * width, y = random() * height;
       droplets.push({ x, y, radius: .8 + random() * 4.1, stretch: 1.2 + random() * 2.5, alpha: .08 + random() * .24 });
     }
-    for (let index = 0; index < 720; index++) {
+    for (let index = 0; index < 260; index++) {
       grain.push({ x: random() * width, y: random() * height, radius: .22 + random() * 1.35, alpha: .08 + random() * .42, rotation: random() * Math.PI });
     }
 
-    const composite = document.createElement('canvas'), compositeScale = 1.25;
+    const composite = document.createElement('canvas'), compositeScale = 1;
     composite.width = Math.ceil(width * compositeScale);
     composite.height = Math.ceil(height * compositeScale);
     const compositeContext = composite.getContext('2d', { alpha: true });
@@ -476,9 +476,6 @@
     const seed = ((width << 16) ^ height ^ 0x5f3759df) >>> 0;
     getFrostAsset(width, height, seededRandom(seed));
   }
-
-  if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });
-  else setTimeout(prewarmFrost, 900);
 
   globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
 })();

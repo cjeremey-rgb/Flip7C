@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-smooth-freeze';
+const CACHE_NAME='flip-rush-7-v2026-08-30-responsive-offline-freeze';
 const APP_SHELL = [
   './',
   './index.html',
