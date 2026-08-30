@@ -6,7 +6,7 @@ const voicePeers=new Map();
 const seenReactions=new Set(),seenPhrases=new Set();
 const ACTION_REVEAL_MS=1000,SECOND_CHANCE_REVEAL_MS=1000,secondChanceVisuals=new Map();
 let pendingActionRevealKey='',pendingActionRevealStarted=0,pendingActionRevealTimer=null;
-const SCREEN_EFFECT_MS=4000;
+const SCREEN_EFFECT_MS=2000;
 let screenEffectTimer=null,screenEffectFrame=0;
 const QUICK_PHRASES=['Nice Job!',"You're almost there!",'So Close!','You suck!','Oh Man!'];
 const BECCA_PHRASE="You're a peckerhead!";
