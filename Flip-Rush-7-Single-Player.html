@@ -178,10 +178,6 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes yourTurnFrame{0%,100%{opacity:.48}50%{opacity:1}}
 @keyframes yourTurnBanner{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
-#game.screen{height:100dvh;min-height:100dvh;overflow:hidden}
-#game.screen.active{display:flex;flex-direction:column}
-#game .table{flex:1 1 auto;min-height:0;width:100%;margin-bottom:0}
-.game-log{display:none!important}
 /* Two-second local-player freeze and bust effects. */
 .screen-effect{position:fixed;z-index:500;inset:0;overflow:hidden;pointer-events:none;animation:screenEffectLife 2s linear forwards}
 @keyframes screenEffectLife{0%{opacity:0}8%,82%{opacity:1}100%{opacity:0}}
@@ -265,7 +261,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
       <button id="start" class="primary decision hidden"><span>START GAME</span><small>Let the rush begin</small></button>
       <button id="next" class="primary decision hidden"><span>NEXT ROUND</span><small>Deal again</small></button>
     </div>
-    <div id="log" class="log hidden" aria-hidden="true"></div>
+    <details class="game-log"><summary>GAME FEED</summary><div id="log" class="log"></div></details>
   </section>
 </main>
 

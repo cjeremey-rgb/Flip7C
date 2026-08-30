@@ -197,13 +197,6 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes yourTurnBanner{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
 
-/* Use the space formerly occupied by the game feed for the table. */
-#game.screen{height:100dvh;min-height:100dvh;overflow:hidden}
-#game.screen.active{display:flex;flex-direction:column}
-#game .table{flex:1 1 auto;min-height:0;width:100%;margin-bottom:0}
-.game-log{display:none!important}
-
-
 /* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */
 .game-head-tools{display:flex;align-items:center;gap:6px}
 .mic-btn{position:relative;overflow:visible;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease}
