@@ -196,6 +196,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   body:has(#game.screen.active),body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game.screen.active{display:flex;flex-direction:column;height:calc(100svh - var(--android-nav-reserve));height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game .table{flex:1 1 auto;min-height:0}
+  .my-area:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px}
 }
 .bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:var(--bottom-ui-inset);background:linear-gradient(180deg,#07101d00,#07101df2 18%,#07101dfb 100%);border-top:1px solid #22384b;backdrop-filter:blur(8px)}
 .bottom-dock .actions{position:relative;z-index:1;left:auto;right:auto;bottom:auto;padding:8px 10px;grid-template-columns:48px 1.45fr 1fr;background:transparent;border-top:0;backdrop-filter:none}
@@ -228,7 +229,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @media(max-width:390px){.game-head-tools{gap:4px}.mic-btn,.game-head-tools .icon-btn{width:39px;height:39px}.room-pill{padding-left:9px;padding-right:9px}.round-pill{padding-left:10px;padding-right:10px}}
 
 /* Two-second, device-resolution frost and shattered-glass effects. */
-.screen-effect{position:fixed;z-index:500;inset:0;overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
+.screen-effect{position:fixed;z-index:500;inset:0 0 var(--bottom-ui-inset);overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
 .screen-effect canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .freeze-screen-effect{background:transparent;animation:frostScreenLife 2s linear forwards}
 .freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 14px 4px rgba(249,253,253,.72),inset 0 0 24px 8px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}

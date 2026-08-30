@@ -17,8 +17,8 @@
 
   function createSurface(effect, type) {
     const canvas = document.createElement('canvas');
-    const width = Math.max(1, innerWidth);
-    const height = Math.max(1, innerHeight);
+    const width = Math.max(1, effect.clientWidth || innerWidth);
+    const height = Math.max(1, effect.clientHeight || innerHeight);
     const scale = type === 'freeze' ? 2 : Math.min(3, Math.max(2, devicePixelRatio || 1));
     canvas.width = Math.round(width * scale);
     canvas.height = Math.round(height * scale);
@@ -487,8 +487,11 @@
 
   function prewarmFrost() {
     if (frostCache || !document.body || innerWidth < 2 || innerHeight < 2) return;
-    const seed = ((innerWidth << 16) ^ innerHeight ^ 0x5f3759df) >>> 0;
-    getFrostAsset(innerWidth, innerHeight, seededRandom(seed));
+    const bottomInset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bottom-ui-inset')) || 0;
+    const width = innerWidth;
+    const height = Math.max(1, innerHeight - bottomInset);
+    const seed = ((width << 16) ^ height ^ 0x5f3759df) >>> 0;
+    getFrostAsset(width, height, seededRandom(seed));
   }
 
   if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });

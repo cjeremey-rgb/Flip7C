@@ -200,6 +200,8 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   body:has(#game.screen.active),body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game.screen.active{display:flex;flex-direction:column;height:calc(100svh - var(--android-nav-reserve));height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game .table{flex:1 1 auto;min-height:0}
+  .my-area:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px;padding:0}
+  .my-area .hand{height:100%;min-height:0}
 }
 .bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:var(--bottom-ui-inset);background:linear-gradient(180deg,#07101d00,#07101df2 18%,#07101dfb 100%);border-top:1px solid #22384b;backdrop-filter:blur(8px)}
 .bottom-dock .actions{position:relative;z-index:1;left:auto;right:auto;bottom:auto;padding:8px 10px;grid-template-columns:48px 1.45fr 1fr;background:transparent;border-top:0;backdrop-filter:none}
@@ -215,7 +217,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes yourTurnBanner{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
 /* Two-second, device-resolution frost and shattered-glass effects. */
-.screen-effect{position:fixed;z-index:500;inset:0;overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
+.screen-effect{position:fixed;z-index:500;inset:0 0 var(--bottom-ui-inset);overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
 .screen-effect canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .freeze-screen-effect{background:transparent;animation:frostScreenLife 2s linear forwards}
 .freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 14px 4px rgba(249,253,253,.72),inset 0 0 24px 8px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}
@@ -300,7 +302,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-edge-frost-full-shatter"></script>
+<script src="screen-effects.js?v=20260830-two-row-bottom-frost"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -372,7 +374,7 @@ function effectRandom(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return
 function effectEase(value){value=Math.max(0,Math.min(1,value));return value*value*(3-2*value)}
 function effectOpacity(progress){return Math.max(0,Math.min(1,progress<.045?progress/.045:progress>.84?(1-progress)/.16:1))}
 function createEffectCanvas(effect){
- const canvas=document.createElement('canvas'),width=Math.max(1,innerWidth),height=Math.max(1,innerHeight),scale=Math.min(3,Math.max(2,devicePixelRatio||1));
+ const canvas=document.createElement('canvas'),width=Math.max(1,effect.clientWidth||innerWidth),height=Math.max(1,effect.clientHeight||innerHeight),scale=Math.min(3,Math.max(2,devicePixelRatio||1));
  canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.width=width+'px';canvas.style.height=height+'px';effect.appendChild(canvas);
  const context=canvas.getContext('2d',{alpha:true});context.setTransform(scale,0,0,scale,0,0);return{canvas,context,width,height};
 }
@@ -638,8 +640,8 @@ function endRound(reason='Round complete.'){
 function displayCardRank(c){if(c.t==='n')return c.v;if(c.t==='m'&&c.v!=='x2')return 100+Number(c.v.slice(1));if(c.t==='m')return 200;if(c.t==='a'&&c.v==='SECOND CHANCE')return 300;return 400}
 function displayCards(cards){return [...cards].sort((a,b)=>displayCardRank(a)-displayCardRank(b))}
 function splitDisplayCards(cards){const sorted=displayCards(cards);return{numbers:sorted.filter(c=>c.t==='n'),other:sorted.filter(c=>c.t!=='n')}}
-function fitOfflineRow(row,reservePreview=false){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
-function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;fitOfflineRow(hand.querySelector('.hand-other'),false);fitOfflineRow(hand.querySelector('.hand-numbers'),true)}
+function fitOfflineRow(row,reservePreview=false,maxScale=1){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(maxScale,1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
+function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;const other=hand.querySelector('.hand-other'),numbers=hand.querySelector('.hand-numbers'),rows=[other,numbers].filter(row=>row&&row.children.length),style=getComputedStyle(hand),gap=parseFloat(style.rowGap||style.gap)||0,padding=(parseFloat(style.paddingTop)||0)+(parseFloat(style.paddingBottom)||0),baseHeight=window.matchMedia('(min-width:700px)').matches?121:104,verticalScale=rows.length>1?Math.min(1,Math.max(.45,(hand.clientHeight-padding-gap*(rows.length-1))/(baseHeight*rows.length))):1;fitOfflineRow(other,false,verticalScale);fitOfflineRow(numbers,true,verticalScale)}
 function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
 function renderOfflineDiscardPile(){const root=$('discardVisual');if(!root)return;$('discardCount').textContent=discard.length;root.innerHTML=discard.length?cardHtml(discard[discard.length-1]):'<div class="discard-empty">DISCARD</div>'}
 function offlineFlipThreeAnchor(index){if(index===me)return $('myArea');return document.querySelector(`.bot-seat[data-player-index="${index}"]`)||$('table')}
