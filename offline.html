@@ -216,24 +216,24 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes yourTurnFrame{0%,100%{opacity:.48}50%{opacity:1}}
 @keyframes yourTurnBanner{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
-/* 2.5-second full-screen action effects. */
+/* Full-screen action effects; Freeze and Bust remain 2.5 seconds. */
 .screen-effect{position:fixed;z-index:500;inset:0 0 var(--bottom-ui-inset);overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2.5s linear forwards}
 .screen-effect canvas{position:absolute;z-index:0;inset:0;width:100%;height:100%;display:block}
 .screen-effect-stamp{--stamp-rotation:-4deg;position:absolute;z-index:3;left:50%;top:50%;width:max-content;min-width:min(82vw,520px);max-width:calc(100vw - 30px);padding:16px 24px;border-radius:18px;text-align:center;font:900 clamp(46px,16vw,96px)/.9 'Archivo Black',Impact,sans-serif;letter-spacing:.055em;pointer-events:none;will-change:transform,opacity;animation:screenEffectStampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
 .frozen-screen-stamp{color:#eaffff;background:linear-gradient(180deg,rgba(177,237,255,.82),rgba(36,139,202,.78));border:4px solid rgba(226,251,255,.94);text-shadow:0 4px 0 rgba(15,76,113,.78),0 0 20px #d8f9ff;box-shadow:0 14px 38px #00131fbb,inset 0 0 22px rgba(255,255,255,.46),0 0 34px rgba(107,219,255,.58)}
 .bust-screen-stamp{--stamp-rotation:5deg;color:#fff4f5;background:linear-gradient(180deg,rgba(255,71,94,.88),rgba(143,5,31,.84));border:4px solid rgba(255,224,228,.96);text-shadow:0 4px 0 rgba(91,0,15,.86),0 0 18px rgba(255,225,230,.62);box-shadow:0 14px 38px #120005cc,inset 0 0 22px rgba(255,255,255,.3),0 0 36px rgba(255,46,78,.52)}
-.flip3-screen-stamp{--stamp-rotation:0deg;z-index:4;top:52%;min-width:0;max-width:calc(100vw - 18px);padding:0;color:#fff7ff;background:transparent;border:0;border-radius:0;font-size:clamp(70px,24vw,138px);line-height:.82;letter-spacing:-.035em;white-space:nowrap;text-shadow:0 6px 0 #5b24bd,0 11px 20px #000d,0 0 16px #fff,0 0 42px #a85dff;box-shadow:none;animation:flip3StampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
+.flip3-screen-stamp{--stamp-rotation:0deg;z-index:4;top:52%;min-width:0;max-width:calc(100vw - 18px);padding:0;color:#fff7ff;background:transparent;border:0;border-radius:0;font-size:clamp(70px,24vw,138px);line-height:.82;letter-spacing:-.035em;white-space:nowrap;text-shadow:0 6px 0 #5b24bd,0 11px 20px #000d,0 0 16px #fff,0 0 42px #a85dff;box-shadow:none;animation:flip3StampLife 3.5s cubic-bezier(.18,.86,.24,1) forwards}
 .freeze-screen-effect{background:rgba(236,243,245,.025);will-change:opacity;animation:frostScreenLife 2.5s linear forwards}
 .freeze-screen-effect:after{content:'';position:absolute;z-index:1;inset:0;box-shadow:inset 0 0 20px 5px rgba(249,253,253,.72),inset 0 0 74px 22px rgba(183,197,200,.34);animation:frostEdgeLife 2.5s ease-out forwards}
 .shatter-screen-effect{background:transparent;animation:shatterScreenLife 2.5s ease-out forwards}
-.flip3-screen-effect{background:transparent;animation:flip3ScreenLife 2.5s ease-out forwards}
-.flip3-screen-effect:before{content:'';position:absolute;z-index:0;left:50%;top:47%;width:112vmin;height:112vmin;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.14) 0 3deg,transparent 3deg 16deg);filter:blur(1px);animation:flip3Spin 2.5s cubic-bezier(.12,.7,.2,1) forwards}
-.flip3-screen-effect:after{content:'';position:absolute;z-index:1;left:50%;top:47%;width:18vmin;height:18vmin;border:5px solid #fff9;border-radius:50%;box-shadow:0 0 0 14px #c477ff55,0 0 60px 24px #e5b5ff77;animation:flip3Ring 2.5s ease-out forwards}
+.flip3-screen-effect{background:transparent;animation:flip3ScreenLife 3.5s ease-out forwards}
+.flip3-screen-effect:before{content:'';position:absolute;z-index:0;left:50%;top:47%;width:112vmin;height:112vmin;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.14) 0 3deg,transparent 3deg 16deg);filter:blur(1px);animation:flip3Spin 3.5s cubic-bezier(.12,.7,.2,1) forwards}
+.flip3-screen-effect:after{content:'';position:absolute;z-index:1;left:50%;top:47%;width:18vmin;height:18vmin;border:5px solid #fff9;border-radius:50%;box-shadow:0 0 0 14px #c477ff55,0 0 60px 24px #e5b5ff77;animation:flip3Ring 3.5s ease-out forwards}
 .flip3-screen-cards{position:absolute;z-index:2;inset:0;perspective:900px}
-.flip3-screen-card{position:absolute;left:50%;top:43%;width:clamp(82px,25vw,126px);height:clamp(118px,36vw,180px);display:flex;flex-direction:column;align-items:center;justify-content:center;border:clamp(4px,1.2vw,7px) solid #fff;border-radius:clamp(13px,4vw,22px);color:white;background:linear-gradient(145deg,#d1b7ff,#8e58ef 58%,#5b24bd);box-shadow:0 10px 0 #32106c,0 22px 46px #000b,0 0 34px #d6a4ff99;transform-style:preserve-3d;opacity:0;animation:flip3CardArrival 2.12s cubic-bezier(.16,.88,.22,1) var(--card-delay) both}
+.flip3-screen-card{position:absolute;left:50%;top:43%;width:clamp(82px,25vw,126px);height:clamp(118px,36vw,180px);display:flex;flex-direction:column;align-items:center;justify-content:center;border:clamp(4px,1.2vw,7px) solid #fff;border-radius:clamp(13px,4vw,22px);color:white;background:linear-gradient(145deg,#d1b7ff,#8e58ef 58%,#5b24bd);box-shadow:0 10px 0 #32106c,0 22px 46px #000b,0 0 34px #d6a4ff99;transform-style:preserve-3d;opacity:0;animation:flip3CardArrival 3.12s cubic-bezier(.16,.88,.22,1) var(--card-delay) both}
 .flip3-screen-card small{position:absolute;top:8px;left:9px;font:900 clamp(7px,2vw,10px) Inter,sans-serif;letter-spacing:.12em}.flip3-screen-card strong{font:900 clamp(52px,17vw,88px)/.9 'Archivo Black',Impact,sans-serif;text-shadow:0 5px 0 #431283}.flip3-screen-card b{margin-top:4px;font:900 clamp(9px,3vw,14px) Inter,sans-serif;letter-spacing:.16em}
 .flip3-screen-card-1{--card-x:-72%;--card-r:-16deg;--start-x:-155vw;--start-r:-210deg;--card-delay:0s}.flip3-screen-card-2{--card-x:-50%;--card-r:0deg;--start-x:0vw;--start-r:180deg;--card-delay:.12s;z-index:2}.flip3-screen-card-3{--card-x:-28%;--card-r:16deg;--start-x:155vw;--start-r:210deg;--card-delay:.24s}
-.flip3-screen-sparks{position:absolute;z-index:1;left:50%;top:47%;width:1px;height:1px}.flip3-screen-sparks i{position:absolute;left:0;top:0;width:clamp(8px,2.2vw,14px);height:3px;border-radius:99px;background:#fff5a6;box-shadow:0 0 10px #fff,0 0 18px #d9a2ff;transform-origin:0 50%;animation:flip3Spark 1.15s ease-out var(--spark-delay) both}
+.flip3-screen-sparks{position:absolute;z-index:1;left:50%;top:47%;width:1px;height:1px}.flip3-screen-sparks i{position:absolute;left:0;top:0;width:clamp(8px,2.2vw,14px);height:3px;border-radius:99px;background:#fff5a6;box-shadow:0 0 10px #fff,0 0 18px #d9a2ff;transform-origin:0 50%;animation:flip3Spark 2.15s ease-out var(--spark-delay) both}
 @keyframes screenEffectStampLife{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1.65)}8%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}82%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(.94)}}
 @keyframes screenEffectLife{0%{opacity:0}3%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostScreenLife{0%{opacity:0}8%,84%{opacity:1}100%{opacity:0}}
@@ -321,7 +321,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-flip3-logo-no-wash"></script>
+<script src="screen-effects.js?v=20260830-flip3-paced-sequence"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -387,7 +387,7 @@ function discardCard(card){if(card)discard.push(card)}
 function newRound(){running=true;players.forEach(p=>{p.cards=[];p.nums=new Set();p.banked=false;p.bust=false;p.second=false;p.frozen=false;p.bonusAwarded=false});current=(dealerIndex+1)%players.length;$('round').textContent=round;log('Round '+round+' begins');render();dealInitial()}
 async function dealInitial(){for(let offset=0;offset<players.length&&running;offset++){const i=(dealerIndex+1+offset)%players.length;if(isRoundActive(players[i])){await drawFor(i,{type:'deal'});if(offset<players.length-1)await wait(140)}}if(!running)return;current=(dealerIndex+1)%players.length;while(!isRoundActive(players[current]))current=(current+1)%players.length;render();turnLoop()}
 function wait(ms){return new Promise(r=>setTimeout(r,ms))}
-const SCREEN_EFFECT_MS=2500;
+const SCREEN_EFFECT_MS=2500,FLIP3_SCREEN_EFFECT_MS=3500,FLIP3_SEQUENCE_INTRO_MS=4500,FLIP3_BUST_DELAY_MS=500;
 let screenEffectTimer=null,screenEffectFrame=0;
 function effectRandom(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
 function effectEase(value){value=Math.max(0,Math.min(1,value));return value*value*(3-2*value)}
@@ -461,7 +461,7 @@ function showLocalScreenEffect(type){
  if(globalThis.RealisticScreenEffects){globalThis.RealisticScreenEffects.show(type);return}
  clearTimeout(screenEffectTimer);cancelAnimationFrame(screenEffectFrame);$('screenEffect')?.remove();
  const effect=document.createElement('div');effect.id='screenEffect';effect.className='screen-effect '+(type==='freeze'?'freeze-screen-effect':type==='flip3'?'flip3-screen-effect':'shatter-screen-effect');effect.setAttribute('aria-hidden','true');document.body.appendChild(effect);
- if(type==='flip3'){addFallbackFlipThreeEffect(effect);screenEffectTimer=setTimeout(()=>{if(effect.isConnected)effect.remove();screenEffectTimer=null},SCREEN_EFFECT_MS);return}
+ if(type==='flip3'){addFallbackFlipThreeEffect(effect);screenEffectTimer=setTimeout(()=>{if(effect.isConnected)effect.remove();screenEffectTimer=null},FLIP3_SCREEN_EFFECT_MS);return}
  const surface=createEffectCanvas(effect),random=effectRandom((Date.now()^(surface.width<<8)^surface.height)>>>0),started=performance.now();
  if(type==='freeze')startFrostCanvas(effect,surface.context,surface.width,surface.height,random,started);else startShatterCanvas(effect,surface.context,surface.width,surface.height,random,started);
  screenEffectTimer=setTimeout(()=>{cancelAnimationFrame(screenEffectFrame);if(effect.isConnected)effect.remove();screenEffectTimer=null},SCREEN_EFFECT_MS);
@@ -567,13 +567,13 @@ async function resolveFlip3(sourceIndex,flipCard){
  if(targetIndex===null){discardCard(flipCard);log('No active player could receive Flip 3.');render();return}
  const target=players[targetIndex];log(source.name+' gave Flip 3 to '+target.name+'.');
  activeFlipThree={token:String(Date.now())+Math.random(),fromIndex:sourceIndex,targetIndex,stage:'giver'};render();await wait(1000);
- activeFlipThree.stage='target';render();await wait(700);
+ activeFlipThree.stage='target';render();await wait(targetIndex===me?FLIP3_SEQUENCE_INTRO_MS:700);
  const queued=[];
  for(let n=1;n<=3&&running&&isRoundActive(target);n++){
   const c=takeCard();if(!c){await finishOfflineFlipThree(flipCard);endRound('The draw pile and discard pile were exhausted.');return}
   target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();await wait(c.t==='a'?1000:350);
   if(c.t==='n'){
-   const result=await resolveNumberCard(targetIndex,c);
+   const result=await resolveNumberCard(targetIndex,c,{fromFlipThree:true});
    if(result==='bust'){discardQueuedActions(target,queued);await finishOfflineFlipThree(flipCard);if(active().length===0)endRound('All players are out of the round.');return}
    if(result==='flip7'){await finishOfflineFlipThree(flipCard);return}
   }else if(c.t==='a'&&c.v==='SECOND CHANCE'){
@@ -588,7 +588,7 @@ async function resolveFlip3(sourceIndex,flipCard){
  await resolveQueuedActions(queued);
 }
 
-async function resolveNumberCard(i,c){
+async function resolveNumberCard(i,c,options={}){
  const p=players[i];
  if(p.nums.has(c.v)){
   if(p.second){
@@ -600,7 +600,7 @@ async function resolveNumberCard(i,c){
    const duplicateIndex=p.cards.lastIndexOf(c);if(duplicateIndex>=0)discardCard(p.cards.splice(duplicateIndex,1)[0]);
    log(p.name+' discarded Second Chance and the duplicate '+c.v+'.');render();return 'protected';
   }
-  p.bust=true;if(i===me)showLocalScreenEffect('bust');log(p.name+' busted on a duplicate '+c.v+'!');render();return 'bust';
+  p.bust=true;log(p.name+' busted on a duplicate '+c.v+'!');render();if(i===me){if(options.fromFlipThree)await wait(FLIP3_BUST_DELAY_MS);showLocalScreenEffect('bust')}return 'bust';
  }
  p.nums.add(c.v);
  if(p.nums.size>=7&&!p.bonusAwarded){p.bonusAwarded=true;log(p.name+' reached seven unique number cards and earned a +15 bonus!');showSevenBonus(p);render();endRound(p.name+' reached Flip 7 and ended the round immediately!');return 'flip7'}

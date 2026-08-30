@@ -2,6 +2,7 @@
   'use strict';
 
   const EFFECT_MS = 2500;
+  const FLIP3_EFFECT_MS = 3500;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -481,7 +482,7 @@
       cancelAnimationFrame(effectFrame);
       document.body.classList.remove('shatter-impact');
       if (effect.isConnected) effect.remove();
-    }, EFFECT_MS);
+    }, type === 'flip3' ? FLIP3_EFFECT_MS : EFFECT_MS);
   }
 
   function prewarmFrost() {

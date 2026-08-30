@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-flip3-logo-no-wash';
+const CACHE_NAME='flip-rush-7-v2026-08-30-flip3-paced-sequence';
 const APP_SHELL = [
   './',
   './index.html',

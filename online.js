@@ -6,7 +6,7 @@ const voicePeers=new Map();
 const seenReactions=new Set(),seenPhrases=new Set();
 const ACTION_REVEAL_MS=1000,SECOND_CHANCE_REVEAL_MS=1000,secondChanceVisuals=new Map();
 let pendingActionRevealKey='',pendingActionRevealStarted=0,pendingActionRevealTimer=null;
-const SCREEN_EFFECT_MS=2500;
+const SCREEN_EFFECT_MS=2500,FLIP3_SCREEN_EFFECT_MS=3500,FLIP3_BUST_DELAY_MS=500;
 let screenEffectTimer=null,screenEffectFrame=0;
 const QUICK_PHRASES=['Nice Job!',"You're almost there!",'So Close!','You suck!','Oh Man!'];
 const BECCA_PHRASE="You're a peckerhead!";
@@ -92,7 +92,7 @@ function showLocalScreenEffect(type){
  if(globalThis.RealisticScreenEffects){globalThis.RealisticScreenEffects.show(type);return}
  clearTimeout(screenEffectTimer);cancelAnimationFrame(screenEffectFrame);$('screenEffect')?.remove();
  const effect=document.createElement('div');effect.id='screenEffect';effect.className='screen-effect '+(type==='freeze'?'freeze-screen-effect':type==='flip3'?'flip3-screen-effect':'shatter-screen-effect');effect.setAttribute('aria-hidden','true');document.body.appendChild(effect);
- if(type==='flip3'){addFallbackFlipThreeEffect(effect);screenEffectTimer=setTimeout(()=>{if(effect.isConnected)effect.remove();screenEffectTimer=null},SCREEN_EFFECT_MS);return}
+ if(type==='flip3'){addFallbackFlipThreeEffect(effect);screenEffectTimer=setTimeout(()=>{if(effect.isConnected)effect.remove();screenEffectTimer=null},FLIP3_SCREEN_EFFECT_MS);return}
  const surface=createEffectCanvas(effect),random=effectRandom((Date.now()^(surface.width<<8)^surface.height)>>>0),started=performance.now();
  if(type==='freeze')startFrostCanvas(effect,surface.context,surface.width,surface.height,random,started);else startShatterCanvas(effect,surface.context,surface.width,surface.height,random,started);
  screenEffectTimer=setTimeout(()=>{cancelAnimationFrame(screenEffectFrame);if(effect.isConnected)effect.remove();screenEffectTimer=null},SCREEN_EFFECT_MS);
@@ -185,7 +185,7 @@ const area=$('myArea');if(me)renderHand(area,me,oldMe,s,previous);else{area.inne
 renderTargetPicker(s);$('hit').disabled=!myTurn;$('stay').disabled=!myTurn||!(me&&(me.cards.length||me.mods.length||me.second));$('hit').classList.toggle('hidden',s.phase!=='playing'||!!s.pendingAction);$('stay').classList.toggle('hidden',s.phase!=='playing'||!!s.pendingAction);$('start').classList.toggle('hidden',!(s.phase==='lobby'&&s.hostId===myId));$('next').classList.toggle('hidden',!(s.phase==='roundEnd'&&s.hostId===myId));$('lobbyCard').classList.toggle('hidden',s.phase!=='lobby');$('table').classList.toggle('hidden',s.phase==='lobby');
 const [big,small]=statusText(s,myTurn);$('status').innerHTML=`<span class="pulse"></span><b>${esc(big)}</b><small>${esc(small)}</small>`;$('log').innerHTML=s.log.map(x=>`<div>${esc(x)}</div>`).join('');
 renderNewReactions(s);renderNewPhrases(s);syncVoicePeers(s);
-if(previous){const newCount=(me?.cards.length||0)+(me?.mods.length||0)+(me?.second?1:0),oldCount=(oldMe?.cards.length||0)+(oldMe?.mods.length||0)+(oldMe?.second?1:0);if(newCount>oldCount){tone(680,.08,'triangle');haptic(12)}const flip7Player=findNewFlip7(previous,s);if(flip7Player)showSevenBonus(flip7Player);if(previous.phase!=='gameOver'&&s.phase==='gameOver'){if(flip7Player)setTimeout(()=>showWinnerPopup(s),2300);else showWinnerPopup(s)}}else if(s.phase==='gameOver'){setTimeout(()=>showWinnerPopup(s),120)}if(bustedNow)showLocalScreenEffect('bust');else if(frozeNow)showLocalScreenEffect('freeze');lastPhase=s.phase}
+if(previous){const newCount=(me?.cards.length||0)+(me?.mods.length||0)+(me?.second?1:0),oldCount=(oldMe?.cards.length||0)+(oldMe?.mods.length||0)+(oldMe?.second?1:0);if(newCount>oldCount){tone(680,.08,'triangle');haptic(12)}const flip7Player=findNewFlip7(previous,s);if(flip7Player)showSevenBonus(flip7Player);if(previous.phase!=='gameOver'&&s.phase==='gameOver'){if(flip7Player)setTimeout(()=>showWinnerPopup(s),2300);else showWinnerPopup(s)}}else if(s.phase==='gameOver'){setTimeout(()=>showWinnerPopup(s),120)}if(bustedNow){const showBust=()=>{if(state?.players.find(p=>p.id===myId)?.busted)showLocalScreenEffect('bust')};if(s.flipThreeVisual||previous?.flipThreeVisual)setTimeout(showBust,FLIP3_BUST_DELAY_MS);else showBust()}else if(frozeNow)showLocalScreenEffect('freeze');lastPhase=s.phase}
 function showModal(html,mode=''){$('modalBody').innerHTML=html;$('modal').classList.remove('hidden');if(mode==='leave')setTimeout(()=>{const b=$('confirmLeave');if(b)b.onclick=leave},0)}
 function closeModal(){$('modal').classList.add('hidden');$('modal').dataset.mode='';$('closeModal').classList.remove('hidden')}
 $('closeModal').onclick=closeModal;$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()}

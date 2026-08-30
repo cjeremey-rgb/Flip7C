@@ -16,6 +16,9 @@ const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INITIAL_DEAL_MS = 900;
 const FLIP_THREE_GIVER_MS = 1000;
 const FLIP_THREE_STEP_MS = 900;
+// Includes the 3.5-second effect, a one-second clear beat, and the client's
+// worst-case 800ms state-poll offset so the recipient never loses the pause.
+const FLIP_THREE_RECIPIENT_INTRO_MS = 5300;
 const ACTION_CARD_GIVER_MS = 1000;
 const ACTION_CARD_TARGET_MS = 900;
 const COMPUTER_TURN_MIN_MS = 850;
@@ -396,14 +399,14 @@ function scheduleInitialDeal(room, nextOffset) {
   }, INITIAL_DEAL_MS);
 }
 
-function scheduleFlipThree(room, targetId, remaining, queued, after) {
+function scheduleFlipThree(room, targetId, remaining, queued, after, delay = FLIP_THREE_STEP_MS) {
   if (room.flipTimer || room.phase !== 'playing') return;
   room.flow = { type: 'flip3' };
   room.flipTimer = setTimeout(() => {
     room.flipTimer = null;
     continueFlipThree(room, targetId, remaining, queued, after);
     scheduleComputerPlayer(room);
-  }, FLIP_THREE_STEP_MS);
+  }, delay);
 }
 
 function discardActiveFlipThree(room) {
@@ -449,7 +452,14 @@ function beginFlipThree(room, chooser, target, card, resume) {
       room.flipThreeVisual.stage = 'target';
       room.flipThreeVisual.updatedAt = Date.now();
     }
-    scheduleFlipThree(room, target.id, 3, [], resume);
+    scheduleFlipThree(
+      room,
+      target.id,
+      3,
+      [],
+      resume,
+      target.computer ? FLIP_THREE_STEP_MS : FLIP_THREE_RECIPIENT_INTRO_MS
+    );
   }, FLIP_THREE_GIVER_MS);
 }
 
