@@ -218,7 +218,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 .freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 34px 9px rgba(249,253,253,.78),inset 0 0 100px 35px rgba(186,205,211,.42);animation:frostEdgeLife 4s ease-out forwards}
 .shatter-screen-effect{background:radial-gradient(circle at 52% 46%,rgba(255,255,255,.34) 0,rgba(255,255,255,.08) 5%,rgba(0,0,0,.04) 18%,transparent 38%);animation:shatterScreenLife 4s ease-out forwards}
 @keyframes screenEffectLife{0%{opacity:0}3%,84%{opacity:1}100%{opacity:0}}
-@keyframes frostScreenLife{0%{opacity:0;backdrop-filter:blur(0) saturate(1)}18%{opacity:1}72%{opacity:1;backdrop-filter:blur(2.8px) saturate(.72)}100%{opacity:0;backdrop-filter:blur(1px) saturate(.9)}}
-@keyframes frostEdgeLife{0%{opacity:0}12%,78%{opacity:1}100%{opacity:0}}
+@keyframes frostScreenLife{0%{opacity:0;backdrop-filter:blur(0) saturate(1)}8%{opacity:1;backdrop-filter:blur(.8px) saturate(.92)}26%,84%{opacity:1;backdrop-filter:blur(2.8px) saturate(.72)}100%{opacity:0;backdrop-filter:blur(1px) saturate(.9)}}
+@keyframes frostEdgeLife{0%{opacity:0}6%,84%{opacity:1}100%{opacity:0}}
 @keyframes shatterScreenLife{0%{opacity:0;background-color:rgba(255,255,255,.9)}2%{opacity:1;background-color:rgba(255,255,255,.2)}8%,84%{opacity:1;background-color:transparent}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.screen-effect,.freeze-screen-effect,.freeze-screen-effect:after,.shatter-screen-effect{animation-timing-function:linear!important;animation-iteration-count:1!important}}
