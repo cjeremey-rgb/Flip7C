@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-feed-removed-fit-screen';
+const CACHE_NAME='flip-rush-7-v2026-08-30-android-navigation-safe';
 const APP_SHELL = [
   './',
   './index.html',
