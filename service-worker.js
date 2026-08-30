@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-three-second-effects';
+const CACHE_NAME='flip-rush-7-v2026-08-30-flip-three-screen-effect';
 const APP_SHELL = [
   './',
   './index.html',

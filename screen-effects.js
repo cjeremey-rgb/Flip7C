@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const EFFECT_MS = 3000;
+  const EFFECT_MS = 2500;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -438,22 +438,44 @@
     document.body.classList.remove('shatter-impact');
     const effect = document.createElement('div');
     effect.id = 'screenEffect';
-    effect.className = `screen-effect ${type === 'freeze' ? 'freeze-screen-effect' : 'shatter-screen-effect'}`;
+    effect.className = `screen-effect ${type === 'freeze' ? 'freeze-screen-effect' : type === 'flip3' ? 'flip3-screen-effect' : 'shatter-screen-effect'}`;
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
-    const surface = createSurface(effect, type);
     const stamp = document.createElement('div');
-    stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : 'bust-screen-stamp'}`;
-    stamp.textContent = type === 'freeze' ? 'FROZEN' : 'BUST';
+    stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : type === 'flip3' ? 'flip3-screen-stamp' : 'bust-screen-stamp'}`;
+    stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP THREE!' : 'BUST';
     effect.appendChild(stamp);
-    const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
-    const started = performance.now();
-    if (type === 'freeze') startFreeze(effect, surface.context, surface.width, surface.height, random, started);
-    else {
-      void document.body.offsetWidth;
-      document.body.classList.add('shatter-impact');
-      shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
-      startBust(effect, surface.context, surface.width, surface.height, random, started);
+    if (type === 'flip3') {
+      const cards = document.createElement('div');
+      cards.className = 'flip3-screen-cards';
+      for (let number = 1; number <= 3; number++) {
+        const card = document.createElement('div');
+        card.className = `flip3-screen-card flip3-screen-card-${number}`;
+        card.innerHTML = `<small>ACTION</small><strong>${number}</strong><b>FLIP</b>`;
+        cards.appendChild(card);
+      }
+      effect.appendChild(cards);
+      const sparks = document.createElement('div');
+      sparks.className = 'flip3-screen-sparks';
+      for (let index = 0; index < 18; index++) {
+        const spark = document.createElement('i');
+        spark.style.setProperty('--spark-angle', `${index * 20}deg`);
+        spark.style.setProperty('--spark-delay', `${(index % 6) * .035}s`);
+        spark.style.setProperty('--spark-distance', `${42 + (index % 4) * 9}vmin`);
+        sparks.appendChild(spark);
+      }
+      effect.appendChild(sparks);
+    } else {
+      const surface = createSurface(effect, type);
+      const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
+      const started = performance.now();
+      if (type === 'freeze') startFreeze(effect, surface.context, surface.width, surface.height, random, started);
+      else {
+        void document.body.offsetWidth;
+        document.body.classList.add('shatter-impact');
+        shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
+        startBust(effect, surface.context, surface.width, surface.height, random, started);
+      }
     }
     effectTimer = setTimeout(() => {
       cancelAnimationFrame(effectFrame);
