@@ -19,7 +19,7 @@
     const canvas = document.createElement('canvas');
     const width = Math.max(1, effect.clientWidth || innerWidth);
     const height = Math.max(1, effect.clientHeight || innerHeight);
-    const scale = type === 'freeze' ? 2 : Math.min(3, Math.max(2, devicePixelRatio || 1));
+    const scale = type === 'freeze' ? 1.25 : Math.min(3, Math.max(2, devicePixelRatio || 1));
     canvas.width = Math.round(width * scale);
     canvas.height = Math.round(height * scale);
     canvas.style.width = `${width}px`;
@@ -229,19 +229,21 @@
   function startFreeze(effect, context, width, height, random, started) {
     const frost = getFrostAsset(width, height, random);
     const animationStarted = performance.now();
+    let lastMaskIndex = -1;
     const draw = now => {
       const progress = clamp((now - animationStarted) / EFFECT_MS);
       const growth = ease(clamp(progress / .22));
-      const opacity = lifeOpacity(progress);
       const maskIndex = Math.min(frost.maskFrames.length - 1, Math.round(growth * (frost.maskFrames.length - 1)));
-      context.clearRect(0, 0, width, height);
-      context.save();
-      context.globalAlpha = opacity;
-      context.drawImage(frost.composite, 0, 0, width, height);
-      context.globalCompositeOperation = 'destination-in';
-      context.drawImage(frost.maskFrames[maskIndex], 0, 0, width, height);
-      context.restore();
-      if (progress < 1 && effect.isConnected) effectFrame = requestAnimationFrame(draw);
+      if (maskIndex !== lastMaskIndex) {
+        lastMaskIndex = maskIndex;
+        context.clearRect(0, 0, width, height);
+        context.save();
+        context.drawImage(frost.composite, 0, 0, width, height);
+        context.globalCompositeOperation = 'destination-in';
+        context.drawImage(frost.maskFrames[maskIndex], 0, 0, width, height);
+        context.restore();
+      }
+      if (growth < 1 && effect.isConnected) effectFrame = requestAnimationFrame(draw);
     };
     effectFrame = requestAnimationFrame(draw);
   }
