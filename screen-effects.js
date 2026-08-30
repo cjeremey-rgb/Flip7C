@@ -106,12 +106,22 @@
     const maskScale = 6;
     const maskWidth = Math.ceil(width / maskScale), maskHeight = Math.ceil(height / maskScale);
     const activation = new Float32Array(maskWidth * maskHeight);
+    const frostDepth = Math.max(40, Math.min(52, minimum * .12));
     for (let y = 0; y < maskHeight; y++) {
       for (let x = 0; x < maskWidth; x++) {
         const screenX = x * maskScale, screenY = y * maskScale;
-        const distance = Math.min(screenX, width - screenX, screenY, height - screenY);
-        const irregularity = (fractalNoise(screenX * .026, screenY * .026, seed + 211) - .5) * .34;
-        activation[y * maskWidth + x] = clamp(distance / (minimum * .5) + irregularity);
+        const edgeDistances = [screenY, width - screenX, height - screenY, screenX];
+        let side = 0;
+        for (let index = 1; index < edgeDistances.length; index++) if (edgeDistances[index] < edgeDistances[side]) side = index;
+        const distance = edgeDistances[side];
+        const along = side % 2 === 0 ? screenX : screenY;
+        const rollingEdge = (fractalNoise(along * .045, side * 19.7 + 3, seed + 211) - .5) * 15;
+        const chippedEdge = (noiseHash(Math.floor(along / 8), side * 37 + 5, seed + 347) - .5) * 17;
+        const splinterNoise = noiseHash(Math.floor(along / 17), side * 53 + 11, seed + 503);
+        const splinter = splinterNoise > .82 ? (splinterNoise - .82) / .18 * 13 : 0;
+        const localDepth = Math.max(28, frostDepth + rollingEdge + chippedEdge + splinter);
+        const surfaceNoise = (fractalNoise(screenX * .031, screenY * .031, seed + 619) - .5) * .1;
+        activation[y * maskWidth + x] = distance / localDepth + surfaceNoise;
       }
     }
     const maskFrames = [];
@@ -122,7 +132,7 @@
       const maskPixels = maskContext.createImageData(maskWidth, maskHeight);
       const growth = ease(frame / 24);
       for (let index = 0; index < activation.length; index++) {
-        const reveal = ease(clamp((growth * 1.12 - activation[index]) / .12));
+        const reveal = ease(clamp((growth * 1.04 - activation[index]) / .14));
         maskPixels.data[index * 4] = 255;
         maskPixels.data[index * 4 + 1] = 255;
         maskPixels.data[index * 4 + 2] = 255;
@@ -254,6 +264,24 @@
     return points;
   }
 
+  function jaggedBetween(start, end, segments, random, variance) {
+    const points = [start];
+    const dx = end.x - start.x, dy = end.y - start.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const normalX = -dy / length, normalY = dx / length;
+    for (let step = 1; step < segments; step++) {
+      const progress = step / segments;
+      const edgeTaper = Math.sin(progress * Math.PI);
+      const offset = (random() - .5) * variance * edgeTaper;
+      points.push({
+        x: start.x + dx * progress + normalX * offset,
+        y: start.y + dy * progress + normalY * offset
+      });
+    }
+    points.push(end);
+    return points;
+  }
+
   function strokeCracks(context, cracks, fraction, darkWidth, lightWidth, opacity) {
     context.save();
     context.globalAlpha = opacity;
@@ -274,166 +302,155 @@
   }
 
   function startBust(effect, context, width, height, random, started) {
-    const minimum = Math.min(width, height);
-    const center = { x: width * (.45 + random() * .1), y: height * (.36 + random() * .2) };
-    const angles = Array.from({ length: 44 }, (_, index) => Math.PI * 2 * index / 44 + (random() - .5) * .21).sort((a, b) => a - b);
-    const rays = [], branches = [], microCracks = [], ringSegments = [], facets = [], satellites = [], dust = [], crater = [], lcdLines = [];
+    const diagonal = Math.hypot(width, height);
+    const impactAnchors = [
+      [.18, .2], [.78, .27], [.3, .7], [.76, .79], [.52, .46]
+    ];
+    const impactCount = width < 520 ? 4 : 5;
+    const impacts = impactAnchors.slice(0, impactCount).map(([x, y]) => ({
+      x: width * (x + (random() - .5) * .1),
+      y: height * (y + (random() - .5) * .08),
+      radius: 10 + random() * 8,
+      rays: [], rings: []
+    }));
+    const majorCracks = [], detailCracks = [], facets = [], dust = [];
 
-    for (let index = 0; index < angles.length; index++) {
-      const angle = angles[index], edge = edgeDistance(center, angle, width, height);
-      const distance = edge * (index % 6 === 0 ? .92 + random() * .13 : .23 + random() * .68);
-      const points = jaggedLine(center, angle, distance, 11 + Math.floor(random() * 8), random, .105);
-      rays.push({ points, angle, distance });
-      for (let branchIndex = 0; branchIndex < 4 + Math.floor(random() * 4); branchIndex++) {
-        const fromIndex = 2 + Math.floor(random() * (points.length - 4));
-        const start = points[fromIndex];
-        const branchAngle = angle + (random() > .5 ? 1 : -1) * (.22 + random() * .72);
-        branches.push({ points: jaggedLine(start, branchAngle, distance * (.035 + random() * .15), 4 + Math.floor(random() * 3), random, .22), delay: .025 + random() * .14 });
-      }
-    }
-
-    const pointAt = (ray, fraction) => {
-      const position = (ray.points.length - 1) * clamp(fraction), index = Math.floor(position), amount = position - index;
-      const a = ray.points[index], b = ray.points[Math.min(ray.points.length - 1, index + 1)];
+    const pointAt = (points, fraction) => {
+      const position = (points.length - 1) * clamp(fraction), index = Math.floor(position), amount = position - index;
+      const a = points[index], b = points[Math.min(points.length - 1, index + 1)];
       return { x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount };
     };
 
-    const ringFractions = [.035, .055, .08, .115, .16, .22, .3, .4, .53, .68];
-    for (let ringIndex = 0; ringIndex < ringFractions.length; ringIndex++) {
-      for (let index = 0; index < rays.length; index++) {
-        if (random() < .2 + ringIndex * .018) continue;
-        const next = (index + 1) % rays.length;
-        const fraction = ringFractions[ringIndex] * (.86 + random() * .26);
-        const a = pointAt(rays[index], fraction), b = pointAt(rays[next], fraction * (.9 + random() * .2));
-        const middle = { x: (a.x + b.x) / 2 + (random() - .5) * (3 + ringIndex), y: (a.y + b.y) / 2 + (random() - .5) * (3 + ringIndex) };
-        ringSegments.push({ points: [a, middle, b], delay: .045 + ringIndex * .012 + random() * .05 });
+    for (const impact of impacts) {
+      const rayCount = 15 + Math.floor(random() * 4);
+      for (let index = 0; index < rayCount; index++) {
+        const angle = Math.PI * 2 * index / rayCount + (random() - .5) * .24;
+        const edge = edgeDistance(impact, angle, width, height);
+        const distance = edge * (.54 + random() * .5);
+        const points = jaggedLine(impact, angle, distance, 10 + Math.floor(random() * 7), random, .12);
+        impact.rays.push(points);
+        majorCracks.push({ points });
+        for (let branch = 0; branch < 2 + Math.floor(random() * 3); branch++) {
+          const from = 2 + Math.floor(random() * Math.max(1, points.length - 3));
+          const start = points[Math.min(points.length - 2, from)];
+          const branchAngle = angle + (random() > .5 ? 1 : -1) * (.28 + random() * .76);
+          detailCracks.push({ points: jaggedLine(start, branchAngle, distance * (.05 + random() * .14), 4 + Math.floor(random() * 4), random, .26) });
+        }
+      }
+      for (const fraction of [.08, .14, .22, .32]) {
+        for (let index = 0; index < impact.rays.length; index++) {
+          if (random() < .24) continue;
+          const next = (index + 1) % impact.rays.length;
+          const a = pointAt(impact.rays[index], fraction * (.86 + random() * .25));
+          const b = pointAt(impact.rays[next], fraction * (.86 + random() * .25));
+          impact.rings.push({ points: [a, { x: (a.x + b.x) / 2 + (random() - .5) * 6, y: (a.y + b.y) / 2 + (random() - .5) * 6 }, b] });
+        }
+      }
+      for (let index = 0; index < 34; index++) {
+        const angle = random() * Math.PI * 2, radius = Math.pow(random(), 1.65) * 58;
+        const start = { x: impact.x + Math.cos(angle) * radius, y: impact.y + Math.sin(angle) * radius };
+        detailCracks.push({ points: jaggedLine(start, angle + (random() - .5) * 1.1, 8 + random() * 48, 3 + Math.floor(random() * 4), random, .36) });
+      }
+      for (let index = 0; index < 24; index++) {
+        const angle = random() * Math.PI * 2, radius = Math.pow(random(), 1.8) * 54;
+        dust.push({ x: impact.x + Math.cos(angle) * radius, y: impact.y + Math.sin(angle) * radius, radius: .25 + random() * 1.4, alpha: .2 + random() * .62 });
       }
     }
 
-    for (let index = 0; index < rays.length; index++) {
-      const next = (index + 1) % rays.length;
-      for (let band = 0; band < 3; band++) {
-        const inner = .035 + band * .19 + random() * .055, outer = Math.min(.92, inner + .13 + random() * .24);
-        facets.push({ points: [pointAt(rays[index], inner), pointAt(rays[index], outer), pointAt(rays[next], Math.min(.94, outer * (.88 + random() * .16))), pointAt(rays[next], inner * (.9 + random() * .18))], alpha: .008 + random() * .052, shade: random(), shift: random() * 1.8 });
+    const edgePoint = side => {
+      if (side === 0) return { x: random() * width, y: -2 };
+      if (side === 1) return { x: width + 2, y: random() * height };
+      if (side === 2) return { x: random() * width, y: height + 2 };
+      return { x: -2, y: random() * height };
+    };
+    for (let index = 0; index < 22; index++) {
+      const side = index % 4;
+      const start = edgePoint(side), end = edgePoint((side + 2 + (random() > .72 ? 1 : 0)) % 4);
+      const points = jaggedBetween(start, end, 18 + Math.floor(random() * 9), random, 28 + random() * 38);
+      majorCracks.push({ points });
+      for (let branch = 3; branch < points.length - 3; branch += 4 + Math.floor(random() * 3)) {
+        const a = points[branch], angle = Math.atan2(points[branch + 1].y - a.y, points[branch + 1].x - a.x) + (random() > .5 ? 1 : -1) * (.42 + random() * .62);
+        detailCracks.push({ points: jaggedLine(a, angle, 18 + random() * 62, 4 + Math.floor(random() * 4), random, .3) });
       }
     }
 
-    for (let index = 0; index < 168; index++) {
-      const angle = random() * Math.PI * 2, startRadius = Math.pow(random(), 1.8) * 42;
-      const start = { x: center.x + Math.cos(angle) * startRadius, y: center.y + Math.sin(angle) * startRadius };
-      microCracks.push({ points: jaggedLine(start, angle + (random() - .5) * .8, 6 + random() * 62, 3 + Math.floor(random() * 5), random, .38), delay: random() * .1 });
+    const columns = 5, rows = 9, nodes = [];
+    for (let row = 0; row <= rows; row++) {
+      nodes[row] = [];
+      for (let column = 0; column <= columns; column++) {
+        nodes[row][column] = {
+          x: width * column / columns + (column > 0 && column < columns ? (random() - .5) * width / columns * .55 : 0),
+          y: height * row / rows + (row > 0 && row < rows ? (random() - .5) * height / rows * .55 : 0)
+        };
+      }
+    }
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const a = nodes[row][column], b = nodes[row][column + 1], c = nodes[row + 1][column + 1], d = nodes[row + 1][column];
+        if (random() > .5) {
+          facets.push({ points: [a, b, d], alpha: .012 + random() * .035, shade: random() });
+          facets.push({ points: [b, c, d], alpha: .012 + random() * .035, shade: random() });
+          detailCracks.push({ points: jaggedBetween(b, d, 5, random, 8) });
+        } else {
+          facets.push({ points: [a, b, c], alpha: .012 + random() * .035, shade: random() });
+          facets.push({ points: [a, c, d], alpha: .012 + random() * .035, shade: random() });
+          detailCracks.push({ points: jaggedBetween(a, c, 5, random, 8) });
+        }
+      }
     }
 
-    for (let index = 0; index < 2; index++) {
-      const angle = random() * Math.PI * 2, distance = minimum * (.18 + random() * .2);
-      const hit = { x: center.x + Math.cos(angle) * distance, y: center.y + Math.sin(angle) * distance, cracks: [] };
-      for (let ray = 0; ray < 11; ray++) hit.cracks.push({ points: jaggedLine(hit, Math.PI * 2 * ray / 11 + (random() - .5) * .34, 11 + random() * 48, 4, random, .25) });
-      satellites.push(hit);
-    }
+    const layer = document.createElement('canvas');
+    const layerScale = Math.min(2, Math.max(1.35, devicePixelRatio || 1));
+    layer.width = Math.ceil(width * layerScale); layer.height = Math.ceil(height * layerScale);
+    const layerContext = layer.getContext('2d', { alpha: true });
+    layerContext.setTransform(layerScale, 0, 0, layerScale, 0, 0);
+    layerContext.fillStyle = 'rgba(218,230,235,.035)';
+    layerContext.fillRect(0, 0, width, height);
 
-    for (let index = 0; index < 96; index++) {
-      const angle = random() * Math.PI * 2, distance = Math.pow(random(), 1.8) * 68;
-      dust.push({ x: center.x + Math.cos(angle) * distance, y: center.y + Math.sin(angle) * distance, radius: .22 + random() * 1.7, alpha: .22 + random() * .7 });
+    for (const facet of facets) {
+      layerContext.beginPath();
+      facet.points.forEach((point, index) => index ? layerContext.lineTo(point.x, point.y) : layerContext.moveTo(point.x, point.y));
+      layerContext.closePath();
+      const gradient = layerContext.createLinearGradient(facet.points[0].x, facet.points[0].y, facet.points[2].x, facet.points[2].y);
+      gradient.addColorStop(0, `rgba(255,255,255,${facet.alpha})`);
+      gradient.addColorStop(.55, facet.shade > .5 ? `rgba(105,132,146,${facet.alpha * .5})` : `rgba(250,253,254,${facet.alpha * .18})`);
+      gradient.addColorStop(1, `rgba(255,255,255,${facet.alpha * .72})`);
+      layerContext.fillStyle = gradient;
+      layerContext.fill();
     }
-    for (let index = 0; index < 26; index++) {
-      const angle = Math.PI * 2 * index / 26, radius = 6 + random() * 9;
-      crater.push({ x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius });
+    strokeCracks(layerContext, majorCracks, 1, 2.45, .5, 1);
+    strokeCracks(layerContext, detailCracks, 1, 1.15, .27, .94);
+    for (const impact of impacts) {
+      strokeCracks(layerContext, impact.rings, 1, 1.35, .32, .96);
+      const chip = layerContext.createRadialGradient(impact.x, impact.y, 0, impact.x, impact.y, impact.radius * 2.4);
+      chip.addColorStop(0, 'rgba(0,1,2,.96)');
+      chip.addColorStop(.19, 'rgba(12,16,18,.9)');
+      chip.addColorStop(.29, 'rgba(255,255,255,.96)');
+      chip.addColorStop(.43, 'rgba(32,39,43,.78)');
+      chip.addColorStop(.62, 'rgba(255,255,255,.42)');
+      chip.addColorStop(1, 'rgba(255,255,255,0)');
+      layerContext.fillStyle = chip;
+      layerContext.beginPath();
+      layerContext.arc(impact.x, impact.y, impact.radius * 2.4, 0, Math.PI * 2);
+      layerContext.fill();
     }
-    for (const [offset, color] of [[-8, 'rgba(255,35,70,.7)'], [-5, 'rgba(50,215,255,.65)'], [4, 'rgba(110,255,120,.55)'], [9, 'rgba(155,70,255,.55)']]) {
-      lcdLines.push({ x1: center.x + offset, y1: Math.max(0, center.y - 150 - random() * 45), x2: center.x + offset + (random() - .5) * 2, y2: Math.min(height, center.y + 185 + random() * 80), color });
+    for (const particle of dust) {
+      layerContext.fillStyle = `rgba(247,251,252,${particle.alpha})`;
+      layerContext.beginPath(); layerContext.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2); layerContext.fill();
     }
 
     const draw = now => {
       const progress = clamp((now - started) / EFFECT_MS), opacity = lifeOpacity(progress);
-      const mainGrowth = ease(clamp(progress / .075));
-      const detailGrowth = ease(clamp((progress - .018) / .12));
-      const webGrowth = ease(clamp((progress - .035) / .18));
+      const growth = ease(clamp(progress / .085));
       context.clearRect(0, 0, width, height);
       context.save();
-      context.globalAlpha = opacity;
-
-      if (progress < .08) {
-        const flash = context.createRadialGradient(center.x, center.y, 0, center.x, center.y, Math.max(width, height) * .52);
-        flash.addColorStop(0, `rgba(255,255,255,${.78 * (1 - progress / .08)})`);
-        flash.addColorStop(.16, `rgba(255,255,255,${.27 * (1 - progress / .08)})`);
-        flash.addColorStop(1, 'rgba(255,255,255,0)');
-        context.fillStyle = flash;
+      context.globalAlpha = opacity * growth;
+      context.drawImage(layer, 0, 0, width, height);
+      if (progress < .065) {
+        context.globalAlpha = opacity * (1 - progress / .065) * .28;
+        context.fillStyle = '#fff';
         context.fillRect(0, 0, width, height);
       }
-
-      context.save();
-      context.globalAlpha = opacity * mainGrowth * .62;
-      context.translate(center.x, center.y);
-      context.scale(1.5, .72);
-      const lcdBruise = context.createRadialGradient(0, 0, 0, 0, 0, 78);
-      lcdBruise.addColorStop(0, 'rgba(0,0,0,.9)');
-      lcdBruise.addColorStop(.22, 'rgba(5,9,13,.72)');
-      lcdBruise.addColorStop(.43, 'rgba(68,18,85,.23)');
-      lcdBruise.addColorStop(.62, 'rgba(20,105,118,.16)');
-      lcdBruise.addColorStop(1, 'rgba(0,0,0,0)');
-      context.fillStyle = lcdBruise;
-      context.beginPath();
-      context.arc(0, 0, 78, 0, Math.PI * 2);
-      context.fill();
-      context.restore();
-
-      context.save();
-      context.globalAlpha = opacity * mainGrowth * .34;
-      for (const line of lcdLines) {
-        context.strokeStyle = line.color;
-        context.lineWidth = .65;
-        context.beginPath();
-        context.moveTo(line.x1, line.y1);
-        context.lineTo(line.x2, line.y2);
-        context.stroke();
-      }
-      context.restore();
-
-      for (const facet of facets) {
-        context.beginPath();
-        facet.points.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y));
-        context.closePath();
-        const gradient = context.createLinearGradient(facet.points[0].x, facet.points[0].y, facet.points[2].x, facet.points[2].y);
-        gradient.addColorStop(0, `rgba(255,255,255,${facet.alpha * webGrowth})`);
-        gradient.addColorStop(.5, facet.shade > .5 ? `rgba(125,151,162,${facet.alpha * .45 * webGrowth})` : `rgba(248,252,253,${facet.alpha * .15 * webGrowth})`);
-        gradient.addColorStop(1, `rgba(255,255,255,${facet.alpha * .75 * webGrowth})`);
-        context.fillStyle = gradient;
-        context.fill();
-      }
-
-      strokeCracks(context, rays, mainGrowth, 3.05, .56, opacity);
-      const visibleBranches = branches.map(branch => ({ points: branch.points, fraction: clamp((detailGrowth - branch.delay) / (1 - branch.delay)) }));
-      context.strokeStyle = 'rgba(0,2,3,.82)'; context.lineWidth = 1.7; context.shadowBlur = 0;
-      for (const branch of visibleBranches) drawPath(context, branch.points, branch.fraction);
-      context.strokeStyle = 'rgba(255,255,255,.9)'; context.lineWidth = .38;
-      for (const branch of visibleBranches) drawPath(context, branch.points, branch.fraction);
-
-      const visibleMicro = microCracks.map(crack => ({ points: crack.points, fraction: clamp((detailGrowth - crack.delay) / (1 - crack.delay)) }));
-      context.strokeStyle = 'rgba(0,2,3,.72)'; context.lineWidth = 1.05;
-      for (const crack of visibleMicro) drawPath(context, crack.points, crack.fraction);
-      context.strokeStyle = 'rgba(255,255,255,.8)'; context.lineWidth = .28;
-      for (const crack of visibleMicro) drawPath(context, crack.points, crack.fraction);
-
-      for (const segment of ringSegments) {
-        const local = clamp((webGrowth - segment.delay) / (1 - segment.delay));
-        context.strokeStyle = 'rgba(0,2,3,.76)'; context.lineWidth = 1.45; drawPath(context, segment.points, local);
-        context.strokeStyle = 'rgba(255,255,255,.84)'; context.lineWidth = .32; drawPath(context, segment.points, local);
-      }
-
-      for (const hit of satellites) {
-        strokeCracks(context, hit.cracks, webGrowth, 1.75, .35, opacity);
-        const chip = context.createRadialGradient(hit.x, hit.y, 0, hit.x, hit.y, 9);
-        chip.addColorStop(0, 'rgba(0,2,3,.9)'); chip.addColorStop(.25, 'rgba(255,255,255,.92)'); chip.addColorStop(.47, 'rgba(30,35,38,.7)'); chip.addColorStop(1, 'rgba(255,255,255,0)');
-        context.fillStyle = chip; context.beginPath(); context.arc(hit.x, hit.y, 9 * webGrowth, 0, Math.PI * 2); context.fill();
-      }
-
-      context.globalAlpha = opacity * mainGrowth;
-      for (const particle of dust) { context.fillStyle = `rgba(245,249,250,${particle.alpha})`; context.beginPath(); context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2); context.fill(); }
-      context.beginPath(); crater.forEach((point, index) => index ? context.lineTo(point.x, point.y) : context.moveTo(point.x, point.y)); context.closePath();
-      context.fillStyle = 'rgba(0,1,2,.94)'; context.fill(); context.lineWidth = 1.25; context.strokeStyle = 'rgba(255,255,255,.96)'; context.stroke();
-      const impact = context.createRadialGradient(center.x, center.y, 0, center.x, center.y, 36);
-      impact.addColorStop(0, 'rgba(0,0,0,.98)'); impact.addColorStop(.16, 'rgba(8,10,12,.94)'); impact.addColorStop(.25, 'rgba(255,255,255,.98)'); impact.addColorStop(.35, 'rgba(21,27,30,.86)'); impact.addColorStop(.5, 'rgba(255,255,255,.55)'); impact.addColorStop(1, 'rgba(255,255,255,0)');
-      context.fillStyle = impact; context.beginPath(); context.arc(center.x, center.y, 36 * mainGrowth, 0, Math.PI * 2); context.fill();
       context.restore();
       if (progress < 1 && effect.isConnected) effectFrame = requestAnimationFrame(draw);
     };

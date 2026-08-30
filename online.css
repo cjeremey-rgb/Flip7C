@@ -227,8 +227,8 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 /* Two-second, device-resolution frost and shattered-glass effects. */
 .screen-effect{position:fixed;z-index:500;inset:0;overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2s linear forwards}
 .screen-effect canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.freeze-screen-effect{background:rgba(236,243,245,.025);animation:frostScreenLife 2s linear forwards}
-.freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 20px 5px rgba(249,253,253,.72),inset 0 0 74px 22px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}
+.freeze-screen-effect{background:transparent;animation:frostScreenLife 2s linear forwards}
+.freeze-screen-effect:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 14px 4px rgba(249,253,253,.72),inset 0 0 24px 8px rgba(183,197,200,.34);animation:frostEdgeLife 2s ease-out forwards}
 .shatter-screen-effect{background:transparent;animation:shatterScreenLife 2s ease-out forwards}
 @keyframes screenEffectLife{0%{opacity:0}3%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostScreenLife{0%{opacity:0}8%,84%{opacity:1}100%{opacity:0}}
