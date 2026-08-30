@@ -6,7 +6,8 @@ const voicePeers=new Map();
 const seenReactions=new Set(),seenPhrases=new Set();
 const ACTION_REVEAL_MS=1000,SECOND_CHANCE_REVEAL_MS=1000,secondChanceVisuals=new Map();
 let pendingActionRevealKey='',pendingActionRevealStarted=0,pendingActionRevealTimer=null;
-let screenEffectTimer=null;
+const SCREEN_EFFECT_MS=4000;
+let screenEffectTimer=null,screenEffectFrame=0;
 const QUICK_PHRASES=['Nice Job!',"You're almost there!",'So Close!','You suck!','Oh Man!'];
 const BECCA_PHRASE="You're a peckerhead!";
 const newDeviceId=()=>globalThis.crypto?.randomUUID?.()||`device-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -19,12 +20,75 @@ $('name').value=localStorage.fr7name||'';
 if(invitedRoom){$('roomCode').value=invitedRoom;if(room&&room!==invitedRoom){room='';myId='';localStorage.removeItem('fr7room');localStorage.removeItem('fr7pid')}}
 function haptic(ms=18){if(navigator.vibrate)navigator.vibrate(ms)}
 function tone(freq=440,duration=.08,type='sine',gain=.05){if(!soundOn)return;try{const C=window.AudioContext||window.webkitAudioContext,a=new C(),o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.value=gain;o.connect(g);g.connect(a.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,a.currentTime+duration);o.stop(a.currentTime+duration)}catch{}}
+function effectRandom(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
+function effectEase(value){value=Math.max(0,Math.min(1,value));return value*value*(3-2*value)}
+function effectOpacity(progress){return Math.max(0,Math.min(1,progress<.045?progress/.045:progress>.84?(1-progress)/.16:1))}
+function createEffectCanvas(effect){
+ const canvas=document.createElement('canvas'),width=Math.max(1,innerWidth),height=Math.max(1,innerHeight),scale=Math.min(3,Math.max(2,devicePixelRatio||1));
+ canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);canvas.style.width=width+'px';canvas.style.height=height+'px';effect.appendChild(canvas);
+ const context=canvas.getContext('2d',{alpha:true});context.setTransform(scale,0,0,scale,0,0);return{canvas,context,width,height};
+}
+function drawEffectPath(context,points,fraction){
+ if(!points.length||fraction<=0)return;const last=(points.length-1)*Math.min(1,fraction),whole=Math.floor(last);context.beginPath();context.moveTo(points[0].x,points[0].y);
+ for(let index=1;index<=whole;index++)context.lineTo(points[index].x,points[index].y);
+ if(whole<points.length-1){const amount=last-whole,a=points[whole],b=points[whole+1];context.lineTo(a.x+(b.x-a.x)*amount,a.y+(b.y-a.y)*amount)}context.stroke();
+}
+function startFrostCanvas(effect,context,width,height,random,startTime){
+ const crystals=[],specks=[],minimum=Math.min(width,height);
+ for(let index=0;index<148;index++){
+  const side=index%4,across=random(),start=side===0?{x:across*width,y:-2}:side===1?{x:width+2,y:across*height}:side===2?{x:across*width,y:height+2}:{x:-2,y:across*height};
+  const angle=(side===0?Math.PI/2:side===1?Math.PI:side===2?-Math.PI/2:0)+(random()-.5)*.42,length=(side%2===0?height:width)*(.28+random()*.34),segments=8+Math.floor(random()*6),phase=random()*Math.PI*2,points=[start],branches=[];
+  for(let step=1;step<=segments;step++){
+   const distance=length*step/segments,wobble=Math.sin(step*1.67+phase)*(1.3+distance*.011),point={x:start.x+Math.cos(angle)*distance+Math.cos(angle+Math.PI/2)*wobble,y:start.y+Math.sin(angle)*distance+Math.sin(angle+Math.PI/2)*wobble};points.push(point);
+   if(step>1&&step<segments&&step%2===1){for(const direction of [-1,1]){const branchLength=length*(.055+random()*.07),branchAngle=angle+direction*(.62+random()*.32),tip={x:point.x+Math.cos(branchAngle)*branchLength,y:point.y+Math.sin(branchAngle)*branchLength},twigAngle=branchAngle+direction*(.45+random()*.24);branches.push({at:step/segments,points:[point,tip,{x:tip.x+Math.cos(twigAngle)*branchLength*.36,y:tip.y+Math.sin(twigAngle)*branchLength*.36}]})}}
+  }
+  crystals.push({points,branches,delay:random()*.34,width:.48+random()*.85});
+ }
+ for(let index=0;index<560;index++){const x=random()*width,y=random()*height,distance=Math.min(x,width-x,y,height-y);specks.push({x,y,distance,radius:.45+random()*2.2,alpha:.16+random()*.42,rotation:random()*Math.PI})}
+ const draw=now=>{
+  const progress=Math.min(1,(now-startTime)/SCREEN_EFFECT_MS),grow=effectEase(Math.min(1,progress/.70)),opacity=effectOpacity(progress),reachX=width*.56*grow,reachY=height*.56*grow;
+  context.clearRect(0,0,width,height);context.save();context.globalAlpha=opacity;
+  const frostBand=(x0,y0,x1,y1,x,y,w,h)=>{const gradient=context.createLinearGradient(x0,y0,x1,y1);gradient.addColorStop(0,'rgba(250,253,253,.94)');gradient.addColorStop(.18,'rgba(224,233,235,.78)');gradient.addColorStop(.55,'rgba(193,207,211,.42)');gradient.addColorStop(1,'rgba(238,243,244,0)');context.fillStyle=gradient;context.fillRect(x,y,w,h)};
+  if(reachY>1){frostBand(0,0,0,reachY,0,0,width,reachY);frostBand(0,height,0,height-reachY,0,height-reachY,width,reachY)}
+  if(reachX>1){frostBand(0,0,reachX,0,0,0,reachX,height);frostBand(width,0,width-reachX,0,width-reachX,0,reachX,height)}
+  context.fillStyle='rgba(235,241,242,'+(.075*grow)+')';context.fillRect(0,0,width,height);
+  context.globalCompositeOperation='screen';
+  for(const speck of specks){const activation=speck.distance/(minimum*.5);if(grow<activation)continue;const local=Math.min(1,(grow-activation)/.18);context.globalAlpha=opacity*speck.alpha*local;context.beginPath();context.ellipse(speck.x,speck.y,speck.radius*(1+local*.7),speck.radius*.55,speck.rotation,0,Math.PI*2);context.fillStyle='rgba(250,252,252,.92)';context.fill()}
+  context.lineCap='round';context.lineJoin='round';context.shadowColor='rgba(255,255,255,.72)';context.shadowBlur=2.5;
+  for(const crystal of crystals){const local=Math.max(0,Math.min(1,(grow-crystal.delay)/(1-crystal.delay)));if(!local)continue;context.globalAlpha=opacity*(.5+local*.42);context.strokeStyle='rgba(247,251,251,.92)';context.lineWidth=crystal.width;drawEffectPath(context,crystal.points,local);context.lineWidth=Math.max(.35,crystal.width*.62);for(const branch of crystal.branches)drawEffectPath(context,branch.points,Math.max(0,Math.min(1,(local-branch.at)/(1-branch.at))))}
+  context.restore();effect.style.filter='grayscale('+(grow*.18)+')';if(progress<1&&effect.isConnected)screenEffectFrame=requestAnimationFrame(draw);
+ };screenEffectFrame=requestAnimationFrame(draw);
+}
+function startShatterCanvas(effect,context,width,height,random,startTime){
+ const center={x:width*(.47+random()*.08),y:height*(.39+random()*.14)},rayCount=26,rays=[],branches=[],rings=[],shards=[];
+ for(let index=0;index<rayCount;index++){
+  const angle=Math.PI*2*index/rayCount+(random()-.5)*.16,dx=Math.cos(angle),dy=Math.sin(angle),edgeX=dx>0?(width-center.x)/dx:-center.x/dx,edgeY=dy>0?(height-center.y)/dy:-center.y/dy,distance=Math.min(Math.abs(edgeX),Math.abs(edgeY))*1.08,segments=9+Math.floor(random()*5),points=[center];
+  for(let step=1;step<=segments;step++){const along=distance*step/segments,bend=(random()-.5)*(2.5+along*.018);points.push({x:center.x+dx*along-dy*bend,y:center.y+dy*along+dx*bend})}
+  rays.push({angle,points});
+  for(let branchIndex=0;branchIndex<2+Math.floor(random()*3);branchIndex++){const fromIndex=2+Math.floor(random()*(segments-3)),from=points[fromIndex],branchAngle=angle+(random()>.5?1:-1)*(.28+random()*.48),length=distance*(.07+random()*.18),branchPoints=[from];for(let step=1;step<=4;step++){const along=length*step/4,jitter=(random()-.5)*4;branchPoints.push({x:from.x+Math.cos(branchAngle)*along-Math.sin(branchAngle)*jitter,y:from.y+Math.sin(branchAngle)*along+Math.cos(branchAngle)*jitter})}branches.push({points:branchPoints,delay:.06+random()*.16})}
+ }
+ const pointAt=(ray,fraction)=>{const position=(ray.points.length-1)*fraction,index=Math.floor(position),amount=position-index,a=ray.points[index],b=ray.points[Math.min(ray.points.length-1,index+1)];return{x:a.x+(b.x-a.x)*amount,y:a.y+(b.y-a.y)*amount}};
+ for(const fraction of [.09,.16,.25,.37,.52,.7])rings.push(rays.map(ray=>pointAt(ray,Math.min(.94,fraction*(.9+random()*.2)))));
+ for(let index=0;index<rayCount;index++){const next=(index+1)%rayCount,inner=.12+random()*.18,outer=.5+random()*.4;shards.push({points:[pointAt(rays[index],inner),pointAt(rays[index],outer),pointAt(rays[next],Math.min(.94,outer*(.86+random()*.18))),pointAt(rays[next],inner)],alpha:.012+random()*.04,shift:1+random()*3})}
+ const strokePaths=(paths,fraction,darkWidth,lightWidth)=>{context.strokeStyle='rgba(4,8,10,.72)';context.lineWidth=darkWidth;context.shadowBlur=0;for(const path of paths)drawEffectPath(context,path.points||path,fraction);context.strokeStyle='rgba(252,253,253,.96)';context.lineWidth=lightWidth;context.shadowColor='rgba(255,255,255,.75)';context.shadowBlur=2;for(const path of paths)drawEffectPath(context,path.points||path,fraction)};
+ const draw=now=>{
+  const progress=Math.min(1,(now-startTime)/SCREEN_EFFECT_MS),opacity=effectOpacity(progress),mainGrow=effectEase(Math.min(1,progress/.19)),branchGrow=effectEase(Math.max(0,Math.min(1,(progress-.055)/.25))),webGrow=effectEase(Math.max(0,Math.min(1,(progress-.09)/.25)));
+  context.clearRect(0,0,width,height);context.save();context.globalAlpha=opacity;
+  if(progress<.12){const flash=context.createRadialGradient(center.x,center.y,0,center.x,center.y,Math.max(width,height)*.42);flash.addColorStop(0,'rgba(255,255,255,'+(.5*(1-progress/.12))+')');flash.addColorStop(.18,'rgba(255,255,255,'+(.16*(1-progress/.12))+')');flash.addColorStop(1,'rgba(255,255,255,0)');context.fillStyle=flash;context.fillRect(0,0,width,height)}
+  const shift=progress>.16?Math.min(1,(progress-.16)/.18):0;for(const shard of shards){context.beginPath();shard.points.forEach((point,index)=>{const dx=point.x-center.x,dy=point.y-center.y,length=Math.hypot(dx,dy)||1,x=point.x+dx/length*shard.shift*shift,y=point.y+dy/length*shard.shift*shift;index?context.lineTo(x,y):context.moveTo(x,y)});context.closePath();context.fillStyle='rgba(242,247,248,'+(shard.alpha*webGrow)+')';context.fill()}
+  context.lineCap='round';context.lineJoin='round';strokePaths(rays,mainGrow,2.35,.72);
+  const visibleBranches=branches.map(branch=>({points:branch.points,fraction:Math.max(0,Math.min(1,(branchGrow-branch.delay)/(1-branch.delay)))}));context.strokeStyle='rgba(6,9,11,.68)';context.lineWidth=1.65;context.shadowBlur=0;for(const branch of visibleBranches)drawEffectPath(context,branch.points,branch.fraction);context.strokeStyle='rgba(250,252,252,.88)';context.lineWidth=.48;context.shadowColor='rgba(255,255,255,.65)';context.shadowBlur=1.5;for(const branch of visibleBranches)drawEffectPath(context,branch.points,branch.fraction);
+  context.shadowBlur=0;context.lineWidth=1.35;context.strokeStyle='rgba(7,10,12,.6)';for(let ringIndex=0;ringIndex<rings.length;ringIndex++){const ring=rings[ringIndex],fraction=Math.max(0,Math.min(1,webGrow*1.25-ringIndex*.07));context.beginPath();for(let index=0;index<=ring.length;index++){const point=ring[index%ring.length];if(index===0||(index+ringIndex)%8===0)context.moveTo(point.x,point.y);else context.lineTo(point.x,point.y)}context.globalAlpha=opacity*fraction;context.stroke()}context.lineWidth=.42;context.strokeStyle='rgba(255,255,255,.9)';for(let ringIndex=0;ringIndex<rings.length;ringIndex++){const ring=rings[ringIndex],fraction=Math.max(0,Math.min(1,webGrow*1.25-ringIndex*.07));context.beginPath();for(let index=0;index<=ring.length;index++){const point=ring[index%ring.length];if(index===0||(index+ringIndex)%8===0)context.moveTo(point.x,point.y);else context.lineTo(point.x,point.y)}context.globalAlpha=opacity*fraction;context.stroke()}
+  context.globalAlpha=opacity;const impact=context.createRadialGradient(center.x,center.y,0,center.x,center.y,23);impact.addColorStop(0,'rgba(0,0,0,.92)');impact.addColorStop(.12,'rgba(255,255,255,.98)');impact.addColorStop(.22,'rgba(25,28,30,.78)');impact.addColorStop(.42,'rgba(255,255,255,.55)');impact.addColorStop(1,'rgba(255,255,255,0)');context.fillStyle=impact;context.beginPath();context.arc(center.x,center.y,23*Math.min(1,mainGrow*1.5),0,Math.PI*2);context.fill();context.restore();
+  if(progress<1&&effect.isConnected)screenEffectFrame=requestAnimationFrame(draw);
+ };screenEffectFrame=requestAnimationFrame(draw);
+}
 function showLocalScreenEffect(type){
- clearTimeout(screenEffectTimer);$('screenEffect')?.remove();
- const effect=document.createElement('div');effect.id='screenEffect';effect.className=`screen-effect ${type==='freeze'?'freeze-screen-effect':'shatter-screen-effect'}`;effect.setAttribute('aria-hidden','true');
- if(type==='freeze')effect.innerHTML='<i class="ice-edge top"></i><i class="ice-edge right"></i><i class="ice-edge bottom"></i><i class="ice-edge left"></i>';
- else effect.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g><polygon points="52,47 69,17 61,48 86,35 55,51 79,73 53,54 62,94 49,55 33,86 46,53 8,66 44,49 18,23 48,46"/><polygon points="52,47 69,17 61,48"/><polygon points="55,51 86,35 79,73"/><polygon points="49,55 62,94 33,86"/><polygon points="44,49 8,66 18,23"/><path pathLength="100" d="M52 47L69 17 73 2M52 47L61 48 86 35 97 29M55 51L79 73 96 82M53 54L62 94 64 100M49 55L33 86 24 100M46 53L8 66 0 72M44 49L18 23 3 13M48 46L39 17 34 0"/><path pathLength="100" d="M52 47L57 34 52 24 58 11M61 48L71 42 75 48 91 44M55 51L67 58 64 67 82 83M53 54L54 70 48 78 52 99M49 55L40 67 41 76 29 91M46 53L31 57 24 52 4 59M44 49L33 39 35 31 15 17M48 46L47 33 40 27 42 6"/><path pathLength="100" d="M52 47L45 43 38 45 28 38M52 47L58 52 69 51 78 58M52 47L50 39 54 31M52 47L47 57 49 68 43 76"/></g></svg>`;
- document.body.appendChild(effect);screenEffectTimer=setTimeout(()=>{effect.remove();if($('screenEffect')===effect)screenEffectTimer=null},2000);
+ clearTimeout(screenEffectTimer);cancelAnimationFrame(screenEffectFrame);$('screenEffect')?.remove();
+ const effect=document.createElement('div');effect.id='screenEffect';effect.className='screen-effect '+(type==='freeze'?'freeze-screen-effect':'shatter-screen-effect');effect.setAttribute('aria-hidden','true');document.body.appendChild(effect);
+ const surface=createEffectCanvas(effect),random=effectRandom((Date.now()^(surface.width<<8)^surface.height)>>>0),started=performance.now();
+ if(type==='freeze')startFrostCanvas(effect,surface.context,surface.width,surface.height,random,started);else startShatterCanvas(effect,surface.context,surface.width,surface.height,random,started);
+ screenEffectTimer=setTimeout(()=>{cancelAnimationFrame(screenEffectFrame);if(effect.isConnected)effect.remove();screenEffectTimer=null},SCREEN_EFFECT_MS);
 }
 function voiceSupported(){return Boolean(navigator.mediaDevices?.getUserMedia&&window.RTCPeerConnection)}
 function updateMicButton(){const b=$('micBtn');if(!b)return;b.classList.toggle('voice-on',voiceOn);b.classList.toggle('voice-speaking',voiceOn&&voiceSpeaking);b.setAttribute('aria-label',voiceOn?'Mute microphone':'Turn microphone on');b.title=voiceOn?(voiceSpeaking?'Microphone on — you are speaking':'Microphone on — tap to mute'):'Microphone off';if(!voiceSupported()){b.disabled=true;b.title='Voice chat is not supported on this device'}}
