@@ -180,6 +180,14 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .action-transfer-card.discarding{opacity:.25;transform:rotate(16deg) scale(.62)!important;animation:none!important}
 @keyframes actionCardAttention{from{filter:brightness(1)}to{filter:brightness(1.18)}}
 @keyframes flipThreeAttention{from{filter:brightness(1);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 20px #a66dff77}to{filter:brightness(1.18);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 38px #c28cffcc}}
+.invite-actions{display:grid;gap:9px;margin-top:14px}
+.invite-actions button{width:100%;padding:13px 16px}
+.past-player-list{display:grid;gap:9px;margin:14px 0}
+.past-player{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid #2f506c;border-radius:15px;background:#0b1b2a}
+.past-player span{min-width:0;color:#fff;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.past-player button{flex:none;border-radius:12px;background:linear-gradient(180deg,#ffe65e,#ffc928);color:#111c25;padding:9px 13px;font-size:10px;font-weight:900;box-shadow:0 4px 0 #9b7714}
+.past-player button:disabled{opacity:.65;box-shadow:none;transform:translateY(3px)}
+.invite-note{padding:12px;border-radius:14px;background:#07111d;color:#a8bbca;font-size:12px;line-height:1.45}
 
 
 /* Multiplayer voice chat - additive controls only; current game layout remains unchanged. */

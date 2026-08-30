@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import webpush from 'web-push';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,99 @@ const ACTION_CARD_TARGET_MS = 900;
 const COMPUTER_TURN_MIN_MS = 850;
 const COMPUTER_TURN_JITTER_MS = 650;
 const COMPUTER_ACTION_MS = 1100;
+const PUSH_DATA_FILE = process.env.PUSH_DATA_FILE || path.join(process.env.TMPDIR || '/tmp', 'flip-rush-7-push-data.json');
+const PUSH_DEVICE_MAX_AGE = 180 * 24 * 60 * 60 * 1000;
+const pushInviteTimes = new Map();
+
+function readPushStore() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(PUSH_DATA_FILE, 'utf8'));
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch { return {}; }
+}
+
+const pushStore = readPushStore();
+const configuredVapid = process.env.PUSH_VAPID_PUBLIC_KEY && process.env.PUSH_VAPID_PRIVATE_KEY ? {
+  publicKey: process.env.PUSH_VAPID_PUBLIC_KEY,
+  privateKey: process.env.PUSH_VAPID_PRIVATE_KEY
+} : null;
+const vapidKeys = configuredVapid || pushStore.vapidKeys || webpush.generateVAPIDKeys();
+const pushDevices = new Map(Object.entries(pushStore.devices || {}).filter(([, device]) => (
+  device?.subscription?.endpoint && Date.now() - Number(device.updatedAt || 0) < PUSH_DEVICE_MAX_AGE
+)));
+const pushContacts = new Map(Object.entries(pushStore.contacts || {}).map(([deviceId, contacts]) => (
+  [deviceId, new Set(Array.isArray(contacts) ? contacts.map(cleanDeviceId).filter(Boolean) : [])]
+)));
+webpush.setVapidDetails('mailto:fliprush7@example.com', vapidKeys.publicKey, vapidKeys.privateKey);
+
+function savePushStore() {
+  try {
+    fs.mkdirSync(path.dirname(PUSH_DATA_FILE), { recursive: true });
+    const tempFile = `${PUSH_DATA_FILE}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify({
+      vapidKeys,
+      devices: Object.fromEntries(pushDevices),
+      contacts: Object.fromEntries([...pushContacts].map(([deviceId, contacts]) => [deviceId, [...contacts]]))
+    }));
+    fs.renameSync(tempFile, PUSH_DATA_FILE);
+  } catch (error) {
+    console.warn('Could not persist push notification registrations:', error.message);
+  }
+}
+savePushStore();
+
+function cleanDeviceId(value) {
+  const id = String(value || '').trim();
+  return /^[A-Za-z0-9-]{8,80}$/.test(id) ? id : '';
+}
+
+function validPushSubscription(subscription) {
+  return subscription && typeof subscription === 'object' &&
+    typeof subscription.endpoint === 'string' && subscription.endpoint.startsWith('https://') &&
+    subscription.endpoint.length < 4096 && typeof subscription.keys?.p256dh === 'string' &&
+    typeof subscription.keys?.auth === 'string' && JSON.stringify(subscription).length < 16000;
+}
+
+function rememberPlayerContacts(room, joined) {
+  if (!joined?.deviceId) return;
+  for (const player of room.players) {
+    if (!player.deviceId || player.deviceId === joined.deviceId || player.computer) continue;
+    if (!pushContacts.has(joined.deviceId)) pushContacts.set(joined.deviceId, new Set());
+    if (!pushContacts.has(player.deviceId)) pushContacts.set(player.deviceId, new Set());
+    pushContacts.get(joined.deviceId).add(player.deviceId);
+    pushContacts.get(player.deviceId).add(joined.deviceId);
+  }
+  savePushStore();
+}
+
+async function sendPushInvite(room, sender, targetDeviceId) {
+  if (room.players.some(player => player.deviceId === targetDeviceId)) throw new Error('That player is already in this room.');
+  if (!sender.deviceId || !pushContacts.get(sender.deviceId)?.has(targetDeviceId)) throw new Error('You can only notify people you have previously played with.');
+  const target = pushDevices.get(targetDeviceId);
+  if (!target?.subscription) throw new Error('That player has not enabled notifications on their phone yet.');
+  const throttleKey = `${sender.deviceId || sender.id}:${targetDeviceId}`;
+  if (Date.now() - (pushInviteTimes.get(throttleKey) || 0) < 30000) throw new Error('Please wait a moment before inviting that player again.');
+  const url = `/online.html?room=${encodeURIComponent(room.code)}&invite=1`;
+  try {
+    await webpush.sendNotification(target.subscription, JSON.stringify({
+      title: `${sender.name} wants to play!`,
+      body: `Tap to join Flip Rush 7 room ${room.code}.`,
+      url,
+      tag: `flip-rush-7-${room.code}`
+    }), { TTL: 60 * 60, urgency: 'high' });
+    pushInviteTimes.set(throttleKey, Date.now());
+    target.updatedAt = Date.now();
+    pushDevices.set(targetDeviceId, target);
+    savePushStore();
+  } catch (error) {
+    if (error?.statusCode === 404 || error?.statusCode === 410) {
+      pushDevices.delete(targetDeviceId);
+      savePushStore();
+      throw new Error('That player needs to enable notifications again before you can invite them.');
+    }
+    throw new Error('The notification could not be delivered. Try the text/share invitation instead.');
+  }
+}
 
 const send = (res, code, obj, type = 'application/json') => {
   res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store' });
@@ -54,12 +148,12 @@ function makeDeck() {
   return shuffle(deck);
 }
 
-function makePlayer(id, name) {
+function makePlayer(id, name, deviceId = '') {
   return {
     id, name: String(name || 'Player').slice(0, 18), score: 0,
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
     second: false, roundScore: 0, lastSeen: Date.now(),
-    voiceEnabled: false, voiceSpeaking: false
+    voiceEnabled: false, voiceSpeaking: false, deviceId: cleanDeviceId(deviceId)
   };
 }
 
@@ -769,7 +863,10 @@ function publicState(room) {
       updatedAt: room.actionCardVisual.updatedAt
     } : null,
     pendingAction: pending,
-    players: room.players.map(player => ({ ...player, connected: player.computer || Date.now() - player.lastSeen < 12000 })),
+    players: room.players.map(player => {
+      const { deviceId, ...visible } = player;
+      return { ...visible, inviteId: deviceId || null, connected: player.computer || Date.now() - player.lastSeen < 12000 };
+    }),
     reactions: room.reactions,
     phrases: room.phrases,
     log: room.log.slice(-18), winner: room.winner
@@ -784,12 +881,32 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/health') return send(res, 200, { ok: true, service: 'flip-rush-7' });
   if (url.pathname.startsWith('/api/')) {
     const body = req.method === 'POST' ? await parse(req) : {};
+    if (url.pathname === '/api/push/public-key') {
+      return send(res, 200, { ok: true, publicKey: vapidKeys.publicKey });
+    }
+    if (url.pathname === '/api/push/subscribe') {
+      const deviceId = cleanDeviceId(body.deviceId);
+      if (!deviceId || !validPushSubscription(body.subscription)) return apiError(res, 'Invalid notification registration.');
+      pushDevices.set(deviceId, {
+        name: String(body.name || 'Player').trim().slice(0, 18) || 'Player',
+        subscription: body.subscription,
+        updatedAt: Date.now()
+      });
+      savePushStore();
+      return send(res, 200, { ok: true });
+    }
+    if (url.pathname === '/api/push/unsubscribe') {
+      const deviceId = cleanDeviceId(body.deviceId);
+      if (deviceId) pushDevices.delete(deviceId);
+      savePushStore();
+      return send(res, 200, { ok: true });
+    }
     if (url.pathname === '/api/create') {
       let code = roomCode(); while (rooms.has(code)) code = roomCode();
       const playerId = uid();
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
-        players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
+        players: [makePlayer(playerId, body.name || 'Host', body.deviceId)], deck: makeDeck(), discard: [],
         heldSecondCards: new Map(), pendingAction: null, flow: null, flipThreeVisual: null, actionCardVisual: null,
         reactions: [], phrases: [], voiceSignals: new Map(),
         log: ['Room created.'], winner: null
@@ -804,8 +921,9 @@ const server = http.createServer(async (req, res) => {
       if (room.phase !== 'lobby') return apiError(res, 'Game already started.');
       if (room.players.length >= 9) return apiError(res, 'This room is full. Flip 7 supports up to 9 players.');
       const playerId = uid();
-      const joined = makePlayer(playerId, body.name);
+      const joined = makePlayer(playerId, body.name, body.deviceId);
       room.players.push(joined);
+      rememberPlayerContacts(room, joined);
       room.log.push(`${joined.name} joined.`);
       return send(res, 200, { ok: true, room: code, playerId, state: publicState(room) });
     }
@@ -818,6 +936,18 @@ const server = http.createServer(async (req, res) => {
     if (player) player.lastSeen = Date.now();
     if (url.pathname === '/api/state') return send(res, 200, { ok: true, state: publicState(room) });
     if (!player) return apiError(res, 'Player not found.', 403);
+
+    if (url.pathname === '/api/push/invite') {
+      if (room.phase !== 'lobby') return apiError(res, 'Invitations can only be sent before the game starts.');
+      const targetDeviceId = cleanDeviceId(body.targetDeviceId);
+      if (!targetDeviceId) return apiError(res, 'That past player is not available.');
+      try {
+        await sendPushInvite(room, player, targetDeviceId);
+        return send(res, 200, { ok: true, delivered: true });
+      } catch (error) {
+        return apiError(res, error.message);
+      }
+    }
 
     if (url.pathname === '/api/voice-signals') {
       const queued = room.voiceSignals.get(playerId) || [];
