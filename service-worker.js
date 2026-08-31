@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-30-flip3-paced-sequence';
+const CACHE_NAME='flip-rush-7-v2026-08-31-expanded-reactions';
 const APP_SHELL = [
   './',
   './index.html',
@@ -27,34 +27,6 @@ self.addEventListener('activate', event => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
     await self.clients.claim();
-  })());
-});
-
-self.addEventListener('push', event => {
-  let data = {};
-  try { data = event.data?.json() || {}; } catch { data = { body: event.data?.text() || '' }; }
-  const title = data.title || 'Flip Rush 7 invitation';
-  const url = new URL(data.url || './online.html', self.location.origin).href;
-  event.waitUntil(self.registration.showNotification(title, {
-    body: data.body || 'A player invited you to join a game.',
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    tag: data.tag || 'flip-rush-7-invite',
-    renotify: true,
-    data: { url }
-  }));
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const targetUrl = event.notification.data?.url || new URL('./online.html', self.location.origin).href;
-  event.waitUntil((async () => {
-    const openClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-    for (const client of openClients) {
-      if ('navigate' in client) await client.navigate(targetUrl);
-      if ('focus' in client) return client.focus();
-    }
-    return self.clients.openWindow(targetUrl);
   })());
 });
 

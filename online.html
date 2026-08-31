@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
-  <link rel="stylesheet" href="online.css?v=20260830-flip3-paced-sequence">
+  <link rel="stylesheet" href="online.css?v=20260831-expanded-reactions">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -59,7 +59,6 @@
       <div class="lobby-icon">♣</div><h2>Your table is ready</h2><p>Start now with computer players, or invite friends to join.</p>
       <div class="invite-actions">
         <button id="share" class="secondary">TEXT OR SHARE INVITE</button>
-        <button id="notifyPast" class="secondary">NOTIFY PAST PLAYERS</button>
       </div>
     </div>
 
@@ -82,7 +81,7 @@
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
-    <div id="reactionTray" class="reaction-tray hidden"><button data-emoji="🔥">🔥</button><button data-emoji="😅">😅</button><button data-emoji="😈">😈</button><button data-emoji="👏">👏</button><button data-emoji="🤯">🤯</button><button id="phraseMenuBtn" class="phrase-menu-btn" aria-label="Quick phrases">💬</button></div>
+    <div id="reactionTray" class="reaction-tray hidden" aria-label="Reactions"><button data-emoji="🔥">🔥</button><button data-emoji="😂">😂</button><button data-emoji="🤣">🤣</button><button data-emoji="😁">😁</button><button data-emoji="😅">😅</button><button data-emoji="😬">😬</button><button data-emoji="😈">😈</button><button data-emoji="🤯">🤯</button><button data-emoji="😱">😱</button><button data-emoji="🙄">🙄</button><button data-emoji="🤔">🤔</button><button data-emoji="😡">😡</button><button data-emoji="😭">😭</button><button data-emoji="😎">😎</button><button data-emoji="🥳">🥳</button><button data-emoji="👏">👏</button><button data-emoji="👍">👍</button><button data-emoji="👎">👎</button><button data-emoji="❤️">❤️</button><button data-emoji="💀">💀</button><button data-emoji="🍀">🍀</button><button data-emoji="🤞">🤞</button><button data-emoji="💩">💩</button><button data-emoji="🤡">🤡</button><button id="phraseMenuBtn" class="phrase-menu-btn" aria-label="Quick phrases">💬</button></div>
     <div id="phraseTray" class="phrase-tray hidden" aria-label="Quick phrases"></div>
     <div class="bottom-dock">
       <div id="actions" class="actions">
@@ -170,7 +169,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260830-flip3-paced-sequence';
+  script.src = 'online.js?v=20260831-expanded-reactions';
   document.body.appendChild(script);
 }
 </script>
