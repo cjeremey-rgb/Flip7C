@@ -400,6 +400,107 @@
     stamp.style.webkitTextStroke = 'clamp(1px,.35vw,3px) rgba(255,255,255,.96)';
   }
 
+  function startFreezeEdgeGrowth(effect, stamp) {
+    effect.classList.add('freeze-edge-growth');
+    effect.style.background = 'transparent';
+
+    if (!document.getElementById('freezeEdgeGrowthStyles')) {
+      const style = document.createElement('style');
+      style.id = 'freezeEdgeGrowthStyles';
+      style.textContent = `
+        .freeze-screen-effect.freeze-edge-growth:before {
+          opacity: 0;
+          animation: freezeCenterCloud 2.5s ease-out forwards;
+        }
+        .freeze-screen-effect.freeze-edge-growth:after {
+          opacity: 0;
+          animation: freezeEdgeFrame 2.5s ease-out forwards;
+        }
+        @keyframes freezeCenterCloud {
+          0%,24% { opacity:0 }
+          44%,84% { opacity:1 }
+          100% { opacity:0 }
+        }
+        @keyframes freezeEdgeFrame {
+          0% { opacity:0 }
+          8%,84% { opacity:1 }
+          100% { opacity:0 }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const layerSpecs = [
+      {
+        start: 'polygon(0 0,100% 0,100% 0,84% 0,67% 0,50% 0,33% 0,16% 0,0 0)',
+        end: 'polygon(0 0,100% 0,100% 48%,84% 53%,67% 49%,50% 56%,33% 50%,16% 54%,0 48%)',
+        delay: 0
+      },
+      {
+        start: 'polygon(0 100%,16% 100%,33% 100%,50% 100%,67% 100%,84% 100%,100% 100%,100% 100%,0 100%)',
+        end: 'polygon(0 52%,16% 47%,33% 51%,50% 45%,67% 50%,84% 46%,100% 52%,100% 100%,0 100%)',
+        delay: 35
+      },
+      {
+        start: 'polygon(0 0,0 0,0 16%,0 33%,0 50%,0 67%,0 84%,0 100%,0 100%)',
+        end: 'polygon(0 0,49% 0,54% 16%,50% 33%,56% 50%,49% 67%,53% 84%,48% 100%,0 100%)',
+        delay: 70
+      },
+      {
+        start: 'polygon(100% 0,100% 0,100% 16%,100% 33%,100% 50%,100% 67%,100% 84%,100% 100%,100% 100%,100% 84%,100% 67%,100% 50%,100% 33%,100% 16%)',
+        end: 'polygon(51% 0,100% 0,100% 16%,100% 33%,100% 50%,100% 67%,100% 84%,100% 100%,52% 100%,47% 84%,51% 67%,45% 50%,50% 33%,46% 16%)',
+        delay: 20
+      }
+    ];
+
+    for (const spec of layerSpecs) {
+      const layer = new Image();
+      layer.className = 'freeze-growth-layer';
+      layer.alt = '';
+      layer.decoding = 'async';
+      layer.src = FROST_TEXTURE_URL;
+      layer.style.position = 'absolute';
+      layer.style.zIndex = '0';
+      layer.style.inset = '0';
+      layer.style.width = '100%';
+      layer.style.height = '100%';
+      layer.style.objectFit = 'cover';
+      layer.style.objectPosition = 'center';
+      layer.style.clipPath = spec.start;
+      layer.style.willChange = 'clip-path, opacity';
+      effect.insertBefore(layer, stamp);
+      if (layer.animate) {
+        layer.animate([
+          { clipPath: spec.start, opacity: .72 },
+          { offset: .16, clipPath: spec.start, opacity: .96 },
+          { clipPath: spec.end, opacity: .96 }
+        ], {
+          duration: 1050,
+          delay: spec.delay,
+          easing: 'cubic-bezier(.14,.72,.22,1)',
+          fill: 'forwards'
+        });
+      } else {
+        layer.style.clipPath = spec.end;
+        layer.style.opacity = '.96';
+      }
+    }
+
+    stamp.style.animation = 'none';
+    stamp.style.opacity = '0';
+    if (stamp.animate) {
+      stamp.animate([
+        { opacity: 0, transform: 'translate(-50%,-50%) rotate(-4deg) scale(1.45)' },
+        { offset: .27, opacity: 0, transform: 'translate(-50%,-50%) rotate(-4deg) scale(1.45)' },
+        { offset: .39, opacity: 1, transform: 'translate(-50%,-50%) rotate(-4deg) scale(1)' },
+        { offset: .84, opacity: 1, transform: 'translate(-50%,-50%) rotate(-4deg) scale(1)' },
+        { opacity: 0, transform: 'translate(-50%,-50%) rotate(-4deg) scale(.94)' }
+      ], { duration: EFFECT_MS, easing: 'cubic-bezier(.18,.86,.24,1)', fill: 'forwards' });
+    } else {
+      stamp.style.opacity = '1';
+    }
+  }
+
   function show(type) {
     clearTimeout(effectTimer);
     clearTimeout(shockTimer);
@@ -478,12 +579,7 @@
       stamp.textContent = type === 'freeze' ? 'FROZEN' : 'FLIP 3';
       effect.appendChild(stamp);
       if (type === 'freeze') {
-      const frostTexture = new Image();
-      frostTexture.className = 'freeze-screen-texture';
-      frostTexture.alt = '';
-      frostTexture.decoding = 'async';
-      frostTexture.src = FROST_TEXTURE_URL;
-      effect.insertBefore(frostTexture, stamp);
+        startFreezeEdgeGrowth(effect, stamp);
       } else {
         const cards = document.createElement('div');
         cards.className = 'flip3-screen-cards';
