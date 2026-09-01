@@ -297,140 +297,105 @@
   }
 
   function startBust(effect, context, width, height, random, started) {
-    const diagonal = Math.hypot(width, height);
-    const impactAnchors = [
-      [.18, .2], [.78, .27], [.3, .7], [.76, .79], [.52, .46]
-    ];
-    const impactCount = width < 520 ? 4 : 5;
-    const impacts = impactAnchors.slice(0, impactCount).map(([x, y]) => ({
-      x: width * (x + (random() - .5) * .1),
-      y: height * (y + (random() - .5) * .08),
-      radius: 10 + random() * 8,
-      rays: [], rings: []
-    }));
-    const majorCracks = [], detailCracks = [], facets = [];
-
-    const pointAt = (points, fraction) => {
-      const position = (points.length - 1) * clamp(fraction), index = Math.floor(position), amount = position - index;
-      const a = points[index], b = points[Math.min(points.length - 1, index + 1)];
-      return { x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount };
+    // Approved bust treatment: one clean central break, sparse long fractures,
+    // no circular impact marks, and no dense spider-web rings.
+    const center = {
+      x: width * (.49 + (random() - .5) * .035),
+      y: height * (.46 + (random() - .5) * .035)
     };
+    const majorCracks = [];
+    const detailCracks = [];
+    const rayCount = width < 520 ? 11 : 13;
 
-    for (const impact of impacts) {
-      const rayCount = 8 + Math.floor(random() * 2);
-      for (let index = 0; index < rayCount; index++) {
-        const angle = Math.PI * 2 * index / rayCount + (random() - .5) * .24;
-        const edge = edgeDistance(impact, angle, width, height);
-        const distance = edge * (.54 + random() * .5);
-        const points = jaggedLine(impact, angle, distance, 10 + Math.floor(random() * 7), random, .12);
-        impact.rays.push(points);
-        majorCracks.push({ points });
-        for (let branch = 0; branch < 2 + Math.floor(random() * 3); branch++) {
-          const from = 2 + Math.floor(random() * Math.max(1, points.length - 3));
-          const start = points[Math.min(points.length - 2, from)];
-          const branchAngle = angle + (random() > .5 ? 1 : -1) * (.28 + random() * .76);
-          detailCracks.push({ points: jaggedLine(start, branchAngle, distance * (.05 + random() * .14), 4 + Math.floor(random() * 4), random, .26) });
-        }
-      }
-      for (const fraction of [.08, .14, .22, .32]) {
-        for (let index = 0; index < impact.rays.length; index++) {
-          if (random() < .24) continue;
-          const next = (index + 1) % impact.rays.length;
-          const a = pointAt(impact.rays[index], fraction * (.86 + random() * .25));
-          const b = pointAt(impact.rays[next], fraction * (.86 + random() * .25));
-          impact.rings.push({ points: [a, { x: (a.x + b.x) / 2 + (random() - .5) * 6, y: (a.y + b.y) / 2 + (random() - .5) * 6 }, b] });
-        }
-      }
-      for (let index = 0; index < 17; index++) {
-        const angle = random() * Math.PI * 2, radius = Math.pow(random(), 1.65) * 58;
-        const start = { x: impact.x + Math.cos(angle) * radius, y: impact.y + Math.sin(angle) * radius };
-        detailCracks.push({ points: jaggedLine(start, angle + (random() - .5) * 1.1, 8 + random() * 48, 3 + Math.floor(random() * 4), random, .36) });
-      }
-    }
-
-    const edgePoint = side => {
-      if (side === 0) return { x: random() * width, y: -2 };
-      if (side === 1) return { x: width + 2, y: random() * height };
-      if (side === 2) return { x: random() * width, y: height + 2 };
-      return { x: -2, y: random() * height };
-    };
-    for (let index = 0; index < 11; index++) {
-      const side = index % 4;
-      const start = edgePoint(side), end = edgePoint((side + 2 + (random() > .72 ? 1 : 0)) % 4);
-      const points = jaggedBetween(start, end, 18 + Math.floor(random() * 9), random, 28 + random() * 38);
+    for (let index = 0; index < rayCount; index++) {
+      const angle = Math.PI * 2 * index / rayCount + (random() - .5) * .2;
+      const distance = edgeDistance(center, angle, width, height) * 1.06;
+      const points = jaggedLine(center, angle, distance, 12 + Math.floor(random() * 6), random, .115);
       majorCracks.push({ points });
-      for (let branch = 3; branch < points.length - 3; branch += 4 + Math.floor(random() * 3)) {
-        const a = points[branch], angle = Math.atan2(points[branch + 1].y - a.y, points[branch + 1].x - a.x) + (random() > .5 ? 1 : -1) * (.42 + random() * .62);
-        detailCracks.push({ points: jaggedLine(a, angle, 18 + random() * 62, 4 + Math.floor(random() * 4), random, .3) });
+
+      const branchCount = index % 3 === 0 ? 2 : 1;
+      for (let branch = 0; branch < branchCount; branch++) {
+        const fromIndex = 3 + Math.floor(random() * Math.max(1, points.length - 6));
+        const from = points[Math.min(points.length - 2, fromIndex)];
+        const direction = random() > .5 ? 1 : -1;
+        const branchAngle = angle + direction * (.38 + random() * .58);
+        const branchLength = Math.min(width, height) * (.07 + random() * .13);
+        detailCracks.push({
+          points: jaggedLine(from, branchAngle, branchLength, 4 + Math.floor(random() * 4), random, .25)
+        });
       }
     }
 
-    const columns = 5, rows = 9, nodes = [];
-    for (let row = 0; row <= rows; row++) {
-      nodes[row] = [];
-      for (let column = 0; column <= columns; column++) {
-        nodes[row][column] = {
-          x: width * column / columns + (column > 0 && column < columns ? (random() - .5) * width / columns * .55 : 0),
-          y: height * row / rows + (row > 0 && row < rows ? (random() - .5) * height / rows * .55 : 0)
-        };
-      }
-    }
-    for (let row = 0; row < rows; row++) {
-      for (let column = 0; column < columns; column++) {
-        const a = nodes[row][column], b = nodes[row][column + 1], c = nodes[row + 1][column + 1], d = nodes[row + 1][column];
-        if (random() > .5) {
-          facets.push({ points: [a, b, d], alpha: .012 + random() * .035, shade: random() });
-          facets.push({ points: [b, c, d], alpha: .012 + random() * .035, shade: random() });
-          if (random() > .5) detailCracks.push({ points: jaggedBetween(b, d, 5, random, 8) });
-        } else {
-          facets.push({ points: [a, b, c], alpha: .012 + random() * .035, shade: random() });
-          facets.push({ points: [a, c, d], alpha: .012 + random() * .035, shade: random() });
-          if (random() > .5) detailCracks.push({ points: jaggedBetween(a, c, 5, random, 8) });
-        }
-      }
+    // A few long offset fractures give the mockup its broken-glass depth
+    // without adding another impact center.
+    for (let index = 0; index < 3; index++) {
+      const vertical = index !== 1;
+      const start = vertical
+        ? { x: width * (.18 + index * .31 + (random() - .5) * .08), y: -2 }
+        : { x: -2, y: height * (.72 + (random() - .5) * .08) };
+      const end = vertical
+        ? { x: width * (.08 + index * .37 + (random() - .5) * .1), y: height + 2 }
+        : { x: width + 2, y: height * (.31 + (random() - .5) * .09) };
+      majorCracks.push({
+        points: jaggedBetween(start, end, 18 + Math.floor(random() * 7), random, 18 + random() * 24)
+      });
     }
 
     const layer = document.createElement('canvas');
     const layerScale = Math.min(2, Math.max(1.35, devicePixelRatio || 1));
-    layer.width = Math.ceil(width * layerScale); layer.height = Math.ceil(height * layerScale);
+    layer.width = Math.ceil(width * layerScale);
+    layer.height = Math.ceil(height * layerScale);
     const layerContext = layer.getContext('2d', { alpha: true });
     layerContext.setTransform(layerScale, 0, 0, layerScale, 0, 0);
-    layerContext.fillStyle = 'rgba(218,230,235,.035)';
+    layerContext.fillStyle = 'rgba(5,8,12,.035)';
     layerContext.fillRect(0, 0, width, height);
-
-    for (const facet of facets) {
-      layerContext.beginPath();
-      facet.points.forEach((point, index) => index ? layerContext.lineTo(point.x, point.y) : layerContext.moveTo(point.x, point.y));
-      layerContext.closePath();
-      const gradient = layerContext.createLinearGradient(facet.points[0].x, facet.points[0].y, facet.points[2].x, facet.points[2].y);
-      gradient.addColorStop(0, `rgba(255,255,255,${facet.alpha})`);
-      gradient.addColorStop(.55, facet.shade > .5 ? `rgba(105,132,146,${facet.alpha * .5})` : `rgba(250,253,254,${facet.alpha * .18})`);
-      gradient.addColorStop(1, `rgba(255,255,255,${facet.alpha * .72})`);
-      layerContext.fillStyle = gradient;
-      layerContext.fill();
-    }
-    strokeCracks(layerContext, majorCracks, 1, 2.45, .5, 1);
-    strokeCracks(layerContext, detailCracks, 1, 1.15, .27, .94);
-    for (const impact of impacts) {
-      strokeCracks(layerContext, impact.rings, 1, 1.35, .32, .96);
-    }
+    strokeCracks(layerContext, majorCracks, 1, 2.65, .58, 1);
+    strokeCracks(layerContext, detailCracks, 1, 1.2, .3, .9);
 
     const draw = now => {
-      const progress = clamp((now - started) / EFFECT_MS), opacity = lifeOpacity(progress);
-      const growth = ease(clamp(progress / .085));
+      const progress = clamp((now - started) / EFFECT_MS);
+      const opacity = lifeOpacity(progress);
+      const majorGrowth = ease(clamp(progress / .09));
+      const detailGrowth = ease(clamp((progress - .035) / .12));
       context.clearRect(0, 0, width, height);
       context.save();
-      context.globalAlpha = opacity * growth;
-      context.drawImage(layer, 0, 0, width, height);
-      if (progress < .065) {
-        context.globalAlpha = opacity * (1 - progress / .065) * .28;
+      context.globalAlpha = opacity;
+      if (progress < .055) {
+        context.globalAlpha = opacity * (1 - progress / .055) * .2;
         context.fillStyle = '#fff';
+        context.fillRect(0, 0, width, height);
+      }
+      context.globalAlpha = opacity * majorGrowth;
+      context.drawImage(layer, 0, 0, width, height);
+      if (detailGrowth < 1) {
+        context.globalAlpha = opacity * (1 - detailGrowth) * .12;
+        context.fillStyle = '#ff183f';
         context.fillRect(0, 0, width, height);
       }
       context.restore();
       if (progress < 1 && effect.isConnected) effectFrame = requestAnimationFrame(draw);
     };
     effectFrame = requestAnimationFrame(draw);
+  }
+
+  function styleBustStamp(stamp) {
+    stamp.style.setProperty('--stamp-rotation', '-5deg');
+    stamp.style.minWidth = '0';
+    stamp.style.width = 'max-content';
+    stamp.style.maxWidth = 'calc(100vw - 24px)';
+    stamp.style.padding = '0';
+    stamp.style.border = '0';
+    stamp.style.borderRadius = '0';
+    stamp.style.color = '#fff';
+    stamp.style.background = 'transparent';
+    stamp.style.fontSize = 'clamp(76px, 25vw, 154px)';
+    stamp.style.lineHeight = '.82';
+    stamp.style.letterSpacing = '-.035em';
+    stamp.style.whiteSpace = 'nowrap';
+    stamp.style.textShadow = '0 5px 0 #8b0019, 0 0 5px #fff, 0 0 18px #ff1744, 0 0 42px rgba(255,20,59,.9)';
+    stamp.style.filter = 'drop-shadow(0 13px 13px rgba(0,0,0,.82))';
+    stamp.style.boxShadow = 'none';
+    stamp.style.webkitTextStroke = 'clamp(1px,.35vw,3px) rgba(255,255,255,.96)';
   }
 
   function show(type) {
@@ -448,6 +413,7 @@
     stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : type === 'flip3' ? 'flip3-screen-stamp' : 'bust-screen-stamp'}`;
     stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP 3' : 'BUST';
     effect.appendChild(stamp);
+    if (type === 'bust') styleBustStamp(stamp);
     if (type === 'freeze') {
       const frostTexture = new Image();
       frostTexture.className = 'freeze-screen-texture';
@@ -507,3 +473,4 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', queueFrostPreload, { once: true });
   else queueFrostPreload();
 })();
+
