@@ -4,11 +4,13 @@
   const EFFECT_MS = 2500;
   const FLIP3_EFFECT_MS = 3500;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
+  const BUST_OVERLAY_URL = 'bust-approved-overlay.png?v=20260901-approved-mockup';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
   let frostCache = null;
   let frostTexturePreload = null;
+  let bustArtworkPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -409,46 +411,57 @@
     effect.className = `screen-effect ${type === 'freeze' ? 'freeze-screen-effect' : type === 'flip3' ? 'flip3-screen-effect' : 'shatter-screen-effect'}`;
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
-    const stamp = document.createElement('div');
-    stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : type === 'flip3' ? 'flip3-screen-stamp' : 'bust-screen-stamp'}`;
-    stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP 3' : 'BUST';
-    effect.appendChild(stamp);
-    if (type === 'bust') styleBustStamp(stamp);
-    if (type === 'freeze') {
+    if (type === 'bust') {
+      const artwork = new Image();
+      artwork.className = 'bust-approved-artwork';
+      artwork.alt = '';
+      artwork.decoding = 'async';
+      artwork.src = BUST_OVERLAY_URL;
+      artwork.style.position = 'absolute';
+      artwork.style.zIndex = '2';
+      artwork.style.inset = '0';
+      artwork.style.width = '100%';
+      artwork.style.height = '100%';
+      artwork.style.objectFit = 'fill';
+      artwork.style.mixBlendMode = 'screen';
+      artwork.style.willChange = 'opacity, transform';
+      effect.appendChild(artwork);
+      void document.body.offsetWidth;
+      document.body.classList.add('shatter-impact');
+      shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
+    } else {
+      const stamp = document.createElement('div');
+      stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : 'flip3-screen-stamp'}`;
+      stamp.textContent = type === 'freeze' ? 'FROZEN' : 'FLIP 3';
+      effect.appendChild(stamp);
+      if (type === 'freeze') {
       const frostTexture = new Image();
       frostTexture.className = 'freeze-screen-texture';
       frostTexture.alt = '';
       frostTexture.decoding = 'async';
       frostTexture.src = FROST_TEXTURE_URL;
       effect.insertBefore(frostTexture, stamp);
-    } else if (type === 'flip3') {
-      const cards = document.createElement('div');
-      cards.className = 'flip3-screen-cards';
-      for (let number = 1; number <= 3; number++) {
-        const card = document.createElement('div');
-        card.className = `flip3-screen-card flip3-screen-card-${number}`;
-        card.innerHTML = `<small>ACTION</small><strong>${number}</strong><b>FLIP</b>`;
-        cards.appendChild(card);
+      } else {
+        const cards = document.createElement('div');
+        cards.className = 'flip3-screen-cards';
+        for (let number = 1; number <= 3; number++) {
+          const card = document.createElement('div');
+          card.className = `flip3-screen-card flip3-screen-card-${number}`;
+          card.innerHTML = `<small>ACTION</small><strong>${number}</strong><b>FLIP</b>`;
+          cards.appendChild(card);
+        }
+        effect.appendChild(cards);
+        const sparks = document.createElement('div');
+        sparks.className = 'flip3-screen-sparks';
+        for (let index = 0; index < 18; index++) {
+          const spark = document.createElement('i');
+          spark.style.setProperty('--spark-angle', `${index * 20}deg`);
+          spark.style.setProperty('--spark-delay', `${(index % 6) * .035}s`);
+          spark.style.setProperty('--spark-distance', `${42 + (index % 4) * 9}vmin`);
+          sparks.appendChild(spark);
+        }
+        effect.appendChild(sparks);
       }
-      effect.appendChild(cards);
-      const sparks = document.createElement('div');
-      sparks.className = 'flip3-screen-sparks';
-      for (let index = 0; index < 18; index++) {
-        const spark = document.createElement('i');
-        spark.style.setProperty('--spark-angle', `${index * 20}deg`);
-        spark.style.setProperty('--spark-delay', `${(index % 6) * .035}s`);
-        spark.style.setProperty('--spark-distance', `${42 + (index % 4) * 9}vmin`);
-        sparks.appendChild(spark);
-      }
-      effect.appendChild(sparks);
-    } else {
-      const surface = createSurface(effect, type);
-      const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
-      const started = performance.now();
-      void document.body.offsetWidth;
-      document.body.classList.add('shatter-impact');
-      shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
-      startBust(effect, surface.context, surface.width, surface.height, random, started);
     }
     effectTimer = setTimeout(() => {
       cancelAnimationFrame(effectFrame);
@@ -458,11 +471,18 @@
   }
 
   function prewarmFrost() {
-    if (frostTexturePreload) return;
-    frostTexturePreload = new Image();
-    frostTexturePreload.decoding = 'async';
-    frostTexturePreload.src = FROST_TEXTURE_URL;
-    frostTexturePreload.decode?.().catch(() => {});
+    if (!frostTexturePreload) {
+      frostTexturePreload = new Image();
+      frostTexturePreload.decoding = 'async';
+      frostTexturePreload.src = FROST_TEXTURE_URL;
+      frostTexturePreload.decode?.().catch(() => {});
+    }
+    if (!bustArtworkPreload) {
+      bustArtworkPreload = new Image();
+      bustArtworkPreload.decoding = 'async';
+      bustArtworkPreload.src = BUST_OVERLAY_URL;
+      bustArtworkPreload.decode?.().catch(() => {});
+    }
   }
 
   globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
@@ -473,4 +493,3 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', queueFrostPreload, { once: true });
   else queueFrostPreload();
 })();
-
