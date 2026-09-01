@@ -218,13 +218,15 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @media(prefers-reduced-motion:reduce){body.my-turn::after,body.my-turn #status{animation:none}}
 /* Full-screen action effects; Freeze and Bust remain 2.5 seconds. */
 .screen-effect{position:fixed;z-index:500;inset:0 0 var(--bottom-ui-inset);overflow:hidden;pointer-events:none;isolation:isolate;animation:screenEffectLife 2.5s linear forwards}
-.screen-effect canvas{position:absolute;z-index:0;inset:0;width:100%;height:100%;display:block}
+.screen-effect canvas,.freeze-screen-texture{position:absolute;z-index:0;inset:0;width:100%;height:100%;display:block}
+.freeze-screen-texture{object-fit:cover;opacity:0;transform:scale(1.055);transform-origin:center;will-change:transform,opacity;animation:deepFreezeTextureLife 2.5s cubic-bezier(.16,.72,.22,1) forwards}
 .screen-effect-stamp{--stamp-rotation:-4deg;position:absolute;z-index:3;left:50%;top:50%;width:max-content;min-width:min(82vw,520px);max-width:calc(100vw - 30px);padding:16px 24px;border-radius:18px;text-align:center;font:900 clamp(46px,16vw,96px)/.9 'Archivo Black',Impact,sans-serif;letter-spacing:.055em;pointer-events:none;will-change:transform,opacity;animation:screenEffectStampLife 2.5s cubic-bezier(.18,.86,.24,1) forwards}
-.frozen-screen-stamp{color:#eaffff;background:linear-gradient(180deg,rgba(177,237,255,.82),rgba(36,139,202,.78));border:4px solid rgba(226,251,255,.94);text-shadow:0 4px 0 rgba(15,76,113,.78),0 0 20px #d8f9ff;box-shadow:0 14px 38px #00131fbb,inset 0 0 22px rgba(255,255,255,.46),0 0 34px rgba(107,219,255,.58)}
+.frozen-screen-stamp{min-width:0;padding:0 10px;border:0;border-radius:0;color:#eaffff;background:url('frost-whiteout.webp?v=20260901-deep-freezer') center/cover;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:clamp(1px,.4vw,3px) rgba(239,253,255,.94);font-size:clamp(58px,19vw,112px);letter-spacing:.02em;filter:drop-shadow(0 5px 0 rgba(15,76,113,.82)) drop-shadow(0 12px 18px rgba(0,19,31,.82)) drop-shadow(0 0 14px rgba(216,249,255,.9));box-shadow:none}
 .bust-screen-stamp{--stamp-rotation:5deg;color:#fff4f5;background:linear-gradient(180deg,rgba(255,71,94,.88),rgba(143,5,31,.84));border:4px solid rgba(255,224,228,.96);text-shadow:0 4px 0 rgba(91,0,15,.86),0 0 18px rgba(255,225,230,.62);box-shadow:0 14px 38px #120005cc,inset 0 0 22px rgba(255,255,255,.3),0 0 36px rgba(255,46,78,.52)}
 .flip3-screen-stamp{--stamp-rotation:0deg;z-index:4;top:52%;min-width:0;max-width:calc(100vw - 18px);padding:0;color:#fff7ff;background:transparent;border:0;border-radius:0;font-size:clamp(70px,24vw,138px);line-height:.82;letter-spacing:-.035em;white-space:nowrap;text-shadow:0 6px 0 #5b24bd,0 11px 20px #000d,0 0 16px #fff,0 0 42px #a85dff;box-shadow:none;animation:flip3StampLife 3.5s cubic-bezier(.18,.86,.24,1) forwards}
-.freeze-screen-effect{background:rgba(236,243,245,.025);will-change:opacity;animation:frostScreenLife 2.5s linear forwards}
-.freeze-screen-effect:after{content:'';position:absolute;z-index:1;inset:0;box-shadow:inset 0 0 20px 5px rgba(249,253,253,.72),inset 0 0 74px 22px rgba(183,197,200,.34);animation:frostEdgeLife 2.5s ease-out forwards}
+.freeze-screen-effect{background:rgba(198,226,235,.18);will-change:opacity;animation:frostScreenLife 2.5s linear forwards}
+.freeze-screen-effect:before{content:'';position:absolute;z-index:1;inset:0;background:radial-gradient(ellipse at 50% 47%,rgba(224,242,246,.18) 0,rgba(215,237,242,.3) 42%,rgba(239,250,252,.5) 100%);animation:frostCloudLife 2.5s ease-out forwards}
+.freeze-screen-effect:after{content:'';position:absolute;z-index:2;inset:0;box-shadow:inset 0 0 28px 9px rgba(251,255,255,.92),inset 0 0 105px 34px rgba(198,220,225,.64);animation:frostEdgeLife 2.5s ease-out forwards}
 .shatter-screen-effect{background:transparent;animation:shatterScreenLife 2.5s ease-out forwards}
 .flip3-screen-effect{background:transparent;animation:flip3ScreenLife 3.5s ease-out forwards}
 .flip3-screen-effect:before{content:'';position:absolute;z-index:0;left:50%;top:47%;width:112vmin;height:112vmin;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.14) 0 3deg,transparent 3deg 16deg);filter:blur(1px);animation:flip3Spin 3.5s cubic-bezier(.12,.7,.2,1) forwards}
@@ -237,6 +239,8 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes screenEffectStampLife{0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1.65)}8%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}82%{opacity:1;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--stamp-rotation)) scale(.94)}}
 @keyframes screenEffectLife{0%{opacity:0}3%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostScreenLife{0%{opacity:0}8%,84%{opacity:1}100%{opacity:0}}
+@keyframes deepFreezeTextureLife{0%{opacity:0;transform:scale(1.055)}9%{opacity:.62}20%,84%{opacity:.96;transform:scale(1)}100%{opacity:0;transform:scale(.995)}}
+@keyframes frostCloudLife{0%{opacity:0}12%,84%{opacity:1}100%{opacity:0}}
 @keyframes frostEdgeLife{0%{opacity:0}6%,84%{opacity:1}100%{opacity:0}}
 @keyframes shatterScreenLife{0%{opacity:0}1%,86%{opacity:1}100%{opacity:0}}
 @keyframes flip3ScreenLife{0%{opacity:0}5%,84%{opacity:1}100%{opacity:0}}
@@ -247,7 +251,7 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 @keyframes flip3Spark{0%{opacity:0;transform:rotate(var(--spark-angle)) translateX(0) scaleX(.2)}18%{opacity:1}78%{opacity:.9;transform:rotate(var(--spark-angle)) translateX(var(--spark-distance)) scaleX(2.1)}100%{opacity:0;transform:rotate(var(--spark-angle)) translateX(var(--spark-distance)) scaleX(.25)}}
 body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s cubic-bezier(.18,.72,.28,1)}
 @keyframes screenShock{0%{transform:translate3d(0,0,0);filter:brightness(1)}7%{transform:translate3d(-7px,4px,0) rotate(-.35deg);filter:brightness(1.7)}16%{transform:translate3d(6px,-4px,0) rotate(.28deg);filter:brightness(.72)}27%{transform:translate3d(-4px,2px,0) rotate(-.18deg);filter:brightness(1.2)}42%{transform:translate3d(3px,-1px,0);filter:brightness(.92)}65%{transform:translate3d(-1px,1px,0);filter:brightness(1.04)}100%{transform:translate3d(0,0,0);filter:brightness(1)}}
-@media(prefers-reduced-motion:reduce){.screen-effect,.screen-effect-stamp,.freeze-screen-effect,.freeze-screen-effect:after,.shatter-screen-effect,.flip3-screen-effect,.flip3-screen-effect:before,.flip3-screen-effect:after,.flip3-screen-card,.flip3-screen-sparks i{animation-timing-function:linear!important;animation-iteration-count:1!important}}
+@media(prefers-reduced-motion:reduce){.screen-effect,.screen-effect-stamp,.freeze-screen-effect,.freeze-screen-texture,.freeze-screen-effect:before,.freeze-screen-effect:after,.shatter-screen-effect,.flip3-screen-effect,.flip3-screen-effect:before,.flip3-screen-effect:after,.flip3-screen-card,.flip3-screen-sparks i{animation-timing-function:linear!important;animation-iteration-count:1!important}}
 </style>
 </head>
 <body>
@@ -321,7 +325,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260830-flip3-paced-sequence"></script>
+<script src="screen-effects.js?v=20260901-deep-freezer"></script>
 <script>
 const $=id=>document.getElementById(id);
 

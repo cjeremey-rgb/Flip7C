@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-08-31-expanded-reactions';
+const CACHE_NAME='flip-rush-7-v2026-09-01-deep-freezer';
 const APP_SHELL = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const APP_SHELL = [
   './online.css',
   './online.js',
   './screen-effects.js',
+  './frost-whiteout.webp',
   './manifest.json',
   './pwa-register.js',
   './icon-192.png',

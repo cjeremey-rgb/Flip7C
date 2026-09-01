@@ -3,10 +3,12 @@
 
   const EFFECT_MS = 2500;
   const FLIP3_EFFECT_MS = 3500;
+  const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
   let frostCache = null;
+  let frostTexturePreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -446,7 +448,14 @@
     stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : type === 'flip3' ? 'flip3-screen-stamp' : 'bust-screen-stamp'}`;
     stamp.textContent = type === 'freeze' ? 'FROZEN' : type === 'flip3' ? 'FLIP 3' : 'BUST';
     effect.appendChild(stamp);
-    if (type === 'flip3') {
+    if (type === 'freeze') {
+      const frostTexture = new Image();
+      frostTexture.className = 'freeze-screen-texture';
+      frostTexture.alt = '';
+      frostTexture.decoding = 'async';
+      frostTexture.src = FROST_TEXTURE_URL;
+      effect.insertBefore(frostTexture, stamp);
+    } else if (type === 'flip3') {
       const cards = document.createElement('div');
       cards.className = 'flip3-screen-cards';
       for (let number = 1; number <= 3; number++) {
@@ -470,13 +479,10 @@
       const surface = createSurface(effect, type);
       const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
       const started = performance.now();
-      if (type === 'freeze') startFreeze(effect, surface.context, surface.width, surface.height, random, started);
-      else {
-        void document.body.offsetWidth;
-        document.body.classList.add('shatter-impact');
-        shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
-        startBust(effect, surface.context, surface.width, surface.height, random, started);
-      }
+      void document.body.offsetWidth;
+      document.body.classList.add('shatter-impact');
+      shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
+      startBust(effect, surface.context, surface.width, surface.height, random, started);
     }
     effectTimer = setTimeout(() => {
       cancelAnimationFrame(effectFrame);
@@ -486,13 +492,18 @@
   }
 
   function prewarmFrost() {
-    if (frostCache || !document.body || innerWidth < 2 || innerHeight < 2) return;
-    const bottomInset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bottom-ui-inset')) || 0;
-    const width = innerWidth;
-    const height = Math.max(1, innerHeight - bottomInset);
-    const seed = ((width << 16) ^ height ^ 0x5f3759df) >>> 0;
-    getFrostAsset(width, height, seededRandom(seed));
+    if (frostTexturePreload) return;
+    frostTexturePreload = new Image();
+    frostTexturePreload.decoding = 'async';
+    frostTexturePreload.src = FROST_TEXTURE_URL;
+    frostTexturePreload.decode?.().catch(() => {});
   }
 
   globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
+  const queueFrostPreload = () => {
+    if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });
+    else setTimeout(prewarmFrost, 250);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', queueFrostPreload, { once: true });
+  else queueFrostPreload();
 })();
