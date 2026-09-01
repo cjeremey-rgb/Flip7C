@@ -4,7 +4,7 @@
   const EFFECT_MS = 2500;
   const FLIP3_EFFECT_MS = 3500;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
-  const BUST_OVERLAY_URL = 'bust-approved-overlay.png?v=20260901-approved-mockup-v2';
+  const BUST_OVERLAY_URL = 'bust-approved-overlay.png?v=20260901-approved-mockup-v3';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -412,43 +412,87 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     if (type === 'bust') {
-      // Draw an immediate fallback so a slow or failed image request can never
-      // leave the player with no bust animation.
-      const surface = createSurface(effect, type);
-      const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
-      const started = performance.now();
-      const fallbackStamp = document.createElement('div');
-      fallbackStamp.className = 'screen-effect-stamp bust-screen-stamp';
-      fallbackStamp.textContent = 'BUST';
-      styleBustStamp(fallbackStamp);
-      effect.appendChild(fallbackStamp);
-      startBust(effect, surface.context, surface.width, surface.height, random, started);
+      // The approved mockup artwork is the bust animation. Do not draw a
+      // competing generated crack pattern or substitute stamp before it.
+      effect.style.inset = '0';
+      effect.style.animation = 'none';
+      effect.style.background = 'transparent';
 
       const artwork = new Image();
       artwork.className = 'bust-approved-artwork';
       artwork.alt = '';
       artwork.decoding = 'async';
-      artwork.src = BUST_OVERLAY_URL;
       artwork.style.position = 'absolute';
       artwork.style.zIndex = '2';
       artwork.style.inset = '0';
       artwork.style.width = '100%';
       artwork.style.height = '100%';
       artwork.style.objectFit = 'fill';
-      artwork.style.willChange = 'opacity, transform';
+      artwork.style.objectPosition = 'center';
       artwork.style.opacity = '0';
-      const revealApprovedArtwork = () => {
-        artwork.style.opacity = '1';
-        surface.canvas.style.visibility = 'hidden';
-        fallbackStamp.style.visibility = 'hidden';
-      };
-      artwork.addEventListener('load', revealApprovedArtwork, { once: true });
-      if (artwork.complete && artwork.naturalWidth) revealApprovedArtwork();
+      artwork.style.transformOrigin = '50% 50%';
+      artwork.style.willChange = 'opacity, transform';
       effect.appendChild(artwork);
-      void document.body.offsetWidth;
-      document.body.classList.add('shatter-impact');
-      shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
-    } else {
+
+      let approvedStarted = false;
+      let fallbackTimer = 0;
+      let fallbackCanvas = null;
+      let fallbackStamp = null;
+
+      const removeEffect = () => {
+        cancelAnimationFrame(effectFrame);
+        document.body.classList.remove('shatter-impact');
+        if (effect.isConnected) effect.remove();
+      };
+
+      const startApprovedArtwork = () => {
+        if (approvedStarted || !artwork.naturalWidth || !effect.isConnected) return;
+        approvedStarted = true;
+        clearTimeout(fallbackTimer);
+        clearTimeout(effectTimer);
+        cancelAnimationFrame(effectFrame);
+        fallbackCanvas?.remove();
+        fallbackStamp?.remove();
+        artwork.style.opacity = '1';
+        artwork.animate([
+          { opacity: 0, transform: 'scale(1.075)' },
+          { offset: .075, opacity: 1, transform: 'scale(1)' },
+          { offset: .86, opacity: 1, transform: 'scale(1)' },
+          { opacity: 0, transform: 'scale(.995)' }
+        ], {
+          duration: EFFECT_MS,
+          easing: 'cubic-bezier(.18,.86,.24,1)',
+          fill: 'forwards'
+        });
+        void document.body.offsetWidth;
+        document.body.classList.add('shatter-impact');
+        shockTimer = setTimeout(() => document.body.classList.remove('shatter-impact'), 420);
+        effectTimer = setTimeout(removeEffect, EFFECT_MS);
+      };
+
+      const startEmergencyFallback = () => {
+        if (approvedStarted || !effect.isConnected) return;
+        const surface = createSurface(effect, type);
+        fallbackCanvas = surface.canvas;
+        const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
+        const started = performance.now();
+        fallbackStamp = document.createElement('div');
+        fallbackStamp.className = 'screen-effect-stamp bust-screen-stamp';
+        fallbackStamp.textContent = 'BUST';
+        styleBustStamp(fallbackStamp);
+        effect.appendChild(fallbackStamp);
+        startBust(effect, surface.context, surface.width, surface.height, random, started);
+        effectTimer = setTimeout(removeEffect, EFFECT_MS);
+      };
+
+      artwork.addEventListener('load', startApprovedArtwork, { once: true });
+      artwork.addEventListener('error', startEmergencyFallback, { once: true });
+      artwork.src = BUST_OVERLAY_URL;
+      if (artwork.complete && artwork.naturalWidth) startApprovedArtwork();
+      else artwork.decode?.().then(startApprovedArtwork).catch(() => {});
+      fallbackTimer = setTimeout(startEmergencyFallback, 1400);
+      return;
+
       const stamp = document.createElement('div');
       stamp.className = `screen-effect-stamp ${type === 'freeze' ? 'frozen-screen-stamp' : 'flip3-screen-stamp'}`;
       stamp.textContent = type === 'freeze' ? 'FROZEN' : 'FLIP 3';
