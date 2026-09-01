@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-01-approved-bust-mockup-v3';
+const CACHE_NAME='flip-rush-7-v2026-09-01-approved-bust-mockup-v4';
 const APP_SHELL = [
   './',
   './index.html',
@@ -9,7 +9,7 @@ const APP_SHELL = [
   './online.js',
   './screen-effects.js',
   './frost-whiteout.webp',
-  './bust-approved-overlay.png',
+  './bust-approved-exact.webp',
   './manifest.json',
   './pwa-register.js',
   './icon-192.png',
