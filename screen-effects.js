@@ -4,7 +4,7 @@
   const EFFECT_MS = 2500;
   const FLIP3_EFFECT_MS = 3500;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
-  const BUST_OVERLAY_URL = 'bust-approved-overlay.png?v=20260901-approved-mockup';
+  const BUST_OVERLAY_URL = 'bust-approved-overlay.png?v=20260901-approved-mockup-v2';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -412,6 +412,18 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     if (type === 'bust') {
+      // Draw an immediate fallback so a slow or failed image request can never
+      // leave the player with no bust animation.
+      const surface = createSurface(effect, type);
+      const random = seededRandom((Date.now() ^ (surface.width << 8) ^ surface.height) >>> 0);
+      const started = performance.now();
+      const fallbackStamp = document.createElement('div');
+      fallbackStamp.className = 'screen-effect-stamp bust-screen-stamp';
+      fallbackStamp.textContent = 'BUST';
+      styleBustStamp(fallbackStamp);
+      effect.appendChild(fallbackStamp);
+      startBust(effect, surface.context, surface.width, surface.height, random, started);
+
       const artwork = new Image();
       artwork.className = 'bust-approved-artwork';
       artwork.alt = '';
@@ -423,8 +435,15 @@
       artwork.style.width = '100%';
       artwork.style.height = '100%';
       artwork.style.objectFit = 'fill';
-      artwork.style.mixBlendMode = 'screen';
       artwork.style.willChange = 'opacity, transform';
+      artwork.style.opacity = '0';
+      const revealApprovedArtwork = () => {
+        artwork.style.opacity = '1';
+        surface.canvas.style.visibility = 'hidden';
+        fallbackStamp.style.visibility = 'hidden';
+      };
+      artwork.addEventListener('load', revealApprovedArtwork, { once: true });
+      if (artwork.complete && artwork.naturalWidth) revealApprovedArtwork();
       effect.appendChild(artwork);
       void document.body.offsetWidth;
       document.body.classList.add('shatter-impact');
