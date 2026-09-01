@@ -4,7 +4,7 @@
   const EFFECT_MS = 2500;
   const FLIP3_EFFECT_MS = 3500;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
-  const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v4';
+  const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -419,6 +419,7 @@
       effect.style.animation = 'none';
       effect.style.background = 'transparent';
       effect.style.isolation = 'auto';
+      effect.style.mixBlendMode = 'screen';
 
       const artwork = new Image();
       artwork.className = 'bust-approved-artwork';
@@ -431,7 +432,7 @@
       artwork.style.height = '100%';
       artwork.style.objectFit = 'fill';
       artwork.style.objectPosition = 'center';
-      artwork.style.mixBlendMode = 'screen';
+      artwork.style.mixBlendMode = 'normal';
       artwork.style.opacity = '0';
       artwork.style.transformOrigin = '50% 50%';
       artwork.style.willChange = 'opacity, transform';

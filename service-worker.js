@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-01-approved-bust-mockup-v4';
+const CACHE_NAME='flip-rush-7-v2026-09-01-approved-bust-mockup-v5';
 const APP_SHELL = [
   './',
   './index.html',
