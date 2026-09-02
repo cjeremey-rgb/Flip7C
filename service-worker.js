@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-guardian-shield-v4';
+const CACHE_NAME='flip-rush-7-v2026-09-02-reactions-restored-v1';
 const APP_SHELL = [
   './',
   './index.html',
