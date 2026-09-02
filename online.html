@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
-  <link rel="stylesheet" href="online.css?v=20260902-facial-expressions-v1">
+  <link rel="stylesheet" href="online.css?v=20260902-avatar-expansion-v1">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -40,6 +40,9 @@
           <button type="button" class="avatar-choice" data-avatar="avatar-4" role="radio" aria-label="Blue-shirt avatar"><img src="avatar-4.webp" alt=""></button>
           <button type="button" class="avatar-choice" data-avatar="avatar-5" role="radio" aria-label="Sunglasses avatar"><img src="avatar-5.webp" alt=""></button>
           <button type="button" class="avatar-choice" data-avatar="avatar-6" role="radio" aria-label="Bearded avatar"><img src="avatar-6.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-7" role="radio" aria-label="Glasses and braces avatar"><img src="avatar-7.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-8" role="radio" aria-label="Sunglasses and beard avatar"><img src="avatar-8.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-9" role="radio" aria-label="Dark-haired braces avatar"><img src="avatar-9.webp" alt=""></button>
         </div>
       </fieldset>
       <button id="create" class="primary big"><span>Create private room</span><small>Invite friends with a code</small></button>
@@ -181,7 +184,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260902-facial-expressions-v1';
+  script.src = 'online.js?v=20260902-avatar-expansion-v1';
   document.body.appendChild(script);
 }
 </script>

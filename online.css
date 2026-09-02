@@ -272,15 +272,15 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 /* Cartoon avatars: additive UI only. Existing game layout and effects remain unchanged. */
 .avatar-picker{margin:14px 0 2px;padding:0;border:0;min-width:0}
 .avatar-picker legend{padding:0;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.15em}
-.avatar-choices{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:9px}
+.avatar-choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:9px}
 .avatar-choice{position:relative;width:100%;aspect-ratio:1;padding:2px;border:2px solid #29455e;border-radius:50%;background:#07111d;box-shadow:0 5px 12px #0007;overflow:hidden;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
 .avatar-choice img,.avatar img,.avatar-portrait img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 .avatar-choice.selected{border-color:var(--yellow);box-shadow:0 0 0 3px #ffdd4230,0 0 18px #ffdd4260;transform:translateY(-2px)}
 .avatar-choice.selected:after{content:'✓';position:absolute;right:-1px;bottom:-1px;width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:var(--yellow);color:#07101d;font-size:10px;font-weight:900;border:2px solid #07111d}
 .avatar{position:relative;border-radius:50%;overflow:visible;background:#07111d!important;border:1px solid #35dff0;box-shadow:0 0 12px #32e5cb38}
 .avatar img{overflow:hidden}
-.seat-identity{display:flex;align-items:center;min-width:0;gap:6px}
-.seat-avatar{width:30px;height:30px;flex:0 0 30px}
+.seat-identity{display:flex;align-items:center;min-width:0;gap:8px}
+.seat-avatar{width:44px;height:44px;flex:0 0 44px}
 .seat-avatar .avatar-portrait{width:100%;height:100%}
 .seat-identity b{min-width:0}
 .avatar-portrait{position:relative;border-radius:50%;background:#07111d;border:2px solid #34dff0;box-shadow:0 4px 12px #0008,0 0 12px #32e5cb38;z-index:5}
@@ -288,9 +288,14 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 .avatar-portrait.avatar-excited{animation:avatarExcited .72s cubic-bezier(.2,.9,.24,1.25) 2}
 .avatar-portrait.avatar-angry{border-color:#ff5d6c;box-shadow:0 4px 12px #0008,0 0 18px #ff5d6c99;animation:avatarAngry .22s linear 6}
 .avatar-portrait.avatar-shocked{border-color:#aa79ff;box-shadow:0 4px 12px #0008,0 0 20px #aa79ffaa;animation:avatarShocked .42s cubic-bezier(.2,.9,.24,1.2) 2}
-.my-zone{position:relative;padding-left:54px}
-.my-avatar-badge{position:absolute;left:5px;top:50%;width:46px;height:46px;transform:translateY(-50%);z-index:6}
-.my-avatar-badge .avatar-portrait{width:46px;height:46px}
+.players .player{height:62px;grid-template-columns:40px minmax(0,1fr) auto;grid-template-rows:1fr 1fr}
+.players .player .avatar{grid-column:1;grid-row:1/3;width:40px;height:40px;margin:0;align-self:center}
+.players .player .name{grid-column:2;grid-row:1;align-self:end}
+.players .player .score{grid-column:3;grid-row:1/3;align-self:center}
+.players .player>small{grid-column:2;grid-row:2;align-self:start;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.my-zone{position:relative;padding-left:72px}
+.my-avatar-badge{position:absolute;left:4px;top:50%;width:64px;height:64px;transform:translateY(-50%);z-index:6}
+.my-avatar-badge .avatar-portrait{width:64px;height:64px}
 @keyframes avatarTurnPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.07);filter:brightness(1.16);box-shadow:0 4px 12px #0008,0 0 20px #ffdd4288}}
 @keyframes avatarExcited{0%,100%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(-8px) rotate(-6deg) scale(1.12)}65%{transform:translateY(-3px) rotate(6deg) scale(1.08)}}
 @keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}

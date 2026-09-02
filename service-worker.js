@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-facial-expressions-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-avatar-expansion-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,9 @@ const APP_SHELL = [
   './avatar-4.webp',
   './avatar-5.webp',
   './avatar-6.webp',
+  './avatar-7.webp',
+  './avatar-8.webp',
+  './avatar-9.webp',
   './avatar-1-excited.webp',
   './avatar-1-angry.webp',
   './avatar-1-shocked.webp',
@@ -35,6 +38,15 @@ const APP_SHELL = [
   './avatar-6-excited.webp',
   './avatar-6-angry.webp',
   './avatar-6-shocked.webp',
+  './avatar-7-excited.webp',
+  './avatar-7-angry.webp',
+  './avatar-7-shocked.webp',
+  './avatar-8-excited.webp',
+  './avatar-8-angry.webp',
+  './avatar-8-shocked.webp',
+  './avatar-9-excited.webp',
+  './avatar-9-angry.webp',
+  './avatar-9-shocked.webp',
   './manifest.json',
   './pwa-register.js',
   './icon-192.png',
