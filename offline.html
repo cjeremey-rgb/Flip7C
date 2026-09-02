@@ -252,6 +252,39 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s cubic-bezier(.18,.72,.28,1)}
 @keyframes screenShock{0%{transform:translate3d(0,0,0);filter:brightness(1)}7%{transform:translate3d(-7px,4px,0) rotate(-.35deg);filter:brightness(1.7)}16%{transform:translate3d(6px,-4px,0) rotate(.28deg);filter:brightness(.72)}27%{transform:translate3d(-4px,2px,0) rotate(-.18deg);filter:brightness(1.2)}42%{transform:translate3d(3px,-1px,0);filter:brightness(.92)}65%{transform:translate3d(-1px,1px,0);filter:brightness(1.04)}100%{transform:translate3d(0,0,0);filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){.screen-effect,.screen-effect-stamp,.freeze-screen-effect,.freeze-screen-texture,.freeze-screen-effect:before,.freeze-screen-effect:after,.shatter-screen-effect,.flip3-screen-effect,.flip3-screen-effect:before,.flip3-screen-effect:after,.flip3-screen-card,.flip3-screen-sparks i{animation-timing-function:linear!important;animation-iteration-count:1!important}}
+
+/* Shared cartoon avatar system for offline and multiplayer play. */
+.avatar-picker{margin:14px 0 2px;padding:0;border:0;min-width:0}
+.avatar-picker legend{padding:0;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.15em}
+.avatar-choices{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:9px}
+.avatar-choice{position:relative;width:100%;aspect-ratio:1;padding:2px;border:2px solid #29455e;border-radius:50%;background:#07111d;box-shadow:0 5px 12px #0007;overflow:hidden;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.avatar-choice img,.avatar-portrait img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-choice.selected{border-color:var(--yellow);box-shadow:0 0 0 3px #ffdd4230,0 0 18px #ffdd4260;transform:translateY(-2px)}
+.avatar-choice.selected:after{content:'✓';position:absolute;right:-1px;bottom:-1px;width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:var(--yellow);color:#07101d;font-size:10px;font-weight:900;border:2px solid #07111d}
+.players .player{height:54px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr}
+.players .player .player-copy{display:contents}
+.players .player .player-copy>b{grid-column:1;grid-row:1;align-self:end;min-width:0;padding-right:4px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.players .player .player-copy>small{grid-column:1;grid-row:2;align-self:start;min-width:0;font-size:6.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.players .player>strong{grid-column:2;grid-row:1/3;align-self:center}
+.bot-seat-head{display:grid;grid-template-columns:72px minmax(0,1fr);grid-template-rows:1fr 1fr;column-gap:9px;min-height:72px;align-items:center}
+.seat-avatar{grid-column:1;grid-row:1/3;width:72px;height:72px}
+.seat-avatar .avatar-portrait{width:100%;height:100%}
+.bot-seat-head>b{grid-column:2;grid-row:1;align-self:end;min-width:0;font-size:11px!important}
+.bot-seat-head>small{grid-column:2;grid-row:2;align-self:start;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.avatar-portrait{position:relative;border-radius:50%;overflow:hidden;background:#07111d;border:2px solid #34dff0;box-shadow:0 4px 12px #0008,0 0 12px #32e5cb38;z-index:5}
+.avatar-portrait.turn-active{animation:avatarTurnPulse 1.1s ease-in-out infinite}
+.avatar-portrait.avatar-excited{animation:avatarExcited .72s cubic-bezier(.2,.9,.24,1.25) 2}
+.avatar-portrait.avatar-angry{border-color:#ff5d6c;box-shadow:0 4px 12px #0008,0 0 18px #ff5d6c99;animation:avatarAngry .22s linear 6}
+.avatar-portrait.avatar-shocked{border-color:#aa79ff;box-shadow:0 4px 12px #0008,0 0 20px #aa79ffaa;animation:avatarShocked .42s cubic-bezier(.2,.9,.24,1.2) 2}
+.my-zone{position:relative;width:100%;padding-left:0}
+.my-avatar-badge{position:absolute;left:7px;top:-98px;width:92px;height:92px;z-index:6}
+.my-avatar-badge .avatar-portrait{width:92px;height:92px}
+.card-piles{left:clamp(34px,11vw,48px)}
+@keyframes avatarTurnPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.07);filter:brightness(1.16);box-shadow:0 4px 12px #0008,0 0 20px #ffdd4288}}
+@keyframes avatarExcited{0%,100%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(-8px) rotate(-6deg) scale(1.12)}65%{transform:translateY(-3px) rotate(6deg) scale(1.08)}}
+@keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
+@keyframes avatarShocked{0%,100%{transform:scale(1) rotate(0)}45%{transform:scale(1.13) rotate(-2deg)}70%{transform:scale(1.07) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.avatar-shocked{animation:none}}
 </style>
 </head>
 <body>
@@ -268,6 +301,20 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
     </div>
     <div class="panel join-panel">
       <label>PLAYER NAME<input id="name" maxlength="18" autocomplete="nickname" placeholder="Enter your name"></label>
+      <fieldset class="avatar-picker">
+        <legend>CHOOSE YOUR AVATAR</legend>
+        <div id="avatarChoices" class="avatar-choices" role="radiogroup" aria-label="Choose your avatar">
+          <button type="button" class="avatar-choice" data-avatar="avatar-1" role="radio" aria-label="Curly-haired avatar"><img src="avatar-1.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-2" role="radio" aria-label="Red-shirt avatar"><img src="avatar-2.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-3" role="radio" aria-label="Blond avatar"><img src="avatar-3.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-4" role="radio" aria-label="Blue-shirt avatar"><img src="avatar-4.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-5" role="radio" aria-label="Sunglasses avatar"><img src="avatar-5.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-6" role="radio" aria-label="Bearded avatar"><img src="avatar-6.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-7" role="radio" aria-label="Glasses and braces avatar"><img src="avatar-7.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-8" role="radio" aria-label="Sunglasses and beard avatar"><img src="avatar-8.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-9" role="radio" aria-label="Dark-haired braces avatar"><img src="avatar-9.webp" alt=""></button>
+        </div>
+      </fieldset>
       <button id="create" class="primary big"><span>Start offline game</span><small>Play against two computer players</small></button>
       <div class="divider"><span>NO SERVER REQUIRED</span></div>
       <div class="join"><input id="roomCode" value="OFFLINE" disabled><button id="join">PLAY</button></div>
@@ -305,7 +352,10 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
           <small><b id="discardCount">0</b> DISCARDED</small>
         </div>
       </div>
-      <div id="myArea" class="my-area"><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
+      <div class="my-zone">
+        <div id="myAvatarBadge" class="my-avatar-badge" aria-hidden="true"></div>
+        <div id="myArea" class="my-area"><div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>0</b></div></div>
+      </div>
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
@@ -328,6 +378,15 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <script src="screen-effects.js?v=20260902-guardian-shield-v4"></script>
 <script>
 const $=id=>document.getElementById(id);
+const HUMAN_AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9'];
+const OFFLINE_AVATAR_IDS=[...HUMAN_AVATAR_IDS,'avatar-nova','avatar-ace'];
+let selectedAvatar=HUMAN_AVATAR_IDS.includes(localStorage.fr7avatar)?localStorage.fr7avatar:'avatar-1';
+const avatarEmotions=new Map();
+function selectAvatar(id){if(!HUMAN_AVATAR_IDS.includes(id))return;selectedAvatar=id;localStorage.fr7avatar=id;document.querySelectorAll('.avatar-choice').forEach(button=>{const chosen=button.dataset.avatar===id;button.classList.toggle('selected',chosen);button.setAttribute('aria-checked',String(chosen));button.tabIndex=chosen?0:-1})}
+$('avatarChoices')?.addEventListener('click',event=>{const button=event.target.closest('.avatar-choice');if(button)selectAvatar(button.dataset.avatar)});
+selectAvatar(selectedAvatar);
+for(const id of OFFLINE_AVATAR_IDS)for(const mood of ['excited','angry','shocked']){const image=new Image();image.src=`${id}-${mood}.webp`}
+$('name').value=localStorage.fr7name||'';
 
 function applyFlipRushTheme(){
  const params=new URLSearchParams(location.search);
@@ -381,8 +440,8 @@ for(let i=0;i<3;i++)d.push({t:'a',v:'FREEZE'},{t:'a',v:'FLIP 3'},{t:'a',v:'SECON
 if(d.length!==94)throw new Error('Deck construction error: expected 94 cards, found '+d.length);
 return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function newPlayer(name,bot=false,style='balanced'){return{name,bot,style,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
-function startOffline(){let name=$('name').value.trim()||'You';players=[newPlayer(name),newPlayer('Nova',true,'cautious'),newPlayer('Ace',true,'bold')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;showGame();requestAnimationFrame(()=>setTimeout(newRound,0))}
+function newPlayer(id,name,bot=false,style='balanced',avatar=''){return{id,name,bot,style,avatar,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
+function startOffline(){let name=$('name').value.trim()||'You';localStorage.fr7name=name;localStorage.fr7avatar=selectedAvatar;players=[newPlayer('local',name,false,'balanced',selectedAvatar),newPlayer('nova','Nova',true,'cautious','avatar-nova'),newPlayer('ace','Ace',true,'bold','avatar-ace')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;showGame();requestAnimationFrame(()=>setTimeout(newRound,0))}
 function showGame(){$('home').classList.remove('active');$('game').classList.add('active');$('start').classList.add('hidden');$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');}
 function replenishDeck(){if(!deck.length&&discard.length){deck=shuffle(discard.splice(0));log('The discard pile was shuffled into a new draw pile.')}}
 function takeCard(){replenishDeck();return deck.pop()||null}
@@ -473,6 +532,11 @@ function showLocalScreenEffect(type){
 function value(p){let sum=0,m=0,x=1;p.cards.forEach(c=>{if(c.t==='n')sum+=c.v;else if(c.t==='m'){if(c.v==='x2')x*=2;else m+=Number(c.v.slice(1))}});return sum*x+m+(p.nums.size>=7?15:0)}
 function isRoundActive(p){return !!p&&!p.bust&&!p.banked&&!p.frozen}
 function active(){return players.filter(isRoundActive)}
+function avatarMoodType(playerId){const emotion=avatarEmotions.get(playerId);return emotion&&emotion.until>Date.now()?emotion.type:''}
+function avatarSource(player,mood=avatarMoodType(player?.id)){if(!OFFLINE_AVATAR_IDS.includes(player?.avatar))return'';return `${player.avatar}${['excited','angry','shocked'].includes(mood)?`-${mood}`:''}.webp`}
+function setAvatarEmotion(player,type,duration=1600){if(!player?.id)return;const token=`${Date.now()}-${Math.random()}`;avatarEmotions.set(player.id,{type,token,until:Date.now()+duration});setTimeout(()=>{const currentEmotion=avatarEmotions.get(player.id);if(currentEmotion?.token!==token)return;avatarEmotions.delete(player.id);if(players.includes(player))render()},duration+30)}
+function avatarMoodClass(player,turnId=''){const mood=avatarMoodType(player?.id);return `${turnId===player?.id?'turn-active ':''}${mood?`avatar-${mood}`:''}`.trim()}
+function avatarPortraitMarkup(player,turnId=''){const source=avatarSource(player);return `<div class="avatar-portrait ${avatarMoodClass(player,turnId)}">${source?`<img src="${source}" alt="">`:(player?.name||'?').charAt(0).toUpperCase()}</div>`}
 
 function eligibleSecondChanceTargets(sourceIndex){return players.map((p,i)=>({p,i})).filter(x=>x.i!==sourceIndex&&isRoundActive(x.p)&&!x.p.second)}
 async function chooseSecondChanceTarget(sourceIndex){
@@ -493,11 +557,11 @@ async function chooseSecondChanceTarget(sourceIndex){
 async function resolveSecondChance(sourceIndex,card){
  const source=players[sourceIndex];
  if(sourceIndex===me)showLocalScreenEffect('secondChance');
- if(!source.second){removeCard(source,card);await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,sourceIndex,()=>{source.second=true;source.cards.push(card);log(source.name+' kept a Second Chance.')},{showGiver:false});return}
+ if(!source.second){removeCard(source,card);await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,sourceIndex,()=>{source.second=true;source.cards.push(card);setAvatarEmotion(source,'excited');log(source.name+' kept a Second Chance.')},{showGiver:false});return}
  const targetIndex=await chooseSecondChanceTarget(sourceIndex);
  removeCard(source,card);
  if(targetIndex===null){await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,sourceIndex,()=>{discardCard(card);log(source.name+' drew an extra Second Chance, but every other active player already has one, so it was discarded.')},{showGiver:false,outcome:'discard'});return}
- await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,targetIndex,()=>{players[targetIndex].second=true;players[targetIndex].cards.push(card);log(source.name+' gave the extra Second Chance to '+players[targetIndex].name+'.')});
+ await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,targetIndex,()=>{players[targetIndex].second=true;players[targetIndex].cards.push(card);setAvatarEmotion(source,'excited');setAvatarEmotion(players[targetIndex],'excited');log(source.name+' gave the extra Second Chance to '+players[targetIndex].name+'.')});
 }
 
 function eligibleFreezeTargets(){return players.map((p,i)=>({p,i})).filter(x=>isRoundActive(x.p))}
@@ -528,7 +592,7 @@ async function resolveFreeze(sourceIndex,freezeCard){
  const targetIndex=await chooseFreezeTarget(sourceIndex);
  removeCard(source,freezeCard);
  if(targetIndex===null){discardCard(freezeCard);log('No active player could receive Freeze, so it was discarded.');return null}
- const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;if(targetIndex===me)showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
+ const target=players[targetIndex];await runOfflineActionTransfer('FREEZE',sourceIndex,targetIndex,()=>{target.cards.push(freezeCard);target.banked=true;target.frozen=true;setAvatarEmotion(target,'angry',1900);if(target!==source)setAvatarEmotion(source,'excited');if(targetIndex===me)showLocalScreenEffect('freeze');log(source.name+' froze '+target.name+' for the rest of the round.')});
  if(active().length===0)endRound('All players are out of the round.');
  return targetIndex;
 }
@@ -570,7 +634,7 @@ async function resolveFlip3(sourceIndex,flipCard){
  const targetIndex=await chooseFlip3Target(sourceIndex);
  removeCard(source,flipCard);
  if(targetIndex===null){discardCard(flipCard);log('No active player could receive Flip 3.');render();return}
- const target=players[targetIndex];log(source.name+' gave Flip 3 to '+target.name+'.');
+ const target=players[targetIndex];setAvatarEmotion(target,'shocked',1800);if(target!==source)setAvatarEmotion(source,'excited');log(source.name+' gave Flip 3 to '+target.name+'.');
  activeFlipThree={token:String(Date.now())+Math.random(),fromIndex:sourceIndex,targetIndex,stage:'giver'};render();await wait(1000);
  activeFlipThree.stage='target';render();await wait(targetIndex===me?FLIP3_SEQUENCE_INTRO_MS:700);
  const queued=[];
@@ -603,18 +667,19 @@ async function resolveNumberCard(i,c,options={}){
    const secondIndex=p.cards.findIndex(card=>card.t==='a'&&card.v==='SECOND CHANCE');
    if(secondIndex>=0)discardCard(p.cards.splice(secondIndex,1)[0]);
    const duplicateIndex=p.cards.lastIndexOf(c);if(duplicateIndex>=0)discardCard(p.cards.splice(duplicateIndex,1)[0]);
-   log(p.name+' discarded Second Chance and the duplicate '+c.v+'.');render();return 'protected';
+   setAvatarEmotion(p,'excited',1900);log(p.name+' discarded Second Chance and the duplicate '+c.v+'.');render();return 'protected';
   }
-  p.bust=true;log(p.name+' busted on a duplicate '+c.v+'!');render();if(i===me){if(options.fromFlipThree)await wait(FLIP3_BUST_DELAY_MS);showLocalScreenEffect('bust')}return 'bust';
+  p.bust=true;setAvatarEmotion(p,'angry',2100);log(p.name+' busted on a duplicate '+c.v+'!');render();if(i===me){if(options.fromFlipThree)await wait(FLIP3_BUST_DELAY_MS);showLocalScreenEffect('bust')}return 'bust';
  }
  p.nums.add(c.v);
- if(p.nums.size>=7&&!p.bonusAwarded){p.bonusAwarded=true;log(p.name+' reached seven unique number cards and earned a +15 bonus!');showSevenBonus(p);render();endRound(p.name+' reached Flip 7 and ended the round immediately!');return 'flip7'}
+ if(p.nums.size>=7&&!p.bonusAwarded){p.bonusAwarded=true;setAvatarEmotion(p,'excited',2300);log(p.name+' reached seven unique number cards and earned a +15 bonus!');showSevenBonus(p);render();endRound(p.name+' reached Flip 7 and ended the round immediately!');return 'flip7'}
+ setAvatarEmotion(p,'excited');
  return 'safe';
 }
 async function drawFor(i){
  const p=players[i];if(!running||!isRoundActive(p))return null;
  const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return null}
- p.cards.push(c);log(p.name+' drew '+c.v);render();
+ p.cards.push(c);if(c.t!=='n')setAvatarEmotion(p,c.t==='a'?'shocked':'excited');log(p.name+' drew '+c.v);render();
  if(c.t==='a')await wait(1000);
  if(c.t==='n')await resolveNumberCard(i,c);
  else if(c.t==='a'&&c.v==='SECOND CHANCE')await resolveSecondChance(i,c);
@@ -639,10 +704,10 @@ function botShouldStay(p){
 function turnLoop(){
  if(!running)return;if(active().length===0){endRound();return}
  let p=players[current];if(!p||!isRoundActive(p)){nextTurn();return}
- if(p.bot){const botIndex=current;setTimeout(async()=>{if(!running||current!==botIndex)return;p=players[botIndex];if(!p||!isRoundActive(p)){nextTurn();return}if(botShouldStay(p)){p.banked=true;log(p.name+' decides to hold with '+value(p)+' points');render();nextTurn()}else{log(p.name+' chooses to flip');await drawFor(botIndex);render();if(running)nextTurn()}},850+Math.floor(Math.random()*650))}
+ if(p.bot){const botIndex=current;setTimeout(async()=>{if(!running||current!==botIndex)return;p=players[botIndex];if(!p||!isRoundActive(p)){nextTurn();return}if(botShouldStay(p)){p.banked=true;setAvatarEmotion(p,'excited');log(p.name+' decides to hold with '+value(p)+' points');render();nextTurn()}else{log(p.name+' chooses to flip');await drawFor(botIndex);render();if(running)nextTurn()}},850+Math.floor(Math.random()*650))}
 }
 async function hit(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;$('hit').disabled=true;$('stay').disabled=true;await drawFor(current);if(running)nextTurn()}
-function stay(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;players[current].banked=true;log(players[current].name+' stays with '+value(players[current]));render();nextTurn()}
+function stay(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;players[current].banked=true;setAvatarEmotion(players[current],'excited');log(players[current].name+' stays with '+value(players[current]));render();nextTurn()}
 function showSevenBonus(p){const flash=$('bonusFlash');flash.innerHTML=`${p.name} reached 7 number cards!<b>+15</b>`;flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');launchConfetti();setTimeout(()=>flash.classList.remove('show'),2200)}
 function launchConfetti(){const box=$('confetti');box.innerHTML='';for(let i=0;i<70;i++){const c=document.createElement('i');c.className='confetti-piece';c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.8)+'s';c.style.background=['#ffdd42','#ff4f8b','#32e5cb','#74dfff','#ffffff'][i%5];box.appendChild(c)}setTimeout(()=>box.innerHTML='',3600)}
 function showWinner(winner){
@@ -675,10 +740,12 @@ function syncOfflineFlipThreeTransfer(){let card=$('flipThreeTransferCard');if(!
 function syncOfflineActionTransfer(){let card=$('actionTransferCard');if(!activeActionTransfer){if(card&&!card.classList.contains('discarding')&&!card.classList.contains('settling')){const outcome=offlineActionTransferOutcome,targetIndex=offlineActionTransferTarget;offlineActionTransferToken='';offlineActionTransferStage='';offlineActionTransferOutcome='';offlineActionTransferTarget=null;if(outcome==='discard'){card.classList.add('discarding');placeOfflineFlipThreeCard(card,$('discardVisual'));setTimeout(()=>card.remove(),520)}else{card.classList.add('settling');placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(targetIndex));setTimeout(()=>card.remove(),420)}}return}const stage=activeActionTransfer.stage||'giver',anchorIndex=stage==='giver'?activeActionTransfer.fromIndex:activeActionTransfer.targetIndex;if(!card||offlineActionTransferToken!==activeActionTransfer.token){card?.remove();const holder=document.createElement('div');holder.innerHTML=cardHtml({t:'a',v:activeActionTransfer.name});card=holder.firstElementChild;card.id='actionTransferCard';card.classList.add('action-transfer-card');document.body.appendChild(card);offlineActionTransferToken=activeActionTransfer.token;offlineActionTransferStage=stage;offlineActionTransferOutcome=activeActionTransfer.outcome||'settle';offlineActionTransferTarget=activeActionTransfer.targetIndex;placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex));return}offlineActionTransferOutcome=activeActionTransfer.outcome||'settle';offlineActionTransferTarget=activeActionTransfer.targetIndex;if(stage!==offlineActionTransferStage){offlineActionTransferStage=stage;card.classList.add('moving');requestAnimationFrame(()=>placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex)));setTimeout(()=>card.classList.remove('moving'),680)}else placeOfflineFlipThreeCard(card,offlineFlipThreeAnchor(anchorIndex))}
 async function runOfflineActionTransfer(name,fromIndex,targetIndex,complete,options={}){const showGiver=options.showGiver!==false;activeActionTransfer={token:String(Date.now())+Math.random(),name,fromIndex,targetIndex,stage:showGiver?'giver':'target',outcome:options.outcome||'settle'};render();if(showGiver){await wait(1000);activeActionTransfer.stage='target';render()}await wait(900);complete();activeActionTransfer=null;render();await wait(180)}
 function offlineStatus(){if(activeActionTransfer){const a=activeActionTransfer,label=a.name,giver=players[a.fromIndex],target=players[a.targetIndex];if(a.stage==='giver'&&a.fromIndex!==a.targetIndex)return`<span class="pulse"></span><b>${giver.name} GIVES ${label}</b><small>Moving to ${target.name}</small>`;if(a.outcome==='discard')return`<span class="pulse"></span><b>${giver.name} REVEALS ${label}</b><small>No eligible recipient — moving to discard</small>`;return`<span class="pulse"></span><b>${target.name} RECEIVES ${label}</b><small>${label==='FREEZE'?'Freeze will remain with that player this round':'Protection is being added to that hand'}</small>`}if(activeFlipThree)return`<span class="pulse"></span><b>${activeFlipThree.stage==='giver'?players[activeFlipThree.fromIndex].name+' GIVES FLIP THREE':players[activeFlipThree.targetIndex].name+' RECEIVES FLIP THREE'}</b><small>${activeFlipThree.stage==='giver'?'Moving to '+players[activeFlipThree.targetIndex].name:'Three cards are being revealed one at a time'}</small>`;return`<span class="pulse"></span><b>${running?'OFFLINE PRACTICE':'READY'}</b><small>${running?'Playing against two computer players':'No server required'}</small>`}
-function render(){$('deckCount').textContent=deck.length;renderOfflineDiscardPile();$('roomCode').value='OFFLINE';$('status').innerHTML=offlineStatus();
- $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="avatar">${p.name[0]}</div><div><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
- $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}" data-player-index="${i}"><div class="bot-seat-head"><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
+function render(){$('deckCount').textContent=deck.length;renderOfflineDiscardPile();$('roomCode').value='OFFLINE';$('status').classList.toggle('hidden',!running);$('status').innerHTML=offlineStatus();
+ const turnId=running?players[current]?.id:'';
+ $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="player-copy"><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
+ $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}" data-player-index="${i}"><div class="bot-seat-head"><div class="seat-avatar">${avatarPortraitMarkup(bp,turnId)}</div><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
  const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]},scoreHtml=`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${p?value(p):0}</b></div>`;$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${scoreHtml}${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:scoreHtml;
+ $('myAvatarBadge').innerHTML=p?avatarPortraitMarkup(p,turnId):'';
  const mine=running&&current===me&&isRoundActive(p);document.body.classList.toggle('my-turn',mine);if(mine&&!activeActionTransfer&&!activeFlipThree)$('status').innerHTML='<span class="pulse"></span><b>YOUR DECISION — FLIP OR HOLD</b><small>It is your turn</small>';$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();syncOfflineFlipThreeTransfer();syncOfflineActionTransfer();
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}

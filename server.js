@@ -11,7 +11,7 @@ const ALLOWED_REACTIONS = new Set(['🔥','😂','🤣','😁','😅','😬','�
 const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!', 'Good luck!', "Let's go!", 'Your turn!', 'Hurry up!', 'No way!', 'Are you kidding me?', 'That was lucky!', 'Bad luck!', 'I needed that!', "Don't bust!", 'Risk it!', 'Hold already!', 'Not today!', 'Ouch!', 'Great game!', 'You got this!', 'That hurt!', "I'm feeling lucky!", 'Here we go!']);
 const BECCA_PHRASE = "You're a peckerhead!";
 const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
-const ALLOWED_AVATARS = new Set(['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6', 'avatar-7', 'avatar-8', 'avatar-9']);
+const ALLOWED_AVATARS = new Set(['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6', 'avatar-7', 'avatar-8', 'avatar-9', 'avatar-nova', 'avatar-ace']);
 const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INITIAL_DEAL_MS = 900;
 const FLIP_THREE_GIVER_MS = 1000;
@@ -67,7 +67,8 @@ function makePlayer(id, name, avatar = null) {
 }
 
 function addComputerPlayer(room, name = 'Computer', style = 'balanced') {
-  const computer = makePlayer(`computer-${uid()}`, name);
+  const computerAvatar = name === 'Ace' ? 'avatar-ace' : 'avatar-nova';
+  const computer = makePlayer(`computer-${uid()}`, name, computerAvatar);
   computer.computer = true;
   computer.computerStyle = style;
   room.players.push(computer);
