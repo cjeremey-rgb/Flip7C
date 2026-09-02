@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-showdown-title-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-one-screen-shell-v2';
 const APP_SHELL = [
   './',
   './index.html',

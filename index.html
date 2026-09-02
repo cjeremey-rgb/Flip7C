@@ -13,15 +13,33 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="online.css">
+  <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
+  <link rel="stylesheet" href="online.css?v=20260902-one-screen-shell-v2">
   <style>
-    .mode-panel{padding:20px}
-    .mode-link{display:flex;min-height:72px;align-items:center;justify-content:center;flex-direction:column;text-decoration:none;text-align:center;border-radius:17px;padding:14px;transition:transform .16s ease,filter .16s ease}
+    .mode-home .topbar{height:24px}
+    .mode-home .showdown-hero{padding-top:0}
+    .mode-panel{position:relative;width:100%;max-width:520px;margin:0 auto;padding:11px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;border:1px solid #34dff0aa;box-shadow:0 22px 60px #0009,0 0 25px #32e5cb1c}
+    .mode-link{position:relative;min-width:0;min-height:142px;display:flex;align-items:center;justify-content:flex-end;flex-direction:column;text-decoration:none;text-align:center;border-radius:18px;padding:12px 8px 13px;overflow:hidden;transition:transform .16s ease,filter .16s ease}
     .mode-link:active{transform:translateY(4px)}
-    .mode-link span{display:block;font-weight:900;letter-spacing:.04em}
-    .mode-link small{display:block;margin-top:4px;opacity:.68;font-size:10px}
-    .mode-link.secondary{color:#fff;box-shadow:0 5px 0 #07101a}
-    .mode-panel .divider{margin:19px 0}
+    .mode-link span{display:block}.mode-link b{display:block;font:900 14px 'Archivo Black',Inter,sans-serif;letter-spacing:.03em}.mode-link small{display:block;margin-top:4px;opacity:.75;font-size:8px;line-height:1.3}
+    .mode-link.secondary{color:#fff;background:linear-gradient(160deg,#173c55,#0d2235);border:1px solid #3b6d8d;box-shadow:0 5px 0 #07101a,0 0 17px #32e5cb20}
+    .mode-panel .divider{display:none}
+    .mode-art{position:relative;width:100%;height:77px;margin-bottom:7px}
+    .mode-face{position:absolute;top:0;width:70px;height:70px;border-radius:50%;object-fit:cover;background:#07111d;border:2px solid #34dff0;box-shadow:0 5px 12px #0009,0 0 12px #32e5cb55}
+    .mode-face.center{z-index:3;left:50%;transform:translateX(-50%)}.mode-face.left{z-index:2;left:5px;top:9px;width:58px;height:58px}.mode-face.right{z-index:2;right:5px;top:9px;width:58px;height:58px}.mode-face.far-left{z-index:1;left:-3px;top:18px;width:48px;height:48px}.mode-face.far-right{z-index:1;right:-3px;top:18px;width:48px;height:48px}
+    .single-mode{background:linear-gradient(180deg,#ffe96b,#ffc51e);color:#101923;border:2px solid #fff09a;box-shadow:0 5px 0 #9b7714,0 0 20px #ffdd4244}
+    .single-mode .mode-face{border-color:#fff09a}.multi-mode .mode-face{border-color:#34dff0}
+    @media(max-width:699px){
+      #home.mode-home.screen.active{padding-bottom:5px}
+      .mode-home .showdown-stage{height:285px}
+      .mode-home .showdown-main{width:112px;margin-left:-56px;top:0}.mode-home .showdown-left{width:92px;top:62px}.mode-home .showdown-right{width:89px;top:58px}.mode-home .showdown-dog{width:84px;top:129px;right:20px}
+      .mode-home .showdown-stage .logo{top:106px;font-size:72px}.mode-home .showdown-card-splash{bottom:0}
+      .mode-home .fly-two,.mode-home .fly-five{bottom:18px}
+      .mode-panel{flex:0 0 auto}
+      .mode-home footer{display:block;margin:4px 0 0;font-size:7px}
+    }
+    @media(max-width:370px),(max-height:700px){
+      .mode-home .showdown-stage{height:235px}.mode-home .showdown-main{width:88px;margin-left:-44px}.mode-home .showdown-left{width:72px;top:52px}.mode-home .showdown-right{width:70px;top:49px}.mode-home .showdown-dog{width:66px;top:105px}.mode-home .showdown-stage .logo{top:83px;font-size:60px}.mode-home .showdown-card-splash{transform:translateX(-50%) scale(.78);transform-origin:center bottom}.mode-link{min-height:124px}.mode-art{height:64px}.mode-face{width:58px;height:58px}.mode-face.left,.mode-face.right{width:49px;height:49px}}
   </style>
 </head>
 <body>
@@ -29,23 +47,30 @@
 <div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
 <div id="seasonBadge" class="season-badge"></div>
 <main>
-  <section id="home" class="screen active">
-    <nav class="topbar"><span></span><span></span></nav>
-    <div class="hero">
+  <section id="home" class="screen active showdown-home mode-home">
+    <nav class="topbar" aria-hidden="true"><span></span><span></span></nav>
+    <div class="hero showdown-hero">
       <span class="kicker">CHOOSE YOUR GAME</span>
-      <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
+      <div class="showdown-stage">
+        <i class="showdown-spark spark-one"></i><i class="showdown-spark spark-two"></i><i class="showdown-spark spark-three"></i><i class="showdown-spark spark-four"></i>
+        <div class="showdown-avatar showdown-left"><img src="avatar-5-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-main"><img src="avatar-4-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-right"><img src="avatar-3-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-dog"><img src="avatar-10-excited.webp" alt=""></div>
+        <div class="showdown-fly-card fly-rush">RUSH</div><div class="showdown-fly-card fly-flip">FLIP</div><div class="showdown-fly-card fly-seven">7</div><div class="showdown-fly-card fly-two">2</div><div class="showdown-fly-card fly-five">5</div>
+        <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
+        <div class="card-splash showdown-card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
+      </div>
       <p>Draw boldly. Bank wisely. Be the first to seven unique numbers.</p>
-      <div class="card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
     </div>
     <div class="panel mode-panel">
-      <a href="offline.html" class="primary mode-link" id="singlePlayer">
-        <span>SINGLE PLAYER</span>
-        <small>Play against computer players</small>
+      <a href="offline.html" class="mode-link single-mode" id="singlePlayer">
+        <span class="mode-art" aria-hidden="true"><img class="mode-face center" src="avatar-6-excited.webp" alt=""><img class="mode-face left" src="avatar-nova.webp" alt=""><img class="mode-face right" src="avatar-ace.webp" alt=""></span>
+        <span><b>SINGLE PLAYER</b><small>Challenge Nova and Ace</small></span>
       </a>
-      <div class="divider"><span>OR</span></div>
-      <a href="online.html" class="secondary mode-link" id="multiPlayer">
-        <span>MULTIPLAYER</span>
-        <small>Create or join a private room</small>
+      <a href="online.html" class="mode-link multi-mode secondary" id="multiPlayer">
+        <span class="mode-art" aria-hidden="true"><img class="mode-face center" src="avatar-1-excited.webp" alt=""><img class="mode-face left" src="avatar-5-excited.webp" alt=""><img class="mode-face right" src="avatar-7-excited.webp" alt=""><img class="mode-face far-right" src="avatar-10-excited.webp" alt=""></span>
+        <span><b>MULTIPLAYER</b><small>Play together from separate phones</small></span>
       </a>
     </div>
     <footer>Choose a mode to start playing</footer>
@@ -53,66 +78,17 @@
 </main>
 <script>
 function applyFlipRushTheme(){
- const params=new URLSearchParams(location.search);
- let theme=(params.get('theme')||'neon').toLowerCase();
- if(theme==='seasonal'||theme==='auto'){
-  const now=new Date(),m=now.getMonth()+1,d=now.getDate();
-  if((m===12)||(m===1&&d<=6))theme='christmas';
-  else if(m>=3&&m<=5)theme='spring';
-  else if(m>=6&&m<=8)theme='summer';
-  else if(m>=9&&m<=11)theme='autumn';
-  else theme='winter';
- }
- const allowed=['neon','spring','summer','autumn','winter','christmas'];
- if(!allowed.includes(theme))theme='neon';
- const info={
-  neon:{label:'Neon Circuit',icon:'\u26a1',count:20},
-  spring:{label:'Spring Table',icon:'\ud83c\udf38',count:16},
-  summer:{label:'Summer Table',icon:'\u2600\ufe0f',count:10},
-  autumn:{label:'Autumn Table',icon:'\ud83c\udf42',count:18},
-  winter:{label:'Winter Table',icon:'\u2744\ufe0f',count:22},
-  christmas:{label:'Christmas Table',icon:'\ud83c\udf84',count:24}
- }[theme];
- document.body.dataset.season=theme;
- const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
- const badge=document.getElementById('seasonBadge');
- if(badge)badge.innerHTML='<span>'+info.icon+'</span>'+info.label;
- const layer=document.getElementById('seasonalLayer');
- if(!layer)return;
- layer.innerHTML='';
- for(let i=0;i<info.count;i++){
-  const el=document.createElement('i');
-  let glyph='\u2022';
-  if(theme==='neon')glyph=Math.random()>.42?'\u2726':'\u2022';
-  if(theme==='christmas')glyph=Math.random()>.35?'\u2744':'\u2726';
-  if(theme==='spring')glyph=Math.random()>.35?'\u273f':'\u2022';
-  if(theme==='summer')glyph=Math.random()>.55?'\u2726':'\u2022';
-  if(theme==='autumn')glyph=Math.random()>.5?'\ud83c\udf41':'\ud83c\udf42';
-  if(theme==='winter')glyph='\u2744';
-  el.textContent=glyph;
-  el.style.left=Math.random()*100+'vw';
-  el.style.fontSize=(theme==='summer'?5+Math.random()*7:theme==='neon'?6+Math.random()*10:9+Math.random()*13)+'px';
-  el.style.animationDuration=(theme==='neon'?7+Math.random()*10:8+Math.random()*12)+'s';
-  el.style.animationDelay=(-Math.random()*18)+'s';
-  el.style.setProperty('--drift',(-45+Math.random()*90)+'px');
-  if(theme==='neon')el.style.color=['#32e5cb','#ffdd42','#ff4f8b','#74dfff'][i%4];
-  if(theme==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';
-  if(theme==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';
-  if(theme==='winter'||theme==='christmas')el.style.color='#fff';
-  layer.appendChild(el);
- }
+ const params=new URLSearchParams(location.search);let theme=(params.get('theme')||'neon').toLowerCase();
+ if(theme==='seasonal'||theme==='auto'){const now=new Date(),m=now.getMonth()+1,d=now.getDate();if((m===12)||(m===1&&d<=6))theme='christmas';else if(m>=3&&m<=5)theme='spring';else if(m>=6&&m<=8)theme='summer';else if(m>=9&&m<=11)theme='autumn';else theme='winter'}
+ const allowed=['neon','spring','summer','autumn','winter','christmas'];if(!allowed.includes(theme))theme='neon';
+ const info={neon:{label:'Neon Circuit',icon:'⚡',count:20},spring:{label:'Spring Table',icon:'🌸',count:16},summer:{label:'Summer Table',icon:'☀️',count:10},autumn:{label:'Autumn Table',icon:'🍂',count:18},winter:{label:'Winter Table',icon:'❄️',count:22},christmas:{label:'Christmas Table',icon:'🎄',count:24}}[theme];
+ document.body.dataset.season=theme;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',getComputedStyle(document.body).backgroundColor||'#07101d');
+ const badge=document.getElementById('seasonBadge');if(badge)badge.innerHTML='<span>'+info.icon+'</span>'+info.label;const layer=document.getElementById('seasonalLayer');if(!layer)return;layer.innerHTML='';
+ for(let i=0;i<info.count;i++){const el=document.createElement('i');let glyph='•';if(theme==='neon')glyph=Math.random()>.42?'✦':'•';if(theme==='christmas')glyph=Math.random()>.35?'❄':'✦';if(theme==='spring')glyph=Math.random()>.35?'✿':'•';if(theme==='summer')glyph=Math.random()>.55?'✦':'•';if(theme==='autumn')glyph=Math.random()>.5?'🍁':'🍂';if(theme==='winter')glyph='❄';el.textContent=glyph;el.style.left=Math.random()*100+'vw';el.style.fontSize=(theme==='summer'?5+Math.random()*7:theme==='neon'?6+Math.random()*10:9+Math.random()*13)+'px';el.style.animationDuration=(theme==='neon'?7+Math.random()*10:8+Math.random()*12)+'s';el.style.animationDelay=(-Math.random()*18)+'s';el.style.setProperty('--drift',(-45+Math.random()*90)+'px');if(theme==='neon')el.style.color=['#32e5cb','#ffdd42','#ff4f8b','#74dfff'][i%4];if(theme==='spring')el.style.color=Math.random()>.5?'#ff9ec0':'#fff1a8';if(theme==='summer')el.style.color=Math.random()>.5?'#ffe36a':'#8cf1ff';if(theme==='winter'||theme==='christmas')el.style.color='#fff';layer.appendChild(el)}
 }
 applyFlipRushTheme();
-const requestedTheme=new URLSearchParams(location.search).get('theme');
-if(requestedTheme){
- document.querySelectorAll('.mode-link').forEach(link=>{
-  const href=link.getAttribute('href');
-  link.setAttribute('href',href+(href.includes('?')?'&':'?')+'theme='+encodeURIComponent(requestedTheme));
- });
-}
+const requestedTheme=new URLSearchParams(location.search).get('theme');if(requestedTheme)document.querySelectorAll('.mode-link').forEach(link=>{const href=link.getAttribute('href');link.setAttribute('href',href+(href.includes('?')?'&':'?')+'theme='+encodeURIComponent(requestedTheme))});
 </script>
-
 <script src="pwa-register.js"></script>
 </body>
 </html>

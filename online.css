@@ -318,6 +318,98 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @media(min-width:700px){#home.showdown-home .topbar{position:absolute}.showdown-home .showdown-hero{text-align:center}.showdown-stage{height:390px;max-width:490px}.showdown-main{width:150px;margin-left:-75px}.showdown-left{width:118px;left:7px}.showdown-right{width:114px;right:7px}.showdown-dog{width:108px;right:30px;top:161px}.showdown-stage .logo{top:141px;font-size:108px}.showdown-card-splash{bottom:5px}.showdown-home .showdown-hero>p{margin-left:auto}}
 @media(prefers-reduced-motion:reduce){.showdown-stage,.showdown-stage:after,.showdown-avatar,.showdown-fly-card,.showdown-stage .logo,.showdown-spark{animation:none}}
 
+/* One-screen mobile shell. Every route stays inside the visible viewport; game
+   hands scale to their allotted table space instead of making the page scroll. */
+@media(max-width:699px){
+  html,body{width:100%;height:100%;min-height:0;overflow:hidden;overscroll-behavior:none}
+  main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
+  .screen{height:100%;min-height:0;overflow:hidden}
+
+  #home.showdown-home.screen.active{display:flex;flex-direction:column;height:100%;min-height:0;padding:calc(5px + env(safe-area-inset-top)) 9px 5px;overflow:hidden}
+  #home.showdown-home .topbar{height:34px;min-height:34px;flex:0 0 34px}
+  #home.showdown-home .topbar .icon-btn{width:32px;height:32px;border-radius:10px}
+  #home.showdown-home .showdown-hero{flex:0 1 auto;min-height:0;padding:0 0 4px}
+  #home.showdown-home .showdown-hero>.kicker{display:block;font-size:7px;line-height:9px;letter-spacing:.2em}
+  #home.showdown-home .showdown-stage{height:clamp(170px,28dvh,218px);max-width:360px;margin-top:0}
+  #home.showdown-home .showdown-main{width:86px;margin-left:-43px;top:0}
+  #home.showdown-home .showdown-left{width:70px;left:6px;top:45px}
+  #home.showdown-home .showdown-right{width:68px;right:6px;top:42px}
+  #home.showdown-home .showdown-dog{width:64px;right:20px;top:99px}
+  #home.showdown-home .showdown-stage .logo{top:74px;font-size:56px}
+  #home.showdown-home .showdown-fly-card{width:32px;height:46px;border-width:2px;border-radius:7px;font-size:7px}
+  #home.showdown-home .fly-flip{left:43px;top:11px}
+  #home.showdown-home .fly-seven{right:4px;top:12px}
+  #home.showdown-home .fly-rush{left:0;top:83px}
+  #home.showdown-home .fly-two{left:5px;bottom:18px}
+  #home.showdown-home .fly-five{right:3px;bottom:18px}
+  #home.showdown-home .showdown-card-splash{bottom:0;height:53px;transform:translateX(-50%) scale(.72);transform-origin:center bottom}
+  #home.showdown-home .showdown-hero>p{margin:1px auto 0;font-size:10px;line-height:1.25}
+  #home.showdown-home .join-panel{width:100%;max-width:430px;flex:0 0 auto;margin:0 auto;padding:9px 11px;border-radius:19px}
+  #home.showdown-home .join-panel:before{inset:5px;border-radius:15px}
+  #home.showdown-home .join-panel label,#home.showdown-home .avatar-picker legend{font-size:7px;letter-spacing:.11em}
+  #home.showdown-home .join-panel input{height:34px;margin-top:3px;padding:7px 10px;border-radius:11px}
+  #home.showdown-home .avatar-picker{margin:6px 0 0}
+  #home.showdown-home .avatar-choices{grid-template-columns:repeat(5,minmax(0,48px));justify-content:space-between;gap:4px;margin-top:4px}
+  #home.showdown-home .avatar-choice{max-width:48px}
+  #home.showdown-home .big{min-height:43px;margin-top:6px;padding:7px;border-radius:13px}
+  #home.showdown-home .big span{font-size:11px}
+  #home.showdown-home .big small{font-size:7px;margin-top:1px}
+  #home.showdown-home .divider{margin:7px 0;font-size:7px}
+  #home.showdown-home .divider:before,#home.showdown-home .divider:after{width:34px;margin:0 6px}
+  #home.showdown-home .join{grid-template-columns:1fr 72px;gap:6px}
+  #home.showdown-home .join input,#home.showdown-home .join button{height:34px;min-height:34px}
+  #home.showdown-home #error{min-height:8px;margin:2px 2px 0;font-size:7px}
+  #home.showdown-home footer{flex:0 0 auto;margin:3px 0 0;font-size:7px;line-height:9px}
+
+  body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
+  #game.screen.active{display:flex;flex-direction:column;height:100%;min-height:0;padding:calc(6px + env(safe-area-inset-top)) 8px calc(82px + var(--bottom-ui-inset));overflow:hidden}
+  #game .game-head{height:38px;min-height:38px;flex:0 0 38px}
+  #game .game-head .icon-btn{width:36px;height:36px}
+  #game .room-pill,#game .round-pill{height:36px}
+  #game .status{flex:0 0 auto;margin:5px 0 4px;padding:5px 8px}
+  #game .players{flex:0 0 auto;padding-bottom:4px}
+  #game .player{height:45px;padding:4px 6px}
+  #game .table{height:auto;min-height:0;flex:1 1 auto;overflow:hidden;padding:7px 7px 8px;border-radius:24px}
+  #game .table:after{inset:6px;border-radius:19px}
+  #game .bot-table{flex:0 0 auto;min-height:0;gap:6px;margin-bottom:4px}
+  #game .bot-seat{min-height:clamp(86px,15dvh,112px);height:clamp(86px,15dvh,112px);padding:5px;border-radius:14px;overflow:hidden}
+  #game .bot-seat-head{grid-template-columns:clamp(48px,8dvh,62px) minmax(0,1fr);min-height:clamp(48px,8dvh,62px);column-gap:6px;margin-bottom:2px}
+  #game .seat-avatar{width:clamp(48px,8dvh,62px);height:clamp(48px,8dvh,62px)}
+  #game .bot-hand{position:absolute;left:calc(clamp(48px,8dvh,62px) + 10px);right:4px;top:38px;bottom:4px;width:auto;height:auto;min-height:0;padding:1px 4px 3px;overflow:hidden}
+  #game .bot-hand .card{width:clamp(24px,4.2dvh,34px);height:clamp(34px,6dvh,48px);font-size:clamp(12px,2.4dvh,17px);margin-left:-11px}
+  #game .card-piles{flex:0 0 auto;gap:22px;height:clamp(72px,13dvh,98px);align-items:flex-start}
+  #game .deck,#game .discard-pile{transform:scale(.82);transform-origin:center top}
+  #game .deck-zone small,#game .discard-zone small{position:relative;top:-16px;margin-top:0}
+  #game .my-zone{width:100%;height:auto;min-height:0;flex:1 1 0;overflow:hidden}
+  #game .my-area{width:100%;height:100%;min-height:0;margin:0;padding:4px 5px;overflow:hidden;border-radius:15px}
+  #game .my-area>.player-hand-row{flex-shrink:0}
+  #game .my-avatar-badge{left:5px;top:-72px;width:68px;height:68px}
+  #game .my-avatar-badge .avatar-portrait{width:68px;height:68px}
+  #game .my-area>.score-preview{right:8px!important;bottom:7px!important}
+  #game .bottom-dock .actions{padding:6px 8px}
+  #game .decision{min-height:54px}
+}
+
+@media(max-width:699px) and (max-height:650px){
+  #home.showdown-home:not(.mode-home) .showdown-stage{height:155px;transform:scale(.86);transform-origin:center top;margin-bottom:-22px}
+  #home.showdown-home:not(.mode-home) .showdown-hero>p{display:none}
+  #home.showdown-home:not(.mode-home) .join-panel{padding:7px 10px}
+  #home.showdown-home:not(.mode-home) .avatar-choices{grid-template-columns:repeat(5,minmax(0,40px))}
+  #home.showdown-home:not(.mode-home) .avatar-choice{max-width:40px}
+  #home.showdown-home:not(.mode-home) footer{display:none}
+  #game .status small{display:none}
+  #game .status{padding:4px 7px}
+  #game .player{height:40px}
+  #game .bot-seat{min-height:86px;height:86px}
+  #game .bot-seat-head{grid-template-columns:44px minmax(0,1fr);min-height:44px}
+  #game .seat-avatar,#game .seat-avatar .avatar-portrait{width:44px;height:44px}
+  #game .bot-hand{left:54px;top:33px;bottom:3px;height:auto;min-height:0}
+  #game .bot-hand .card{width:27px;height:38px;font-size:13px;margin-left:-9px}
+  #game .card-piles{height:64px}
+  #game .deck,#game .discard-pile{transform:scale(.68)}
+  #game .deck-zone small,#game .discard-zone small{top:-29px}
+}
+
 /* Cartoon avatars: additive UI only. Existing game layout and effects remain unchanged. */
 .avatar-picker{margin:14px 0 2px;padding:0;border:0;min-width:0}
 .avatar-picker legend{padding:0;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.15em}
