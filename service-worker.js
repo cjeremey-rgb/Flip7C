@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-guardian-shield-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-guardian-shield-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const APP_SHELL = [
   './screen-effects.js',
   './frost-whiteout.webp',
   './bust-approved-exact.webp',
+  './second-chance-guardian-approved.webp',
   './manifest.json',
   './pwa-register.js',
   './icon-192.png',

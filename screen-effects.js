@@ -7,12 +7,14 @@
   const SECOND_CHANCE_EFFECT_MS = 2150;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
   const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
+  const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
   let frostCache = null;
   let frostTexturePreload = null;
   let bustArtworkPreload = null;
+  let secondChanceArtworkPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -506,153 +508,109 @@
   function startSecondChanceShield(effect) {
     effect.style.animation = 'none';
     effect.style.background = 'transparent';
+    effect.style.isolation = 'auto';
 
-    if (!document.getElementById('secondChanceShieldStyles')) {
-      const style = document.createElement('style');
-      style.id = 'secondChanceShieldStyles';
-      style.textContent = `
-        .second-chance-screen-effect { isolation:isolate; }
-        .second-chance-title {
-          position:absolute;z-index:5;left:50%;top:25%;width:96%;
-          transform:translate(-50%,-50%);text-align:center;white-space:nowrap;
-          color:#fff;font:900 clamp(35px,10.5vw,72px)/.88 'Archivo Black',Impact,sans-serif;
-          letter-spacing:-.025em;-webkit-text-stroke:1px #dffbff;
-          text-shadow:0 4px 0 #087fa8,0 0 8px #fff,0 0 22px #15dfff,0 0 48px #008cff;
-          opacity:0;animation:secondChanceTitle ${SECOND_CHANCE_EFFECT_MS}ms cubic-bezier(.18,.86,.24,1) forwards;
-        }
-        .guardian-shield {
-          position:absolute;z-index:2;left:50%;top:55%;width:min(79vw,470px);height:min(57vh,610px);
-          transform:translate(-50%,-50%) scale(.18);transform-origin:50% 55%;
-          clip-path:polygon(50% 0,94% 12%,94% 53%,87% 72%,72% 88%,50% 100%,28% 88%,13% 72%,6% 53%,6% 12%);
-          background:linear-gradient(145deg,#eaffff 0,#55f1ff 20%,#03aeea 56%,#dffeff 100%);
-          filter:drop-shadow(0 0 9px #dfffff) drop-shadow(0 0 24px #08dfff) drop-shadow(0 0 48px #007cff);
-          opacity:0;animation:guardianShieldLife ${SECOND_CHANCE_EFFECT_MS}ms cubic-bezier(.14,.82,.2,1) forwards;
-        }
-        .guardian-shield-core {
-          position:absolute;inset:5px;
-          clip-path:inherit;
-          background:
-            radial-gradient(circle at 77% 42%,rgba(255,255,255,.72) 0 1px,transparent 3px),
-            repeating-linear-gradient(60deg,rgba(202,252,255,.22) 0 1px,transparent 1px 34px),
-            repeating-linear-gradient(-60deg,rgba(202,252,255,.18) 0 1px,transparent 1px 34px),
-            linear-gradient(160deg,rgba(32,222,255,.34),rgba(0,83,170,.20) 55%,rgba(24,214,255,.34));
-          box-shadow:inset 0 0 28px #a8f7ff,inset 0 0 70px #007eeaaa;
-        }
-        .guardian-shield-core:after {
-          content:'';position:absolute;inset:0;
-          background:radial-gradient(circle at 82% 45%,rgba(255,255,255,.92),rgba(73,232,255,.42) 5%,transparent 17%);
-          opacity:0;animation:guardianImpactFlash ${SECOND_CHANCE_EFFECT_MS}ms ease-out forwards;
-        }
-        .second-chance-card {
-          position:absolute;z-index:4;left:50%;top:55%;width:min(31vw,178px);aspect-ratio:.70;
-          transform:translate(-50%,-50%) rotate(-15deg) scale(.18);border:6px solid #fff;border-radius:22px;
-          display:grid;place-items:center;padding:10px;text-align:center;color:#fff;
-          background:repeating-linear-gradient(135deg,#ff769e 0 20px,#e93473 20px 40px);
-          box-shadow:0 10px 0 #7d1744,0 20px 35px #000b,0 0 20px #ff80bf;
-          font:900 clamp(17px,5.2vw,30px)/.95 'Archivo Black',Impact,sans-serif;
-          text-shadow:0 3px 0 #9d174b;opacity:0;
-          animation:guardianCardLife ${SECOND_CHANCE_EFFECT_MS}ms cubic-bezier(.15,.86,.25,1) forwards;
-        }
-        .second-chance-card:before,.second-chance-card:after {
-          content:'ACTION';position:absolute;left:8px;top:7px;font:800 8px Inter,sans-serif;letter-spacing:.08em;
-        }
-        .second-chance-card:after {left:auto;top:auto;right:8px;bottom:7px;transform:rotate(180deg)}
-        .guardian-hit-card {
-          position:absolute;z-index:4;left:79%;top:53%;width:min(20vw,116px);aspect-ratio:.70;
-          display:grid;place-items:center;border:5px solid #fff;border-radius:17px;color:#fff;
-          background:linear-gradient(145deg,#5d8907,#c8ff22 72%);box-shadow:0 8px 0 #294900,0 15px 28px #000b,0 0 18px #b8ff3d;
-          font:900 clamp(44px,13vw,76px)/1 'Archivo Black',Impact,sans-serif;text-shadow:0 3px 0 #315200;
-          opacity:0;transform:translate(95vw,-16vh) rotate(30deg) scale(1.08);
-          animation:guardianHitCard ${SECOND_CHANCE_EFFECT_MS}ms cubic-bezier(.2,.75,.22,1) forwards;
-        }
-        .guardian-hit-ring {
-          position:absolute;z-index:6;left:81%;top:50%;width:18vmin;height:18vmin;border:5px solid #eaffff;border-radius:50%;
-          box-shadow:0 0 12px #fff,0 0 30px #12dcff;opacity:0;transform:translate(-50%,-50%) scale(.1);
-          animation:guardianHitRing ${SECOND_CHANCE_EFFECT_MS}ms ease-out forwards;
-        }
-        .guardian-shards {position:absolute;z-index:7;left:81%;top:52%;width:1px;height:1px}
-        .guardian-shards i {
-          --a:0deg;--d:22vmin;position:absolute;width:clamp(9px,3vw,17px);height:clamp(12px,4vw,24px);
-          border:2px solid #effff0;background:linear-gradient(145deg,#bfff32,#4b8500);clip-path:polygon(0 0,100% 18%,72% 100%,12% 74%);
-          opacity:0;filter:drop-shadow(0 0 6px #aaff3c);
-          animation:guardianShard ${SECOND_CHANCE_EFFECT_MS}ms cubic-bezier(.18,.75,.25,1) forwards;
-        }
-        @keyframes secondChanceTitle {
-          0%,8%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}
-          19%,78%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-          100%{opacity:0;transform:translate(-50%,-50%) scale(.94)}
-        }
-        @keyframes guardianShieldLife {
-          0%,9%{opacity:0;transform:translate(-50%,-50%) scale(.18)}
-          21%{opacity:.98;transform:translate(-50%,-50%) scale(1.06)}
-          29%,78%{opacity:.96;transform:translate(-50%,-50%) scale(1)}
-          86%{opacity:.8;transform:translate(-50%,-50%) scale(1.03)}
-          100%{opacity:0;transform:translate(-50%,-50%) scale(.76)}
-        }
-        @keyframes guardianCardLife {
-          0%,7%{opacity:0;transform:translate(-50%,-50%) rotate(-15deg) scale(.18)}
-          23%{opacity:1;transform:translate(-50%,-50%) rotate(3deg) scale(1.12)}
-          30%,80%{opacity:1;transform:translate(-50%,-50%) rotate(-2deg) scale(1)}
-          100%{opacity:0;transform:translate(-50%,-50%) rotate(0) scale(.72)}
-        }
-        @keyframes guardianHitCard {
-          0%,25%{opacity:0;transform:translate(95vw,-16vh) rotate(30deg) scale(1.08)}
-          31%{opacity:1}
-          45%{opacity:1;transform:translate(-14%,-50%) rotate(-12deg) scale(1)}
-          49%{opacity:1;transform:translate(3%,-50%) rotate(7deg) scale(.94)}
-          58%,100%{opacity:0;transform:translate(18vw,-36%) rotate(42deg) scale(.42)}
-        }
-        @keyframes guardianImpactFlash {0%,43%{opacity:0}45%{opacity:1}59%,100%{opacity:0}}
-        @keyframes guardianHitRing {0%,43%{opacity:0;transform:translate(-50%,-50%) scale(.1)}45%{opacity:1}62%,100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
-        @keyframes guardianShard {
-          0%,45%{opacity:0;transform:rotate(var(--a)) translateX(0) scale(.2)}
-          49%{opacity:1}
-          72%,100%{opacity:0;transform:rotate(var(--a)) translateX(var(--d)) rotate(190deg) scale(.9)}
-        }
-        @media (max-height:720px) {
-          .second-chance-title{top:21%}.guardian-shield{top:53%;height:60vh}.second-chance-card{top:53%}.guardian-hit-card{top:51%}
-        }
-      `;
-      document.head.appendChild(style);
-    }
+    const artwork = new Image();
+    artwork.className = 'second-chance-approved-artwork';
+    artwork.alt = '';
+    artwork.decoding = 'async';
+    artwork.style.position = 'absolute';
+    artwork.style.zIndex = '2';
+    artwork.style.inset = '0';
+    artwork.style.width = '100%';
+    artwork.style.height = '100%';
+    artwork.style.objectFit = 'fill';
+    artwork.style.objectPosition = 'center';
+    artwork.style.mixBlendMode = 'screen';
+    artwork.style.opacity = '0';
+    artwork.style.transformOrigin = '50% 47%';
+    artwork.style.willChange = 'opacity, transform, filter';
+    effect.appendChild(artwork);
 
-    const title = document.createElement('div');
-    title.className = 'second-chance-title';
-    title.textContent = 'SECOND CHANCE!';
-    effect.appendChild(title);
+    // Screen blending removes the source's pure-black field while preserving the
+    // exact approved glow. This normal-blend card cover keeps the central card
+    // fully opaque, matching the mockup instead of allowing the board through it.
+    const card = document.createElement('div');
+    card.className = 'second-chance-approved-card';
+    card.innerHTML = '<span>SECOND</span><span>CHANCE</span>';
+    Object.assign(card.style, {
+      position: 'absolute',
+      zIndex: '3',
+      left: '49.2%',
+      top: '47.35%',
+      width: 'min(31.5%, 190px)',
+      aspectRatio: '.64',
+      transform: 'translate(-50%,-50%) scale(.82)',
+      transformOrigin: '50% 50%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      border: 'clamp(4px,1.15vw,7px) solid #fff',
+      borderRadius: 'clamp(13px,4.2vw,24px)',
+      color: '#fff',
+      background: 'repeating-linear-gradient(135deg,#ff5f7f 0 17px,#e62f58 17px 34px)',
+      boxShadow: '0 8px 0 #78162d,0 16px 30px rgba(0,0,0,.72),0 0 16px rgba(255,92,132,.55)',
+      fontFamily: "'Archivo Black',Impact,sans-serif",
+      fontSize: 'clamp(17px,4.75vw,30px)',
+      fontWeight: '900',
+      lineHeight: '.95',
+      textAlign: 'center',
+      textShadow: '0 3px 0 #8d1838',
+      opacity: '0',
+      willChange: 'opacity, transform'
+    });
+    effect.appendChild(card);
 
-    const shield = document.createElement('div');
-    shield.className = 'guardian-shield';
-    const shieldCore = document.createElement('div');
-    shieldCore.className = 'guardian-shield-core';
-    shield.appendChild(shieldCore);
-    effect.appendChild(shield);
+    let started = false;
+    const removeEffect = () => {
+      if (effect.isConnected) effect.remove();
+    };
+    const startApprovedArtwork = () => {
+      if (started || !artwork.naturalWidth || !effect.isConnected) return;
+      started = true;
+      artwork.style.opacity = '1';
+      if (artwork.animate) {
+        artwork.animate([
+          { opacity: 0, transform: 'scale(.88)', filter: 'brightness(.75)' },
+          { offset: .12, opacity: 1, transform: 'scale(1.045)', filter: 'brightness(1.18)' },
+          { offset: .22, opacity: 1, transform: 'scale(1)', filter: 'brightness(1)' },
+          { offset: .42, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
+          { offset: .455, opacity: 1, transform: 'translateX(-1.4%) scale(1.012)', filter: 'brightness(1.42)' },
+          { offset: .49, opacity: 1, transform: 'translateX(.8%) scale(1)', filter: 'brightness(1.08)' },
+          { offset: .78, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
+          { opacity: 0, transform: 'scale(.96)', filter: 'brightness(.86)' }
+        ], {
+          duration: SECOND_CHANCE_EFFECT_MS,
+          easing: 'cubic-bezier(.18,.86,.24,1)',
+          fill: 'forwards'
+        });
+      }
+      if (card.animate) {
+        card.animate([
+          { opacity: 0, transform: 'translate(-50%,-50%) rotate(-8deg) scale(.55)' },
+          { offset: .13, opacity: 0, transform: 'translate(-50%,-50%) rotate(-8deg) scale(.55)' },
+          { offset: .24, opacity: 1, transform: 'translate(-50%,-50%) rotate(2deg) scale(1.07)' },
+          { offset: .31, opacity: 1, transform: 'translate(-50%,-50%) rotate(0) scale(1)' },
+          { offset: .79, opacity: 1, transform: 'translate(-50%,-50%) scale(1)' },
+          { opacity: 0, transform: 'translate(-50%,-50%) scale(.92)' }
+        ], {
+          duration: SECOND_CHANCE_EFFECT_MS,
+          easing: 'cubic-bezier(.16,.86,.22,1)',
+          fill: 'forwards'
+        });
+      } else {
+        card.style.opacity = '1';
+        card.style.transform = 'translate(-50%,-50%)';
+      }
+    };
 
-    const secondCard = document.createElement('div');
-    secondCard.className = 'second-chance-card';
-    secondCard.innerHTML = 'SECOND<br>CHANCE';
-    effect.appendChild(secondCard);
-
-    const hitCard = document.createElement('div');
-    hitCard.className = 'guardian-hit-card';
-    hitCard.textContent = '3';
-    effect.appendChild(hitCard);
-
-    const hitRing = document.createElement('div');
-    hitRing.className = 'guardian-hit-ring';
-    effect.appendChild(hitRing);
-
-    const shards = document.createElement('div');
-    shards.className = 'guardian-shards';
-    for (let index = 0; index < 12; index++) {
-      const shard = document.createElement('i');
-      shard.style.setProperty('--a', `${index * 30 - 40}deg`);
-      shard.style.setProperty('--d', `${17 + (index % 4) * 4}vmin`);
-      shards.appendChild(shard);
-    }
-    effect.appendChild(shards);
+    artwork.addEventListener('load', startApprovedArtwork, { once: true });
+    artwork.addEventListener('error', removeEffect, { once: true });
+    artwork.src = SECOND_CHANCE_OVERLAY_URL;
+    if (artwork.complete && artwork.naturalWidth) startApprovedArtwork();
+    else artwork.decode?.().then(startApprovedArtwork).catch(() => {});
   }
-
   function show(type) {
     clearTimeout(effectTimer);
     clearTimeout(shockTimer);
@@ -780,6 +738,12 @@
       bustArtworkPreload.decoding = 'async';
       bustArtworkPreload.src = BUST_OVERLAY_URL;
       bustArtworkPreload.decode?.().catch(() => {});
+    }
+    if (!secondChanceArtworkPreload) {
+      secondChanceArtworkPreload = new Image();
+      secondChanceArtworkPreload.decoding = 'async';
+      secondChanceArtworkPreload.src = SECOND_CHANCE_OVERLAY_URL;
+      secondChanceArtworkPreload.decode?.().catch(() => {});
     }
   }
 
