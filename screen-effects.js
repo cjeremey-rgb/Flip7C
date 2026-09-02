@@ -4,7 +4,7 @@
   const EFFECT_MS = 2500;
   const FREEZE_EFFECT_MS = 2050;
   const FLIP3_EFFECT_MS = 3500;
-  const SECOND_CHANCE_EFFECT_MS = 2150;
+  const SECOND_CHANCE_EFFECT_MS = 3150;
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
   const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
@@ -578,12 +578,12 @@
       if (artwork.animate) {
         artwork.animate([
           { opacity: 0, transform: 'scale(.88)', filter: 'brightness(.75)' },
-          { offset: .12, opacity: 1, transform: 'scale(1.045)', filter: 'brightness(1.18)' },
-          { offset: .22, opacity: 1, transform: 'scale(1)', filter: 'brightness(1)' },
-          { offset: .42, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
-          { offset: .455, opacity: 1, transform: 'translateX(-1.4%) scale(1.012)', filter: 'brightness(1.42)' },
-          { offset: .49, opacity: 1, transform: 'translateX(.8%) scale(1)', filter: 'brightness(1.08)' },
-          { offset: .78, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
+          { offset: .082, opacity: 1, transform: 'scale(1.045)', filter: 'brightness(1.18)' },
+          { offset: .15, opacity: 1, transform: 'scale(1)', filter: 'brightness(1)' },
+          { offset: .287, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
+          { offset: .311, opacity: 1, transform: 'translateX(-1.4%) scale(1.012)', filter: 'brightness(1.42)' },
+          { offset: .334, opacity: 1, transform: 'translateX(.8%) scale(1)', filter: 'brightness(1.08)' },
+          { offset: .85, opacity: 1, transform: 'translateX(0) scale(1)', filter: 'brightness(1)' },
           { opacity: 0, transform: 'scale(.96)', filter: 'brightness(.86)' }
         ], {
           duration: SECOND_CHANCE_EFFECT_MS,
@@ -594,10 +594,10 @@
       if (card.animate) {
         card.animate([
           { opacity: 0, transform: 'translate(-50%,-50%) rotate(-8deg) scale(.55)' },
-          { offset: .13, opacity: 0, transform: 'translate(-50%,-50%) rotate(-8deg) scale(.55)' },
-          { offset: .24, opacity: 1, transform: 'translate(-50%,-50%) rotate(2deg) scale(1.07)' },
-          { offset: .31, opacity: 1, transform: 'translate(-50%,-50%) rotate(0) scale(1)' },
-          { offset: .79, opacity: 1, transform: 'translate(-50%,-50%) scale(1)' },
+          { offset: .089, opacity: 0, transform: 'translate(-50%,-50%) rotate(-8deg) scale(.55)' },
+          { offset: .164, opacity: 1, transform: 'translate(-50%,-50%) rotate(2deg) scale(1.07)' },
+          { offset: .212, opacity: 1, transform: 'translate(-50%,-50%) rotate(0) scale(1)' },
+          { offset: .85, opacity: 1, transform: 'translate(-50%,-50%) scale(1)' },
           { opacity: 0, transform: 'translate(-50%,-50%) scale(.92)' }
         ], {
           duration: SECOND_CHANCE_EFFECT_MS,
