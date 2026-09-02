@@ -509,6 +509,7 @@
     effect.style.animation = 'none';
     effect.style.background = 'transparent';
     effect.style.isolation = 'auto';
+    effect.style.mixBlendMode = 'screen';
 
     const artwork = new Image();
     artwork.className = 'second-chance-approved-artwork';
@@ -521,7 +522,7 @@
     artwork.style.height = '100%';
     artwork.style.objectFit = 'fill';
     artwork.style.objectPosition = 'center';
-    artwork.style.mixBlendMode = 'screen';
+    artwork.style.mixBlendMode = 'normal';
     artwork.style.opacity = '0';
     artwork.style.transformOrigin = '50% 47%';
     artwork.style.willChange = 'opacity, transform, filter';
@@ -531,14 +532,16 @@
     // exact approved glow. This normal-blend card cover keeps the central card
     // fully opaque, matching the mockup instead of allowing the board through it.
     const card = document.createElement('div');
+    card.id = 'secondChanceCardOverlay';
     card.className = 'second-chance-approved-card';
     card.innerHTML = '<span>SECOND</span><span>CHANCE</span>';
+    const effectBounds = effect.getBoundingClientRect();
     Object.assign(card.style, {
-      position: 'absolute',
-      zIndex: '3',
-      left: '49.2%',
-      top: '47.35%',
-      width: 'min(31.5%, 190px)',
+      position: 'fixed',
+      zIndex: '503',
+      left: `${effectBounds.left + effectBounds.width * .492}px`,
+      top: `${effectBounds.top + effectBounds.height * .4735}px`,
+      width: `${Math.min(effectBounds.width * .315, 190)}px`,
       aspectRatio: '.64',
       transform: 'translate(-50%,-50%) scale(.82)',
       transformOrigin: '50% 50%',
@@ -560,10 +563,12 @@
       opacity: '0',
       willChange: 'opacity, transform'
     });
-    effect.appendChild(card);
+    document.body.appendChild(card);
+    effect._secondChanceCard = card;
 
     let started = false;
     const removeEffect = () => {
+      if (card.isConnected) card.remove();
       if (effect.isConnected) effect.remove();
     };
     const startApprovedArtwork = () => {
@@ -616,6 +621,7 @@
     clearTimeout(shockTimer);
     cancelAnimationFrame(effectFrame);
     document.getElementById('screenEffect')?.remove();
+    document.getElementById('secondChanceCardOverlay')?.remove();
     document.body.classList.remove('shatter-impact');
     const effect = document.createElement('div');
     effect.id = 'screenEffect';
@@ -687,6 +693,7 @@
     if (type === 'secondChance') {
       startSecondChanceShield(effect);
       effectTimer = setTimeout(() => {
+        effect._secondChanceCard?.remove();
         if (effect.isConnected) effect.remove();
       }, SECOND_CHANCE_EFFECT_MS);
       return;
