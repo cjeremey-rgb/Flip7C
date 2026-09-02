@@ -315,6 +315,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
           <button type="button" class="avatar-choice" data-avatar="avatar-7" role="radio" aria-label="Glasses and braces avatar"><img src="avatar-7.webp" alt=""></button>
           <button type="button" class="avatar-choice" data-avatar="avatar-8" role="radio" aria-label="Sunglasses and beard avatar"><img src="avatar-8.webp" alt=""></button>
           <button type="button" class="avatar-choice" data-avatar="avatar-9" role="radio" aria-label="Dark-haired braces avatar"><img src="avatar-9.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-10" role="radio" aria-label="Evie dog avatar"><img src="avatar-10.webp" alt=""></button>
         </div>
       </fieldset>
       <button id="create" class="primary big"><span>Start offline game</span><small>Play against two computer players</small></button>
@@ -380,12 +381,12 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div id="reactionPop" class="reaction-pop avatar-reaction-pop" aria-live="polite"></div>
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="avatar-reactions.js?v=20260902-avatar-reactions-v1"></script>
+<script src="avatar-reactions.js?v=20260902-evie-avatar-v1"></script>
 <script src="screen-effects.js?v=20260902-guardian-shield-v4"></script>
 <script>
 const $=id=>document.getElementById(id);
 const ReactionUI=globalThis.AvatarReactions;
-const HUMAN_AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9'];
+const HUMAN_AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9','avatar-10'];
 const OFFLINE_AVATAR_IDS=[...HUMAN_AVATAR_IDS,'avatar-nova','avatar-ace'];
 let selectedAvatar=HUMAN_AVATAR_IDS.includes(localStorage.fr7avatar)?localStorage.fr7avatar:'avatar-1';
 const avatarEmotions=new Map();

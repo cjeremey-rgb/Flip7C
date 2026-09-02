@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-avatar-reactions-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-evie-avatar-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -22,6 +22,7 @@ const APP_SHELL = [
   './avatar-7.webp',
   './avatar-8.webp',
   './avatar-9.webp',
+  './avatar-10.webp',
   './avatar-1-excited.webp',
   './avatar-1-angry.webp',
   './avatar-1-shocked.webp',
@@ -49,6 +50,9 @@ const APP_SHELL = [
   './avatar-9-excited.webp',
   './avatar-9-angry.webp',
   './avatar-9-shocked.webp',
+  './avatar-10-excited.webp',
+  './avatar-10-angry.webp',
+  './avatar-10-shocked.webp',
   './avatar-nova.webp',
   './avatar-nova-excited.webp',
   './avatar-nova-angry.webp',

@@ -15,7 +15,7 @@ const BECCA_PHRASE=ReactionUI.BECCA_PHRASE;
 const invitedRoom=(new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
 const $=id=>document.getElementById(id),home=$('home'),game=$('game'),err=$('error');
 const avatarColors=['#32e5cb','#ffdd42','#ff6f91','#8e7dff','#ff914d','#72d7ff'];
-const AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9'];
+const AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9','avatar-10'];
 const DISPLAY_AVATAR_IDS=[...AVATAR_IDS,'avatar-nova','avatar-ace'];
 let selectedAvatar=AVATAR_IDS.includes(localStorage.fr7avatar)?localStorage.fr7avatar:'avatar-1';
 const avatarEmotions=new Map();

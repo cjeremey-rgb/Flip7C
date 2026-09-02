@@ -28,7 +28,7 @@
 
   const QUICK_PHRASES = ['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!', 'Good luck!', "Let's go!", 'Your turn!', 'Hurry up!', 'No way!', 'Are you kidding me?', 'That was lucky!', 'Bad luck!', 'I needed that!', "Don't bust!", 'Risk it!', 'Hold already!', 'Not today!', 'Ouch!', 'Great game!', 'You got this!', 'That hurt!', "I'm feeling lucky!", 'Here we go!'];
   const BECCA_PHRASE = "You're a peckerhead!";
-  const AVATARS = new Set(['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6', 'avatar-7', 'avatar-8', 'avatar-9', 'avatar-nova', 'avatar-ace']);
+  const AVATARS = new Set(['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6', 'avatar-7', 'avatar-8', 'avatar-9', 'avatar-10', 'avatar-nova', 'avatar-ace']);
   const byEmoji = new Map(ITEMS.map(item => [item.emoji, item]));
 
   function safeAvatar(avatar) {
