@@ -325,7 +325,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
-<script src="screen-effects.js?v=20260901-freeze-edge-growth-v1"></script>
+<script src="screen-effects.js?v=20260902-guardian-shield-v1"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -492,6 +492,7 @@ async function chooseSecondChanceTarget(sourceIndex){
 }
 async function resolveSecondChance(sourceIndex,card){
  const source=players[sourceIndex];
+ if(sourceIndex===me)showLocalScreenEffect('secondChance');
  if(!source.second){removeCard(source,card);await runOfflineActionTransfer('SECOND CHANCE',sourceIndex,sourceIndex,()=>{source.second=true;source.cards.push(card);log(source.name+' kept a Second Chance.')},{showGiver:false});return}
  const targetIndex=await chooseSecondChanceTarget(sourceIndex);
  removeCard(source,card);
@@ -690,5 +691,3 @@ window.addEventListener('resize',()=>{fitOfflineHand();syncOfflineFlipThreeTrans
 <script src="pwa-register.js"></script>
 </body>
 </html>
-
-
