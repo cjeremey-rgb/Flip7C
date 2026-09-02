@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-reactions-restored-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-cartoon-avatars-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -11,6 +11,12 @@ const APP_SHELL = [
   './frost-whiteout.webp',
   './bust-approved-exact.webp',
   './second-chance-guardian-approved.webp',
+  './avatar-1.webp',
+  './avatar-2.webp',
+  './avatar-3.webp',
+  './avatar-4.webp',
+  './avatar-5.webp',
+  './avatar-6.webp',
   './manifest.json',
   './pwa-register.js',
   './icon-192.png',

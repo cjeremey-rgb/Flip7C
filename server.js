@@ -11,6 +11,7 @@ const ALLOWED_REACTIONS = new Set(['🔥','😂','🤣','😁','😅','😬','�
 const ALLOWED_PHRASES = new Set(['Nice Job!', "You're almost there!", 'So Close!', 'You suck!', 'Oh Man!', 'Good luck!', "Let's go!", 'Your turn!', 'Hurry up!', 'No way!', 'Are you kidding me?', 'That was lucky!', 'Bad luck!', 'I needed that!', "Don't bust!", 'Risk it!', 'Hold already!', 'Not today!', 'Ouch!', 'Great game!', 'You got this!', 'That hurt!', "I'm feeling lucky!", 'Here we go!']);
 const BECCA_PHRASE = "You're a peckerhead!";
 const VOICE_SIGNAL_TYPES = new Set(['offer', 'answer', 'candidate']);
+const ALLOWED_AVATARS = new Set(['avatar-1', 'avatar-2', 'avatar-3', 'avatar-4', 'avatar-5', 'avatar-6']);
 const NUMBER_CARD_COUNTS = [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const INITIAL_DEAL_MS = 900;
 const FLIP_THREE_GIVER_MS = 1000;
@@ -56,9 +57,9 @@ function makeDeck() {
   return shuffle(deck);
 }
 
-function makePlayer(id, name) {
+function makePlayer(id, name, avatar = null) {
   return {
-    id, name: String(name || 'Player').slice(0, 18), score: 0,
+    id, name: String(name || 'Player').slice(0, 18), avatar: ALLOWED_AVATARS.has(avatar) ? avatar : null, score: 0,
     cards: [], mods: [], statusCards: [], active: true, stayed: false, busted: false, frozen: false,
     second: false, roundScore: 0, lastSeen: Date.now(),
     voiceEnabled: false, voiceSpeaking: false
@@ -788,7 +789,7 @@ function publicState(room) {
 }
 
 function apiError(res, message, status = 400) { send(res, status, { ok: false, error: message }); }
-const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.ico': 'image/x-icon' };
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
@@ -800,7 +801,7 @@ const server = http.createServer(async (req, res) => {
       const playerId = uid();
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
-        players: [makePlayer(playerId, body.name || 'Host')], deck: makeDeck(), discard: [],
+        players: [makePlayer(playerId, body.name || 'Host', body.avatar)], deck: makeDeck(), discard: [],
         heldSecondCards: new Map(), pendingAction: null, flow: null, flipThreeVisual: null, actionCardVisual: null,
         reactions: [], phrases: [], voiceSignals: new Map(),
         log: ['Room created.'], winner: null
@@ -815,7 +816,7 @@ const server = http.createServer(async (req, res) => {
       if (room.phase !== 'lobby') return apiError(res, 'Game already started.');
       if (room.players.length >= 9) return apiError(res, 'This room is full. Flip 7 supports up to 9 players.');
       const playerId = uid();
-      const joined = makePlayer(playerId, body.name);
+      const joined = makePlayer(playerId, body.name, body.avatar);
       room.players.push(joined);
       room.log.push(`${joined.name} joined.`);
       return send(res, 200, { ok: true, room: code, playerId, state: publicState(room) });

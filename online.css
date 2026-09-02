@@ -268,3 +268,33 @@ body.my-turn #status b{color:#fff;text-shadow:0 0 12px #ffdd42}
 body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s cubic-bezier(.18,.72,.28,1)}
 @keyframes screenShock{0%{transform:translate3d(0,0,0);filter:brightness(1)}7%{transform:translate3d(-7px,4px,0) rotate(-.35deg);filter:brightness(1.7)}16%{transform:translate3d(6px,-4px,0) rotate(.28deg);filter:brightness(.72)}27%{transform:translate3d(-4px,2px,0) rotate(-.18deg);filter:brightness(1.2)}42%{transform:translate3d(3px,-1px,0);filter:brightness(.92)}65%{transform:translate3d(-1px,1px,0);filter:brightness(1.04)}100%{transform:translate3d(0,0,0);filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){.screen-effect,.screen-effect-stamp,.freeze-screen-effect,.freeze-screen-texture,.freeze-screen-effect:before,.freeze-screen-effect:after,.shatter-screen-effect,.flip3-screen-effect,.flip3-screen-effect:before,.flip3-screen-effect:after,.flip3-screen-card,.flip3-screen-sparks i{animation-timing-function:linear!important;animation-iteration-count:1!important}}
+
+/* Cartoon avatars: additive UI only. Existing game layout and effects remain unchanged. */
+.avatar-picker{margin:14px 0 2px;padding:0;border:0;min-width:0}
+.avatar-picker legend{padding:0;color:var(--muted);font-size:10px;font-weight:900;letter-spacing:.15em}
+.avatar-choices{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:9px}
+.avatar-choice{position:relative;width:100%;aspect-ratio:1;padding:2px;border:2px solid #29455e;border-radius:50%;background:#07111d;box-shadow:0 5px 12px #0007;overflow:hidden;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.avatar-choice img,.avatar img,.avatar-portrait img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-choice.selected{border-color:var(--yellow);box-shadow:0 0 0 3px #ffdd4230,0 0 18px #ffdd4260;transform:translateY(-2px)}
+.avatar-choice.selected:after{content:'✓';position:absolute;right:-1px;bottom:-1px;width:17px;height:17px;display:grid;place-items:center;border-radius:50%;background:var(--yellow);color:#07101d;font-size:10px;font-weight:900;border:2px solid #07111d}
+.avatar{position:relative;border-radius:50%;overflow:visible;background:#07111d!important;border:1px solid #35dff0;box-shadow:0 0 12px #32e5cb38}
+.avatar img{overflow:hidden}
+.seat-identity{display:flex;align-items:center;min-width:0;gap:6px}
+.seat-avatar{width:30px;height:30px;flex:0 0 30px}
+.seat-avatar .avatar-portrait{width:100%;height:100%}
+.seat-identity b{min-width:0}
+.avatar-portrait{position:relative;border-radius:50%;background:#07111d;border:2px solid #34dff0;box-shadow:0 4px 12px #0008,0 0 12px #32e5cb38;z-index:5}
+.avatar-portrait.turn-active{animation:avatarTurnPulse 1.1s ease-in-out infinite}
+.avatar-portrait.avatar-excited{animation:avatarExcited .72s cubic-bezier(.2,.9,.24,1.25) 2}
+.avatar-portrait.avatar-angry{border-color:#ff5d6c;box-shadow:0 4px 12px #0008,0 0 18px #ff5d6c99;animation:avatarAngry .22s linear 6}
+.avatar-portrait.avatar-excited:after,.avatar-portrait.avatar-angry:after{position:absolute;right:-10px;top:-14px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#07101df2;border:1px solid #ffffff55;font-size:15px;line-height:1;box-shadow:0 5px 12px #0009;animation:avatarBubbleIn .28s cubic-bezier(.2,.9,.25,1.3) both}
+.avatar-portrait.avatar-excited:after{content:'🤩'}
+.avatar-portrait.avatar-angry:after{content:'😠'}
+.my-zone{position:relative;padding-left:54px}
+.my-avatar-badge{position:absolute;left:5px;top:50%;width:46px;height:46px;transform:translateY(-50%);z-index:6}
+.my-avatar-badge .avatar-portrait{width:46px;height:46px}
+@keyframes avatarTurnPulse{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.07);filter:brightness(1.16);box-shadow:0 4px 12px #0008,0 0 20px #ffdd4288}}
+@keyframes avatarExcited{0%,100%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(-8px) rotate(-6deg) scale(1.12)}65%{transform:translateY(-3px) rotate(6deg) scale(1.08)}}
+@keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
+@keyframes avatarBubbleIn{from{opacity:0;transform:scale(.3) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry{animation:none}}

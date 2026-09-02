@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
-  <link rel="stylesheet" href="online.css?v=20260902-reactions-restored-v1">
+  <link rel="stylesheet" href="online.css?v=20260902-cartoon-avatars-v1">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -31,6 +31,17 @@
     </div>
     <div class="panel join-panel">
       <label>PLAYER NAME<input id="name" maxlength="18" autocomplete="nickname" placeholder="Enter your name"></label>
+      <fieldset class="avatar-picker">
+        <legend>CHOOSE YOUR AVATAR</legend>
+        <div id="avatarChoices" class="avatar-choices" role="radiogroup" aria-label="Choose your avatar">
+          <button type="button" class="avatar-choice" data-avatar="avatar-1" role="radio" aria-label="Curly-haired avatar"><img src="avatar-1.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-2" role="radio" aria-label="Red-shirt avatar"><img src="avatar-2.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-3" role="radio" aria-label="Blond avatar"><img src="avatar-3.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-4" role="radio" aria-label="Blue-shirt avatar"><img src="avatar-4.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-5" role="radio" aria-label="Sunglasses avatar"><img src="avatar-5.webp" alt=""></button>
+          <button type="button" class="avatar-choice" data-avatar="avatar-6" role="radio" aria-label="Bearded avatar"><img src="avatar-6.webp" alt=""></button>
+        </div>
+      </fieldset>
       <button id="create" class="primary big"><span>Create private room</span><small>Invite friends with a code</small></button>
       <div class="divider"><span>OR JOIN A ROOM</span></div>
       <div class="join"><input id="roomCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button id="join">JOIN</button></div>
@@ -76,6 +87,7 @@
         </div>
       </div>
       <div class="my-zone">
+        <div id="myAvatarBadge" class="my-avatar-badge" aria-hidden="true"></div>
         <div id="myArea" class="my-area"></div>
       </div>
     </div>
@@ -169,7 +181,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260902-reactions-restored-v1';
+  script.src = 'online.js?v=20260902-cartoon-avatars-v1';
   document.body.appendChild(script);
 }
 </script>
