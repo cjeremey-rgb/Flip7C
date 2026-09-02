@@ -86,7 +86,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .result-overlay.bust,.result-overlay.hold{opacity:.76!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55));}
 .result-overlay.frozen{opacity:.58!important;filter:drop-shadow(0 4px 4px rgba(0,0,0,.45));}
 
-/* Current-build hand layout: two rows that always fit the viewport.
+/* Current-build hand layout: the table grows to contain every rendered row.
    Non-number cards are on top; numbered cards are below, sorted low to high. */
 .my-area .hand{
   display:flex;
@@ -95,7 +95,7 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   justify-content:flex-end;
   gap:5px;
   width:100%;
-  overflow:hidden;
+  overflow:visible;
   padding:8px;
   scroll-snap-type:none;
 }
@@ -107,8 +107,10 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   justify-content:flex-start;
   gap:0;
   width:100%;
-  overflow:hidden;
-  min-height:0;
+  height:calc(104px * var(--hand-scale));
+  min-height:calc(104px * var(--hand-scale));
+  flex:0 0 auto;
+  overflow:visible;
 }
 .my-area .hand-row:empty{display:none}
 .my-area .hand-row .card{
@@ -129,6 +131,10 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 .my-area .hand-row .card.mult{font-size:calc(31px * var(--hand-scale))}
 .my-area .hand-row .card:last-child{transform:none!important;filter:none}
 @media(min-width:700px){
+  .my-area .hand-row{
+    height:calc(121px * var(--hand-scale));
+    min-height:calc(121px * var(--hand-scale));
+  }
   .my-area .hand-row .card{
     width:calc(84px * var(--hand-scale));
     height:calc(121px * var(--hand-scale));
@@ -197,12 +203,13 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
 @keyframes flipThreeAttention{from{filter:brightness(1);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 20px #a66dff77}to{filter:brightness(1.18);box-shadow:0 8px 0 #26134e,0 18px 38px #000c,0 0 38px #c28cffcc}}
 #game.screen{padding-bottom:calc(104px + var(--bottom-ui-inset))}
 @media(max-width:699px){
-  body:has(#game.screen.active),body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
-  #game.screen.active{display:flex;flex-direction:column;height:calc(100svh - var(--android-nav-reserve));height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
-  #game .table{flex:1 1 auto;min-height:0}
-  .my-zone:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px}
-  .my-zone:has(.hand-other:not(:empty)) .my-area{height:100%;min-height:180px;flex:none;padding:0}
-  .my-area .hand{height:100%;min-height:0}
+  body:has(#game.screen.active){height:auto;min-height:calc(100dvh - var(--android-nav-reserve));overflow-x:hidden;overflow-y:auto}
+  body:has(#game.screen.active) main{height:auto;min-height:calc(100dvh - var(--android-nav-reserve));overflow:visible}
+  #game.screen.active{display:flex;flex-direction:column;height:auto;min-height:calc(100dvh - var(--android-nav-reserve));overflow:visible}
+  #game .table{height:auto;min-height:485px;flex:0 0 auto;overflow:visible}
+  .my-zone:has(.hand-other:not(:empty)){height:auto;min-height:0;flex:0 0 auto}
+  .my-zone:has(.hand-other:not(:empty)) .my-area{height:auto;min-height:0;flex:0 0 auto;padding:0}
+  .my-area .hand{height:auto;min-height:0;overflow:visible}
 }
 .bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:var(--bottom-ui-inset);background:linear-gradient(180deg,#07101d00,#07101df2 18%,#07101dfb 100%);border-top:1px solid #22384b;backdrop-filter:blur(8px)}
 .bottom-dock .actions{position:relative;z-index:1;left:auto;right:auto;bottom:auto;padding:8px 10px;grid-template-columns:48px 1.45fr 1fr;background:transparent;border-top:0;backdrop-filter:none}
@@ -286,6 +293,47 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
 @keyframes avatarShocked{0%,100%{transform:scale(1) rotate(0)}45%{transform:scale(1.13) rotate(-2deg)}70%{transform:scale(1.07) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.avatar-shocked{animation:none}}
+/* Avatar Showdown startup screen */
+.showdown-home .topbar{position:relative;z-index:30}
+.showdown-home .showdown-hero{padding:8px 0 18px;text-align:center}
+.showdown-home .showdown-hero>.kicker{position:relative;z-index:9;color:#7df8e7;text-shadow:0 0 12px #32e5cb88}
+.showdown-stage{position:relative;isolation:isolate;width:100%;max-width:450px;height:350px;margin:7px auto 0;animation:showdownReveal .68s cubic-bezier(.17,.84,.31,1.2) both}
+.showdown-stage:before{content:'';position:absolute;z-index:-2;inset:24px -45px 2px;background:radial-gradient(circle at 50% 45%,#1de3d044 0,#0fa4d522 27%,transparent 62%),radial-gradient(circle at 30% 58%,#ff3e8a30 0,transparent 42%),radial-gradient(circle at 70% 58%,#ffdd4230 0,transparent 42%);filter:blur(5px);pointer-events:none}
+.showdown-stage:after{content:'';position:absolute;z-index:-1;left:50%;top:47%;width:430px;height:430px;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 2deg,transparent 0 10deg,#32e5cb18 10deg 12deg,transparent 12deg 23deg,#ff4f8b18 23deg 25deg);-webkit-mask-image:radial-gradient(circle,black 0 18%,transparent 64%);mask-image:radial-gradient(circle,black 0 18%,transparent 64%);animation:showdownRays 18s linear infinite;pointer-events:none}
+.showdown-avatar{position:absolute;z-index:2;aspect-ratio:1;border-radius:50%;overflow:hidden;background:#07111d;border:3px solid #35e7f3;box-shadow:0 8px 20px #000a,0 0 18px #32e5cb88;animation:showdownFloat 3.2s ease-in-out infinite}
+.showdown-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.showdown-main{z-index:3;width:132px;left:50%;top:1px;margin-left:-66px;animation-delay:-.5s}
+.showdown-left{width:104px;left:3px;top:72px;border-color:#ff4f8b;box-shadow:0 8px 20px #000a,0 0 18px #ff4f8b88;animation-delay:-1.2s}
+.showdown-right{width:101px;right:3px;top:67px;border-color:#ffdd42;box-shadow:0 8px 20px #000a,0 0 18px #ffdd4288;animation-delay:-2s}
+.showdown-dog{z-index:4;width:96px;right:22px;top:147px;border-color:#32e5cb;animation-delay:-2.6s}
+.showdown-stage .logo{position:absolute;z-index:6;left:50%;top:126px;margin:0;transform:translateX(-50%) rotate(-2deg);font-size:clamp(68px,21vw,102px);line-height:.66;filter:drop-shadow(0 13px 13px #000b);animation:showdownLogoPulse 2.6s ease-in-out infinite}
+.showdown-stage .logo span{color:#f7fbff;-webkit-text-stroke:2px #d9fbff;text-shadow:0 4px 0 #174b63,0 8px 0 #082332,0 0 18px #32e5cb}
+.showdown-stage .logo strong{color:#ff3f94;-webkit-text-stroke:2px #ff86bd;text-shadow:0 4px 0 #8f164f,0 8px 0 #4a092a,0 0 20px #ff3e8a}
+.showdown-stage .logo b{right:-.46em;bottom:-.16em;color:#ffdc42;-webkit-text-stroke:2px #fff09a;text-shadow:0 4px 0 #a86504,0 8px 0 #5e3100,0 0 18px #ffdd42;transform:rotate(7deg)}
+.showdown-fly-card{position:absolute;z-index:1;width:47px;height:66px;display:grid;place-items:center;border:3px solid white;border-radius:10px;background:linear-gradient(145deg,#74dfff,#2e9ee8);color:#092031;font:900 11px/1 'Archivo Black',Inter,sans-serif;box-shadow:0 6px 0 #02070b,0 12px 22px #0009,0 0 14px #32e5cb66;animation:showdownCardFloat 3.8s ease-in-out infinite}
+.fly-rush{--card-rotation:-19deg;left:-5px;top:122px;background:linear-gradient(145deg,#ff5aa1,#c82468);color:#fff;animation-delay:-1.1s}
+.fly-flip{--card-rotation:-12deg;left:48px;top:23px;animation-delay:-2.3s}
+.fly-seven{--card-rotation:13deg;right:-2px;top:23px;background:linear-gradient(145deg,#ffe567,#f6a91d);color:#d51b71;animation-delay:-.4s}
+.fly-two{--card-rotation:-17deg;left:9px;bottom:28px;animation-delay:-3s}
+.fly-five{--card-rotation:16deg;right:5px;bottom:28px;animation-delay:-1.8s}
+.showdown-spark{position:absolute;z-index:8;width:10px;height:10px;background:#32e5cb;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);filter:drop-shadow(0 0 7px currentColor);animation:showdownTwinkle 1.4s ease-in-out infinite}
+.spark-one{left:26%;top:39px;color:#ffdd42;background:#ffdd42}.spark-two{right:27%;top:47px;color:#ff4f8b;background:#ff4f8b;animation-delay:-.5s}.spark-three{left:16%;top:207px;animation-delay:-.9s}.spark-four{right:13%;top:217px;color:#ffdd42;background:#ffdd42;animation-delay:-1.2s}
+.showdown-card-splash{position:absolute;z-index:7;left:50%;bottom:2px;height:78px;margin:0;transform:translateX(-50%);filter:drop-shadow(0 9px 12px #0008)}
+.showdown-home .showdown-hero>p{position:relative;z-index:9;max-width:390px;margin:5px auto 3px;color:#f4fbff;font-weight:700;line-height:1.45;text-shadow:0 2px 6px #000}
+.showdown-home .showdown-hero>p::first-line{color:#fff}
+.showdown-home .join-panel{position:relative;border:1px solid #34dff0aa;box-shadow:0 24px 70px #0009,inset 0 1px 0 #ffffff12,0 0 25px #32e5cb18}
+.showdown-home .join-panel:before{content:'';position:absolute;inset:7px;border:1px solid #32e5cb1c;border-radius:21px;pointer-events:none}
+.showdown-home .join-panel>*{position:relative;z-index:1}
+.showdown-home .primary.big{border:2px solid #fff099;background:linear-gradient(180deg,#ffe96b,#ffc51e);box-shadow:0 6px 0 #9b7714,0 14px 28px #0006,0 0 22px #ffdd4255}
+@keyframes showdownReveal{from{opacity:0;transform:translateY(24px) scale(.92)}to{opacity:1;transform:none}}
+@keyframes showdownFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes showdownCardFloat{0%,100%{transform:translateY(0) rotate(var(--card-rotation))}50%{transform:translateY(-8px) rotate(calc(var(--card-rotation) + 3deg))}}
+@keyframes showdownLogoPulse{0%,100%{filter:drop-shadow(0 13px 13px #000b) brightness(1)}50%{filter:drop-shadow(0 13px 13px #000b) drop-shadow(0 0 10px #32e5cb55) brightness(1.07)}}
+@keyframes showdownTwinkle{0%,100%{opacity:.35;transform:scale(.6) rotate(0)}50%{opacity:1;transform:scale(1.4) rotate(90deg)}}
+@keyframes showdownRays{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@media(max-width:380px){.showdown-stage{height:327px}.showdown-main{width:116px;margin-left:-58px}.showdown-left{width:90px;top:68px}.showdown-right{width:88px;top:64px}.showdown-dog{width:84px;right:17px;top:139px}.showdown-stage .logo{top:116px;font-size:clamp(64px,20vw,78px)}.showdown-card-splash{bottom:-1px}.fly-five,.fly-two{bottom:22px}}
+@media(min-width:700px){#home.showdown-home .topbar{position:absolute}.showdown-home .showdown-hero{text-align:center}.showdown-stage{height:390px;max-width:490px}.showdown-main{width:150px;margin-left:-75px}.showdown-left{width:118px;left:7px}.showdown-right{width:114px;right:7px}.showdown-dog{width:108px;right:30px;top:161px}.showdown-stage .logo{top:141px;font-size:108px}.showdown-card-splash{bottom:5px}.showdown-home .showdown-hero>p{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){.showdown-stage,.showdown-stage:after,.showdown-avatar,.showdown-fly-card,.showdown-stage .logo,.showdown-spark{animation:none}}
 </style>
 <link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
@@ -293,13 +341,21 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div class="ambient"><i></i><i></i><i></i></div><div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
 <div id="connection" class="connection hidden">RECONNECTING…</div>
 <main>
-  <section id="home" class="screen active">
+  <section id="home" class="screen active showdown-home">
     <nav class="topbar"><button id="howBtn" class="icon-btn" aria-label="How to play">?</button><button id="soundBtn" class="icon-btn" aria-label="Sound">♪</button></nav>
-    <div class="hero">
+    <div class="hero showdown-hero">
       <span class="kicker">OFFLINE PHONE EDITION</span>
-      <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
+      <div class="showdown-stage">
+        <i class="showdown-spark spark-one"></i><i class="showdown-spark spark-two"></i><i class="showdown-spark spark-three"></i><i class="showdown-spark spark-four"></i>
+        <div class="showdown-avatar showdown-left"><img src="avatar-5-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-main"><img src="avatar-4-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-right"><img src="avatar-3-excited.webp" alt=""></div>
+        <div class="showdown-avatar showdown-dog"><img src="avatar-10-excited.webp" alt=""></div>
+        <div class="showdown-fly-card fly-rush">RUSH</div><div class="showdown-fly-card fly-flip">FLIP</div><div class="showdown-fly-card fly-seven">7</div><div class="showdown-fly-card fly-two">2</div><div class="showdown-fly-card fly-five">5</div>
+        <div class="logo" aria-label="Flip Rush 7"><span>FLIP</span><strong>RUSH</strong><b>7</b></div>
+        <div class="card-splash showdown-card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
+      </div>
       <p>Draw boldly. Bank wisely. Be the first to seven unique numbers.</p>
-      <div class="card-splash" aria-hidden="true"><div class="mini-card c4">4</div><div class="mini-card c7">7</div><div class="mini-card cx">×2</div></div>
     </div>
     <div class="panel join-panel">
       <label>PLAYER NAME<input id="name" maxlength="18" autocomplete="nickname" placeholder="Enter your name"></label>
@@ -746,7 +802,7 @@ function displayCardRank(c){if(c.t==='n')return c.v;if(c.t==='m'&&c.v!=='x2')ret
 function displayCards(cards){return [...cards].sort((a,b)=>displayCardRank(a)-displayCardRank(b))}
 function splitDisplayCards(cards){const sorted=displayCards(cards);return{numbers:sorted.filter(c=>c.t==='n'),other:sorted.filter(c=>c.t!=='n')}}
 function fitOfflineRow(row,reservePreview=false,maxScale=1){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(maxScale,1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
-function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;const other=hand.querySelector('.hand-other'),numbers=hand.querySelector('.hand-numbers'),rows=[other,numbers].filter(row=>row&&row.children.length),style=getComputedStyle(hand),gap=parseFloat(style.rowGap||style.gap)||0,padding=(parseFloat(style.paddingTop)||0)+(parseFloat(style.paddingBottom)||0),baseHeight=window.matchMedia('(min-width:700px)').matches?121:104,verticalScale=rows.length>1?Math.min(1,Math.max(.45,(hand.clientHeight-padding-gap*(rows.length-1))/(baseHeight*rows.length))):1;fitOfflineRow(other,false,verticalScale);fitOfflineRow(numbers,true,verticalScale)}
+function fitOfflineHand(){const hand=document.querySelector('#myArea .hand');if(!hand)return;const other=hand.querySelector('.hand-other'),numbers=hand.querySelector('.hand-numbers');fitOfflineRow(other,false,1);fitOfflineRow(numbers,true,1)}
 function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
 function renderOfflineDiscardPile(){const root=$('discardVisual');if(!root)return;$('discardCount').textContent=discard.length;root.innerHTML=discard.length?cardHtml(discard[discard.length-1]):'<div class="discard-empty">DISCARD</div>'}
 function offlineFlipThreeAnchor(index){if(index===me)return $('myArea');return document.querySelector(`.bot-seat[data-player-index="${index}"]`)||$('table')}
