@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-avatar-expansion-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-avatar-layout-v2';
 const APP_SHELL = [
   './',
   './index.html',
