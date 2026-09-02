@@ -14,7 +14,8 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
-  <link rel="stylesheet" href="online.css?v=20260902-bot-avatars-v1">
+  <link rel="stylesheet" href="online.css?v=20260902-two-row-hand-v2">
+  <link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div>
@@ -96,7 +97,7 @@
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
-    <div id="reactionTray" class="reaction-tray hidden" aria-label="Reactions"><button data-emoji="🔥">🔥</button><button data-emoji="😂">😂</button><button data-emoji="🤣">🤣</button><button data-emoji="😁">😁</button><button data-emoji="😅">😅</button><button data-emoji="😬">😬</button><button data-emoji="😈">😈</button><button data-emoji="🤯">🤯</button><button data-emoji="😱">😱</button><button data-emoji="🙄">🙄</button><button data-emoji="🤔">🤔</button><button data-emoji="😡">😡</button><button data-emoji="😭">😭</button><button data-emoji="😎">😎</button><button data-emoji="🥳">🥳</button><button data-emoji="👏">👏</button><button data-emoji="👍">👍</button><button data-emoji="👎">👎</button><button data-emoji="❤️">❤️</button><button data-emoji="💀">💀</button><button data-emoji="🍀">🍀</button><button data-emoji="🤞">🤞</button><button data-emoji="💩">💩</button><button data-emoji="🤡">🤡</button><button id="phraseMenuBtn" class="phrase-menu-btn" aria-label="Quick phrases">💬</button></div>
+    <div id="reactionTray" class="reaction-tray avatar-reaction-tray hidden" aria-label="Avatar reactions"></div>
     <div id="phraseTray" class="phrase-tray hidden" aria-label="Quick phrases"></div>
     <div class="bottom-dock">
       <div id="actions" class="actions">
@@ -112,10 +113,11 @@
 </main>
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
-<div id="reactionPop" class="reaction-pop" aria-live="polite"></div>
+<div id="reactionPop" class="reaction-pop avatar-reaction-pop" aria-live="polite"></div>
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="voiceAudioRack" class="voice-audio-rack" aria-hidden="true"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
+<script src="avatar-reactions.js?v=20260902-avatar-reactions-v1"></script>
 <script src="screen-effects.js?v=20260902-guardian-shield-v4"></script>
 <script>
 function applyFlipRushTheme(){
@@ -184,7 +186,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260902-bot-avatars-v1';
+  script.src = 'online.js?v=20260902-avatar-reactions-v1';
   document.body.appendChild(script);
 }
 </script>

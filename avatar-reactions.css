@@ -1,0 +1,195 @@
+/* Avatar reaction picker and board pop-up. This is an overlay and does not alter gameplay layout. */
+.reaction-tray.avatar-reaction-tray{
+  z-index:75;
+  left:50%;
+  bottom:calc(86px + var(--bottom-ui-inset));
+  width:min(390px,calc(100vw - 28px));
+  max-height:min(54vh,430px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  padding:10px;
+  border:1px solid #35dff088;
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(16,36,56,.97),rgba(5,17,29,.97));
+  box-shadow:0 22px 60px #000d,0 0 28px #32e5cb30,inset 0 1px 0 #ffffff12;
+  scrollbar-width:thin;
+  scrollbar-color:#35dff066 transparent;
+}
+.reaction-tray.avatar-reaction-tray::after{
+  content:'';
+  position:absolute;
+  left:25px;
+  bottom:-9px;
+  width:18px;
+  height:18px;
+  background:#091b2b;
+  border-right:1px solid #35dff088;
+  border-bottom:1px solid #35dff088;
+  transform:rotate(45deg);
+  pointer-events:none;
+}
+.reaction-tray .avatar-reaction-button{
+  position:relative;
+  min-width:0;
+  min-height:70px;
+  display:grid;
+  place-items:center;
+  padding:3px;
+  border:1px solid #ffffff12;
+  border-radius:16px;
+  background:linear-gradient(145deg,#0d2335,#071522);
+  box-shadow:inset 0 1px 0 #ffffff0d,0 4px 10px #0005;
+}
+.reaction-tray .avatar-reaction-button:active{transform:scale(.94);filter:brightness(1.18)}
+.avatar-reaction-sticker{
+  position:relative;
+  display:block;
+  width:60px;
+  height:60px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:#07111d;
+  border:2px solid #35dff0;
+  box-shadow:0 4px 10px #000a,0 0 12px #32e5cb45;
+}
+.avatar-reaction-sticker.mood-angry{border-color:#ff5d6c;box-shadow:0 4px 10px #000a,0 0 14px #ff5d6c66}
+.avatar-reaction-sticker.mood-shocked{border-color:#aa79ff;box-shadow:0 4px 10px #000a,0 0 14px #aa79ff66}
+.avatar-reaction-sticker img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.reaction-cue{
+  position:absolute;
+  right:-5px;
+  bottom:-4px;
+  min-width:25px;
+  height:25px;
+  display:grid;
+  place-items:center;
+  padding:0 2px;
+  border-radius:50%;
+  background:#07111df2;
+  border:1px solid #ffffffaa;
+  color:#fff;
+  font-size:17px;
+  line-height:1;
+  filter:drop-shadow(0 3px 4px #000b);
+}
+.reaction-tray .phrase-menu-btn{
+  grid-column:1/-1;
+  min-height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:8px 12px;
+  margin-top:1px;
+  border:1px solid #32e5cb66;
+  border-radius:13px;
+  background:#183249;
+  box-shadow:inset 0 0 14px #32e5cb18,0 3px 0 #07101a;
+  color:#fff;
+  font-size:18px;
+}
+.reaction-tray .phrase-menu-btn b{font-size:10px;letter-spacing:.12em}
+
+.phrase-tray{
+  position:fixed;
+  z-index:75;
+  left:50%;
+  bottom:calc(86px + var(--bottom-ui-inset));
+  width:min(390px,calc(100vw - 28px));
+  max-height:min(56vh,440px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  transform:translateX(-50%);
+  padding:9px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  border:1px solid #263d52;
+  border-radius:20px;
+  background:#102438;
+  box-shadow:0 24px 70px rgba(0,0,0,.62);
+}
+.phrase-tray button{min-height:38px;padding:8px 11px;border:1px solid #2f506c;border-radius:12px;background:#183249;color:#fff;text-align:left;font-size:11px;font-weight:900;letter-spacing:.02em;box-shadow:0 3px 0 #07101a}
+.phrase-tray button:active{transform:translateY(1px);box-shadow:0 2px 0 #07101a}
+.phrase-tray .becca-phrase{border-color:#ff4f8b88;box-shadow:0 3px 0 #07101a,0 0 14px #ff4f8b22}
+.phrase-pop{position:fixed;z-index:72;left:50%;top:48%;width:min(520px,calc(100vw - 30px));transform:translate(-50%,-50%) scale(.88);opacity:0;pointer-events:none;text-align:center;padding:18px 22px;border-radius:24px;background:#07101df2;border:1px solid #ffffff4a;box-shadow:0 18px 55px #000d,0 0 32px #32e5cb48;transition:opacity .15s ease,transform .2s cubic-bezier(.2,.9,.28,1.25)}
+.phrase-pop.show{opacity:1;transform:translate(-50%,-50%) scale(1);animation:phraseFlash .48s ease-in-out 3}
+.phrase-pop b{display:block;color:#32e5cb;font-size:10px;letter-spacing:.13em;margin-bottom:7px;text-transform:uppercase}
+.phrase-pop strong{display:block;color:#fff;font:900 clamp(22px,6vw,38px) 'Archivo Black',Inter,system-ui,sans-serif;line-height:1.08;text-shadow:0 2px 0 #0009,0 0 16px #ffffff28}
+@keyframes phraseFlash{0%,100%{filter:brightness(1);box-shadow:0 18px 55px #000d,0 0 28px #32e5cb3d}50%{filter:brightness(1.25);box-shadow:0 18px 55px #000d,0 0 46px #ffdd4270}}
+
+.reaction-pop.avatar-reaction-pop{
+  position:fixed;
+  z-index:74;
+  left:50%;
+  top:55%;
+  bottom:auto;
+  width:150px;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  opacity:0;
+  transform:translate(-50%,30px) scale(.62) rotate(-5deg);
+  transition:opacity .16s ease,transform .3s cubic-bezier(.16,.9,.25,1.32);
+  pointer-events:none;
+  white-space:nowrap;
+}
+.reaction-pop.avatar-reaction-pop.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1) rotate(0);
+  animation:avatarReactionFloat .72s ease-in-out .35s 2 alternate;
+}
+.reaction-burst{position:relative;width:116px;height:116px;display:grid;place-items:center}
+.reaction-burst::before,.reaction-burst::after{
+  content:'';
+  position:absolute;
+  inset:3px;
+  border-radius:50%;
+  border:4px solid #35dff0;
+  box-shadow:0 0 22px #35dff0aa;
+  animation:reactionRing .85s ease-out 2;
+}
+.reaction-burst::after{inset:12px;border-color:#ff4f8b;animation-delay:.12s}
+.reaction-pop-sticker{width:98px;height:98px;z-index:2;border-width:3px;box-shadow:0 8px 22px #000c,0 0 22px #32e5cb88}
+.reaction-pop-sticker .reaction-cue{right:-8px;bottom:-5px;min-width:36px;height:36px;font-size:25px;border-width:2px}
+.reaction-player-name{
+  display:block;
+  max-width:170px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  padding:7px 13px;
+  border:1px solid #ffffff4a;
+  border-radius:10px;
+  background:#07101df2;
+  color:#fff;
+  box-shadow:0 8px 22px #000b,0 0 15px #32e5cb35;
+  font:900 11px/1 Inter,system-ui,sans-serif;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+.reaction-spark{position:absolute;z-index:1;width:8px;height:25px;border-radius:4px;background:#ff4f8b;box-shadow:0 0 10px currentColor}
+.reaction-spark.spark-one{left:0;top:5px;transform:rotate(-34deg)}
+.reaction-spark.spark-two{right:1px;top:14px;transform:rotate(42deg);background:#35dff0}
+.reaction-spark.spark-three{right:13px;bottom:-2px;transform:rotate(18deg);background:#ffdd42}
+@keyframes reactionRing{0%{transform:scale(.35);opacity:0}45%{opacity:1}100%{transform:scale(1.22);opacity:0}}
+@keyframes avatarReactionFloat{from{margin-top:0}to{margin-top:-8px}}
+
+@media(max-width:360px){
+  .reaction-tray.avatar-reaction-tray{gap:5px;padding:8px}
+  .reaction-tray .avatar-reaction-button{min-height:63px}
+  .avatar-reaction-sticker{width:54px;height:54px}
+}
+@media(prefers-reduced-motion:reduce){
+  .reaction-pop.avatar-reaction-pop.show,.reaction-burst::before,.reaction-burst::after{animation:none}
+}

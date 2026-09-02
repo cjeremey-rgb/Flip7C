@@ -200,7 +200,8 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   body:has(#game.screen.active),body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game.screen.active{display:flex;flex-direction:column;height:calc(100svh - var(--android-nav-reserve));height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game .table{flex:1 1 auto;min-height:0}
-  .my-area:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px;padding:0}
+  .my-zone:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px}
+  .my-zone:has(.hand-other:not(:empty)) .my-area{height:100%;min-height:180px;flex:none;padding:0}
   .my-area .hand{height:100%;min-height:0}
 }
 .bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:var(--bottom-ui-inset);background:linear-gradient(180deg,#07101d00,#07101df2 18%,#07101dfb 100%);border-top:1px solid #22384b;backdrop-filter:blur(8px)}
@@ -286,6 +287,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @keyframes avatarShocked{0%,100%{transform:scale(1) rotate(0)}45%{transform:scale(1.13) rotate(-2deg)}70%{transform:scale(1.07) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.avatar-shocked{animation:none}}
 </style>
+<link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
 <body>
 <div class="ambient"><i></i><i></i><i></i></div><div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
@@ -359,7 +361,8 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
     </div>
 
     <div id="targetPicker" class="target-picker hidden"></div>
-    <div id="reactionTray" class="reaction-tray hidden"><button>🔥</button><button>😅</button><button>😈</button><button>👏</button><button>🤯</button></div>
+    <div id="reactionTray" class="reaction-tray avatar-reaction-tray hidden" aria-label="Avatar reactions"></div>
+    <div id="phraseTray" class="phrase-tray hidden" aria-label="Quick phrases"></div>
     <div class="bottom-dock">
       <div id="actions" class="actions">
         <button id="react" class="react-btn">☺</button>
@@ -374,10 +377,14 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 </main>
 
 <div id="modal" class="modal hidden"><div class="modal-card"><button id="closeModal" class="modal-close">×</button><div id="modalBody"></div></div></div>
+<div id="reactionPop" class="reaction-pop avatar-reaction-pop" aria-live="polite"></div>
+<div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
+<script src="avatar-reactions.js?v=20260902-avatar-reactions-v1"></script>
 <script src="screen-effects.js?v=20260902-guardian-shield-v4"></script>
 <script>
 const $=id=>document.getElementById(id);
+const ReactionUI=globalThis.AvatarReactions;
 const HUMAN_AVATAR_IDS=['avatar-1','avatar-2','avatar-3','avatar-4','avatar-5','avatar-6','avatar-7','avatar-8','avatar-9'];
 const OFFLINE_AVATAR_IDS=[...HUMAN_AVATAR_IDS,'avatar-nova','avatar-ace'];
 let selectedAvatar=HUMAN_AVATAR_IDS.includes(localStorage.fr7avatar)?localStorage.fr7avatar:'avatar-1';
@@ -387,6 +394,13 @@ $('avatarChoices')?.addEventListener('click',event=>{const button=event.target.c
 selectAvatar(selectedAvatar);
 for(const id of OFFLINE_AVATAR_IDS)for(const mood of ['excited','angry','shocked']){const image=new Image();image.src=`${id}-${mood}.webp`}
 $('name').value=localStorage.fr7name||'';
+let offlineReactionTimer=null,offlinePhraseTimer=null;
+function escapeReactionText(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function restoreOfflineReactionMenus(){const tray=$('reactionTray');if(!tray)return;tray.innerHTML=ReactionUI.pickerMarkup(selectedAvatar,true);tray.setAttribute('aria-label','Avatar reactions and phrases')}
+function showOfflineReaction(emoji){const pop=$('reactionPop'),player=players[me],name=player?.name||$('name').value.trim()||'You',avatar=player?.avatar||selectedAvatar;if(!pop)return;pop.innerHTML=ReactionUI.popMarkup(avatar,emoji,name);pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');clearTimeout(offlineReactionTimer);offlineReactionTimer=setTimeout(()=>pop.classList.remove('show'),2600)}
+function openOfflinePhraseTray(){const tray=$('phraseTray'),name=(players[me]?.name||$('name').value||'').trim(),phrases=[...ReactionUI.QUICK_PHRASES];if(name.toLowerCase()==='becca')phrases.push(ReactionUI.BECCA_PHRASE);tray.innerHTML=phrases.map(phrase=>`<button type="button" data-phrase="${escapeReactionText(phrase)}" class="${phrase===ReactionUI.BECCA_PHRASE?'becca-phrase':''}">${escapeReactionText(phrase)}</button>`).join('');$('reactionTray').classList.add('hidden');tray.classList.toggle('hidden')}
+function showOfflinePhrase(phrase){const pop=$('phrasePop'),name=players[me]?.name||$('name').value.trim()||'You';if(!pop)return;pop.innerHTML=`<b>${escapeReactionText(name)} SAYS</b><strong>${escapeReactionText(phrase)}</strong>`;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');clearTimeout(offlinePhraseTimer);offlinePhraseTimer=setTimeout(()=>pop.classList.remove('show'),3000)}
+restoreOfflineReactionMenus();
 
 function applyFlipRushTheme(){
  const params=new URLSearchParams(location.search);
@@ -750,6 +764,9 @@ function render(){$('deckCount').textContent=deck.length;renderOfflineDiscardPil
 }
 function log(s){let el=$('log');el.innerHTML=`<p>${s}</p>`+el.innerHTML}
 $('create').onclick=startOffline;$('join').onclick=startOffline;$('hit').onclick=hit;$('stay').onclick=stay;$('next').onclick=()=>{if(gameOver)return;round++;$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');newRound()};$('leave').onclick=()=>location.reload();
+$('react').onclick=()=>{$('phraseTray').classList.add('hidden');restoreOfflineReactionMenus();$('reactionTray').classList.toggle('hidden')};
+$('reactionTray').onclick=event=>{const button=event.target.closest('button');if(!button)return;if(button.id==='phraseMenuBtn'){openOfflinePhraseTray();return}const emoji=button.dataset.emoji;if(!emoji)return;$('reactionTray').classList.add('hidden');showOfflineReaction(emoji)};
+$('phraseTray').onclick=event=>{const button=event.target.closest('button[data-phrase]');if(!button)return;$('phraseTray').classList.add('hidden');showOfflinePhrase(button.dataset.phrase)};
 $('howBtn').onclick=()=>alert('Offline practice uses the official Flip 7 rules. Draw unique number cards, stay to bank your points, and avoid duplicates. A Second Chance only protects against a duplicate number; you may hold only one, and an extra must be given to another active player without one or discarded if nobody is eligible. Freeze and Flip 3 may target any active player, including yourself. During Flip 3, all three revealed cards count; Second Chance resolves immediately, while Freeze and Flip 3 cards wait until the sequence is complete. Seven unique number cards immediately end the round and earn +15. If the highest score at 200 or more is tied, everyone plays another full round.');
 $('soundBtn').onclick=()=>alert('Sound is available in the hosted multiplayer build.');$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
 window.addEventListener('resize',()=>{fitOfflineHand();syncOfflineFlipThreeTransfer();syncOfflineActionTransfer()});

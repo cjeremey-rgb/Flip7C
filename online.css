@@ -200,7 +200,8 @@ body[data-season="christmas"] .primary{background:linear-gradient(180deg,#f8e58d
   body:has(#game.screen.active),body:has(#game.screen.active) main{height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game.screen.active{display:flex;flex-direction:column;height:calc(100svh - var(--android-nav-reserve));height:calc(100dvh - var(--android-nav-reserve));min-height:0;overflow:hidden}
   #game .table{flex:1 1 auto;min-height:0}
-  .my-area:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px}
+  .my-zone:has(.hand-other:not(:empty)){height:180px;min-height:180px;flex:0 0 180px}
+  .my-zone:has(.hand-other:not(:empty)) .my-area{height:100%;min-height:180px;flex:none}
 }
 .bottom-dock{position:fixed;z-index:20;left:0;right:0;bottom:var(--bottom-ui-inset);background:linear-gradient(180deg,#07101d00,#07101df2 18%,#07101dfb 100%);border-top:1px solid #22384b;backdrop-filter:blur(8px)}
 .bottom-dock .actions{position:relative;z-index:1;left:auto;right:auto;bottom:auto;padding:8px 10px;grid-template-columns:48px 1.45fr 1fr;background:transparent;border-top:0;backdrop-filter:none}

@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-bot-avatars-v1';
+const CACHE_NAME='flip-rush-7-v2026-09-02-avatar-reactions-v1';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,6 +7,8 @@ const APP_SHELL = [
   './online.html',
   './online.css',
   './online.js',
+  './avatar-reactions.css',
+  './avatar-reactions.js',
   './screen-effects.js',
   './frost-whiteout.webp',
   './bust-approved-exact.webp',
