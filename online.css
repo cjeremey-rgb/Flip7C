@@ -380,11 +380,12 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
   #game .card-piles{flex:0 0 auto;gap:22px;height:clamp(72px,13dvh,98px);align-items:flex-start}
   #game .deck,#game .discard-pile{transform:scale(.82);transform-origin:center top}
   #game .deck-zone small,#game .discard-zone small{position:relative;top:-16px;margin-top:0}
-  #game .my-zone{width:100%;height:auto;min-height:0;flex:1 1 0;overflow:hidden}
+  #game .my-zone{--hand-zone-height:112px;width:100%;height:var(--hand-zone-height);min-height:0;flex:0 0 var(--hand-zone-height);margin-top:auto;overflow:visible}
+  #game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)){--hand-zone-height:180px}
   #game .my-area{width:100%;height:100%;min-height:0;margin:0;padding:4px 5px;overflow:hidden;border-radius:15px}
   #game .my-area>.player-hand-row{flex-shrink:0}
-  #game .my-avatar-badge{left:5px;top:-72px;width:68px;height:68px}
-  #game .my-avatar-badge .avatar-portrait{width:68px;height:68px}
+  #game .my-avatar-badge{left:7px;top:-94px;width:92px;height:92px}
+  #game .my-avatar-badge .avatar-portrait{width:92px;height:92px}
   #game .my-area>.score-preview{right:8px!important;bottom:7px!important}
   #game .bottom-dock .actions{padding:6px 8px}
   #game .decision{min-height:54px}
@@ -408,6 +409,10 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
   #game .card-piles{height:64px}
   #game .deck,#game .discard-pile{transform:scale(.68)}
   #game .deck-zone small,#game .discard-zone small{top:-29px}
+  #game .my-zone{--hand-zone-height:100px}
+  #game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)){--hand-zone-height:150px}
+  #game .my-avatar-badge{top:-78px;width:76px;height:76px}
+  #game .my-avatar-badge .avatar-portrait{width:76px;height:76px}
 }
 
 /* Cartoon avatars: additive UI only. Existing game layout and effects remain unchanged. */

@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-02-one-screen-shell-v2';
+const CACHE_NAME='flip-rush-7-v2026-09-03-compact-hand-v3';
 const APP_SHELL = [
   './',
   './index.html',
