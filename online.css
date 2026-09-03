@@ -395,6 +395,10 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
   #game .seat-avatar,#game .seat-avatar .avatar-portrait{width:72px;height:72px}
   #game .bot-hand{position:static;left:auto;right:auto;top:auto;bottom:auto;width:100%;height:auto;min-height:53px;padding:0 7px;overflow:visible}
   #game .bot-hand .card{width:34px;height:49px;font-size:17px;margin-left:-10px}
+  #game .bot-hand .card.action{font-size:5px;line-height:1.05;padding:2px;overflow:hidden;text-align:center}
+  #game .bot-hand .card.action strong{display:block;max-width:100%;font-size:inherit;line-height:inherit;overflow-wrap:anywhere}
+  #game .bot-hand .card.mod{font-size:10px}
+  #game .bot-hand .card.mult{font-size:11px}
   #game .bottom-dock .actions{padding:6px 8px}
   #game .decision{min-height:54px}
 }
@@ -453,9 +457,9 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 .bot-seat-head>small{grid-column:2;grid-row:2;align-self:start;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .avatar-portrait{position:relative;border-radius:50%;background:#07111d;border:2px solid #34dff0;box-shadow:0 4px 12px #0008,0 0 12px #32e5cb38;z-index:5}
 .avatar-portrait.turn-active{animation:avatarTurnPulse 1.1s ease-in-out infinite}
-.avatar-portrait.avatar-excited{animation:avatarExcited .72s cubic-bezier(.2,.9,.24,1.25) 2}
-.avatar-portrait.avatar-angry{border-color:#ff5d6c;box-shadow:0 4px 12px #0008,0 0 18px #ff5d6c99;animation:avatarAngry .22s linear 6}
-.avatar-portrait.avatar-shocked{border-color:#aa79ff;box-shadow:0 4px 12px #0008,0 0 20px #aa79ffaa;animation:avatarShocked .42s cubic-bezier(.2,.9,.24,1.2) 2}
+.avatar-portrait.turn-active.avatar-excited{animation:avatarExcited .72s cubic-bezier(.2,.9,.24,1.25) 2}
+.avatar-portrait.turn-active.avatar-angry{border-color:#ff5d6c;box-shadow:0 4px 12px #0008,0 0 18px #ff5d6c99;animation:avatarAngry .22s linear 6}
+.avatar-portrait.turn-active.avatar-shocked{border-color:#aa79ff;box-shadow:0 4px 12px #0008,0 0 20px #aa79ffaa;animation:avatarShocked .42s cubic-bezier(.2,.9,.24,1.2) 2}
 .players .player{height:54px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:1fr 1fr}
 .players .player .name{grid-column:1;grid-row:1;align-self:end;padding-right:4px}
 .players .player .score{grid-column:2;grid-row:1/3;align-self:center}
@@ -468,4 +472,4 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @keyframes avatarExcited{0%,100%{transform:translateY(0) rotate(0) scale(1)}30%{transform:translateY(-8px) rotate(-6deg) scale(1.12)}65%{transform:translateY(-3px) rotate(6deg) scale(1.08)}}
 @keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
 @keyframes avatarShocked{0%,100%{transform:scale(1) rotate(0)}45%{transform:scale(1.13) rotate(-2deg)}70%{transform:scale(1.07) rotate(2deg)}}
-@media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.avatar-shocked{animation:none}}
+@media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.turn-active.avatar-shocked{animation:none}}
