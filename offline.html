@@ -671,6 +671,58 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
   #bonusFlash .flip7-points{animation-timing-function:linear!important}
 }
 
+
+/* Full-screen neon game-over celebration */
+#modal[data-mode="winner"]{z-index:120;padding:0;background:rgba(2,6,13,.82);backdrop-filter:blur(4px) brightness(.56)}
+#modal[data-mode="winner"] .modal-card{width:100%;height:100%;max-height:none;overflow:hidden;padding:0;border:0;border-radius:0;background:radial-gradient(circle at 50% 28%,rgba(0,230,255,.24),transparent 29%),radial-gradient(circle at 12% 61%,rgba(255,37,145,.14),transparent 28%),linear-gradient(180deg,rgba(4,30,48,.96),rgba(3,8,18,.98));box-shadow:none}
+#modal[data-mode="winner"] .modal-card::before{content:"";position:absolute;inset:-40%;pointer-events:none;opacity:.38;background:repeating-conic-gradient(from -7deg at 50% 35%,rgba(45,229,203,.25) 0 2deg,transparent 2deg 13deg);animation:winner-rays 18s linear infinite}
+#modal[data-mode="winner"] .modal-card::after{content:"";position:absolute;left:50%;top:31%;width:min(70vw,420px);aspect-ratio:1;border:2px solid rgba(49,229,203,.3);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 35px rgba(49,229,203,.24),inset 0 0 35px rgba(49,229,203,.12);pointer-events:none;animation:winner-ring 2.4s ease-in-out infinite}
+#modal[data-mode="winner"] .modal-close{display:none}
+#modal[data-mode="winner"] #modalBody{position:relative;z-index:2;width:100%;height:100%;overflow:hidden}
+.winner-celebration{box-sizing:border-box;width:min(100%,620px);height:100%;margin:auto;padding:max(10px,env(safe-area-inset-top)) 16px max(12px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,.8dvh,10px);text-align:center}
+.winner-hero{position:relative;flex:0 1 clamp(250px,42dvh,450px);min-height:210px;width:100%;max-width:560px}
+.winner-card-fan{position:absolute;inset:0;z-index:1;pointer-events:none;filter:drop-shadow(0 11px 13px rgba(0,0,0,.55))}
+.winner-card{position:absolute;left:50%;top:5%;width:clamp(58px,15vw,94px);aspect-ratio:.68;border:4px solid #fff;border-radius:clamp(9px,2vw,16px);display:grid;place-items:center;font:900 clamp(29px,8vw,54px)/1 "Archivo Black",sans-serif;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.28);box-shadow:inset 0 0 0 3px rgba(255,255,255,.24),0 0 18px currentColor;transform-origin:50% 155%;animation:winner-card-in .7s cubic-bezier(.18,.9,.22,1.25) both}
+.winner-card:nth-child(1){color:#ff3aa6;background:linear-gradient(145deg,#ff4ba8,#cf167b);transform:translateX(-50%) rotate(-67deg) translateY(26px);animation-delay:.05s}
+.winner-card:nth-child(2){color:#35dfff;background:linear-gradient(145deg,#3ee6ff,#117ba7);transform:translateX(-50%) rotate(-45deg) translateY(9px);animation-delay:.1s}
+.winner-card:nth-child(3){color:#ff9d2d;background:linear-gradient(145deg,#ffb839,#e96118);transform:translateX(-50%) rotate(-23deg);animation-delay:.15s}
+.winner-card:nth-child(4){color:#ffde35;background:linear-gradient(145deg,#ffe84b,#efa600);transform:translateX(-50%);animation-delay:.2s}
+.winner-card:nth-child(5){color:#70dd45;background:linear-gradient(145deg,#7fe64c,#279c45);transform:translateX(-50%) rotate(23deg);animation-delay:.25s}
+.winner-card:nth-child(6){color:#31c9ff;background:linear-gradient(145deg,#39d3ff,#1975d0);transform:translateX(-50%) rotate(45deg) translateY(9px);animation-delay:.3s}
+.winner-card:nth-child(7){color:#ba68ff;background:linear-gradient(145deg,#c66dff,#743bd6);transform:translateX(-50%) rotate(67deg) translateY(26px);animation-delay:.35s}
+.winner-avatar{position:absolute;z-index:3;left:50%;bottom:0;transform:translateX(-50%);width:clamp(130px,31vw,194px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:linear-gradient(145deg,#163a54,#07121f);border:clamp(5px,1.4vw,9px) solid #1ce7ef;outline:3px solid #ff2d9f;box-shadow:0 0 0 7px rgba(0,0,0,.6),0 0 30px #21dded,0 0 58px rgba(255,35,151,.65);font:900 clamp(58px,15vw,100px)/1 "Archivo Black";color:#fff;animation:winner-avatar-in .8s .25s cubic-bezier(.18,.9,.22,1.18) both}
+.winner-avatar img{width:100%;height:100%;object-fit:cover}
+.winner-crown{position:absolute;z-index:5;left:50%;top:24%;width:clamp(88px,22vw,140px);height:clamp(54px,13vw,85px);transform:translate(-50%,-50%) rotate(-7deg);filter:drop-shadow(0 7px 0 #ad6200) drop-shadow(0 0 14px #ffe54d);animation:winner-crown-drop .8s .55s cubic-bezier(.2,.9,.2,1.3) both}
+.winner-crown::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,#fff17a 2%,#ffc318 45%,#ff8a00 82%);clip-path:polygon(2% 22%,25% 58%,36% 2%,52% 55%,76% 8%,72% 60%,99% 29%,88% 100%,13% 100%);border-radius:8px}
+.winner-crown::after{content:"◆  ◆  ◆";position:absolute;left:13%;right:10%;bottom:4%;height:25%;border-radius:7px;background:#ffbe13;color:#ff358f;font-size:clamp(8px,2.4vw,14px);line-height:1.35;letter-spacing:clamp(8px,2.3vw,14px);white-space:nowrap;overflow:hidden;box-shadow:inset 0 3px rgba(255,255,255,.38)}
+.winner-game-over{position:relative;z-index:3;flex:0 0 auto;margin-top:-3px;font:900 clamp(38px,10.5vw,72px)/.9 "Archivo Black",sans-serif;letter-spacing:-.055em;color:#fff;text-transform:uppercase;text-shadow:0 4px 0 #65748a,0 8px 0 #142033,0 0 24px rgba(255,255,255,.4);animation:winner-copy-in .55s .65s both}
+.winner-name{position:relative;z-index:3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:900 clamp(21px,6vw,38px)/1.05 "Archivo Black",sans-serif;color:#ffe23e;text-transform:uppercase;text-shadow:0 3px 0 #dc7015,0 0 18px rgba(255,219,45,.75);animation:winner-copy-in .55s .75s both}
+.winner-standings{position:relative;z-index:3;flex:0 1 auto;width:min(100%,500px);max-height:clamp(125px,24dvh,250px);overflow:auto;padding:clamp(8px,1.5dvh,14px) clamp(12px,3vw,20px);border:2px solid #21d9e7;border-radius:clamp(15px,4vw,24px);background:linear-gradient(160deg,rgba(9,35,54,.94),rgba(4,14,26,.96));box-shadow:inset 0 0 20px rgba(36,214,232,.12),0 0 18px rgba(36,214,232,.28);animation:winner-panel-in .55s .86s both}
+.winner-standings-title{margin-bottom:4px;font:900 clamp(11px,3.2vw,16px)/1.2 "Archivo Black",sans-serif;letter-spacing:.18em;color:#33e4ef}
+.winner-score-row{min-height:27px;display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:8px;padding:clamp(3px,.55dvh,6px) 3px;border-top:1px solid rgba(82,198,221,.17);color:#dcecff;font-size:clamp(12px,3.2vw,16px);font-weight:900}
+.winner-score-row:first-of-type{border-top:0}
+.winner-score-row.is-winner{color:#ffe13d}
+.winner-score-rank{display:grid;place-items:center;width:27px;aspect-ratio:1;border-radius:50%;background:#133149;color:#8cc9df;font:900 12px "Archivo Black"}
+.winner-score-row.is-winner .winner-score-rank{background:#ffe13d;color:#16202c;box-shadow:0 0 12px rgba(255,225,61,.6)}
+.winner-score-person{min-width:0;display:flex;align-items:center;gap:8px;text-align:left}
+.winner-score-person img,.winner-score-initial{flex:0 0 auto;width:27px;height:27px;border-radius:50%;object-fit:cover;border:2px solid #24dce8;background:#132d43}
+.winner-score-initial{display:grid;place-items:center;font:900 12px "Archivo Black";color:#fff}
+.winner-score-person-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.winner-score-value{font:900 clamp(16px,4vw,23px)/1 "Archivo Black";color:#eefaff}
+.winner-score-row.is-winner .winner-score-value{color:#ffe13d;text-shadow:0 0 10px rgba(255,225,61,.52)}
+#modal[data-mode="winner"] .winner-play-again{position:relative;z-index:3;flex:0 0 auto;width:min(100%,500px);min-height:clamp(54px,7dvh,72px);margin:0;padding:10px 20px!important;border:3px solid #ff5dc2!important;border-radius:21px!important;background:linear-gradient(180deg,#f53dc0,#b4118f)!important;color:#fff!important;font:900 clamp(18px,5vw,27px)/1 "Archivo Black",sans-serif!important;letter-spacing:.04em!important;box-shadow:0 6px 0 #6c0755,0 0 24px rgba(255,55,191,.72)!important;animation:winner-panel-in .55s .98s both}
+#modal[data-mode="winner"] .winner-play-again:active{transform:translateY(4px);box-shadow:0 2px 0 #6c0755,0 0 18px rgba(255,55,191,.62)!important}
+.winner-waiting{position:relative;z-index:3;width:min(100%,500px);padding:15px;border:1px solid #38556b;border-radius:18px;background:rgba(6,20,33,.9);color:#a8bac9;font-size:clamp(12px,3vw,15px);font-weight:900;letter-spacing:.08em}
+@keyframes winner-rays{to{transform:rotate(360deg)}}
+@keyframes winner-ring{50%{transform:translate(-50%,-50%) scale(1.08);opacity:.55}}
+@keyframes winner-card-in{from{opacity:0;translate:0 45px;scale:.45}to{opacity:1;translate:0 0;scale:1}}
+@keyframes winner-avatar-in{from{opacity:0;transform:translateX(-50%) scale(.45)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes winner-crown-drop{from{opacity:0;transform:translate(-50%,-130%) rotate(-18deg) scale(.55)}to{opacity:1;transform:translate(-50%,-50%) rotate(-7deg) scale(1)}}
+@keyframes winner-copy-in{from{opacity:0;transform:translateY(22px) scale(.8)}to{opacity:1;transform:none}}
+@keyframes winner-panel-in{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+@media(max-height:700px){.winner-celebration{gap:3px}.winner-hero{flex-basis:245px}.winner-standings{padding:7px 12px;max-height:150px}.winner-score-row{min-height:24px;padding:2px}.winner-game-over{font-size:38px}.winner-name{font-size:21px}}
+@media(prefers-reduced-motion:reduce){#modal[data-mode="winner"] .modal-card::before,#modal[data-mode="winner"] .modal-card::after,.winner-card,.winner-avatar,.winner-crown,.winner-game-over,.winner-name,.winner-standings,#modal[data-mode="winner"] .winner-play-again{animation:none!important}}
+
 </style>
 <link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
@@ -1120,8 +1172,11 @@ function showSevenBonus(p){const flash=$('bonusFlash');if(!flash||!p)return;flas
 function launchConfetti(){const box=$('confetti');box.innerHTML='';for(let i=0;i<70;i++){const c=document.createElement('i');c.className='confetti-piece';c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.8)+'s';c.style.background=['#ffdd42','#ff4f8b','#32e5cb','#74dfff','#ffffff'][i%5];box.appendChild(c)}setTimeout(()=>box.innerHTML='',3600)}
 function showWinner(winner){
  gameOver=true;running=false;$('hit').classList.add('hidden');$('stay').classList.add('hidden');$('next').classList.add('hidden');$('closeModal').classList.add('hidden');
- $('modalBody').innerHTML=`<div style="text-align:center;padding:18px 4px"><div style="font-size:58px">🏆</div><div style="font:900 15px 'Archivo Black';letter-spacing:.18em;color:#32e5cb;margin-top:8px">GAME OVER</div><h2 style="font-size:42px;margin:10px 0;color:#ffdd42">${winner.name} WINS!</h2><p style="font-size:18px;color:white">Final score: <b>${winner.score}</b> points</p><div style="margin:18px 0;padding:14px;border-radius:18px;background:#07111d">${[...players].sort((a,b)=>b.score-a.score).map((p,i)=>`<div style="display:flex;justify-content:space-between;padding:7px 4px;color:${i===0?'#ffdd42':'#dcecff'}"><span>${i+1}. ${p.name}</span><b>${p.score}</b></div>`).join('')}</div><button class="menu-action play-again" onclick="location.reload()" aria-label="Play another game">↻ PLAY AGAIN</button></div>`;
- $('modal').classList.remove('hidden');launchConfetti();
+ const standings=[...players].sort((a,b)=>b.score-a.score),safe=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const winnerImage=avatarSource(winner,'excited'),cards=Array.from({length:7},()=>'<span class="winner-card">7</span>').join('');
+ const scoreRows=standings.map((p,i)=>{const source=avatarSource(p,p.id===winner.id?'excited':'normal');return `<div class="winner-score-row ${p.id===winner.id?'is-winner':''}"><span class="winner-score-rank">${i+1}</span><span class="winner-score-person">${source?`<img src="${source}" alt="">`:`<span class="winner-score-initial">${safe((p.name||'?').charAt(0).toUpperCase())}</span>`}<span class="winner-score-person-name">${safe(p.name)}</span></span><strong class="winner-score-value">${p.score}</strong></div>`}).join('');
+ $('modalBody').innerHTML=`<div class="winner-celebration"><div class="winner-hero"><div class="winner-card-fan" aria-hidden="true">${cards}</div><div class="winner-crown" aria-hidden="true"></div><div class="winner-avatar">${winnerImage?`<img src="${winnerImage}" alt="">`:safe((winner.name||'?').charAt(0).toUpperCase())}</div></div><div class="winner-game-over">GAME OVER</div><div class="winner-name">${safe(winner.name)} WINS!</div><div class="winner-standings"><div class="winner-standings-title">FINAL SCORES</div>${scoreRows}</div><button class="menu-action play-again winner-play-again" onclick="location.reload()" aria-label="Play another game">↻ PLAY AGAIN</button></div>`;
+ $('modal').dataset.mode='winner';$('modal').classList.remove('hidden');launchConfetti();
 }
 function endRound(reason='Round complete.'){
  if(!running)return;running=false;
