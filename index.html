@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
   <script>if(/Android/i.test(navigator.userAgent))document.documentElement.classList.add('android-nav');</script>
-  <link rel="stylesheet" href="online.css?v=20260903-restored-player-seats-v4">
+  <link rel="stylesheet" href="online.css?v=20260903-full-screen-startups-v5">
   <style>
     .mode-home .topbar{height:24px}
     .mode-home .showdown-hero{padding-top:0}
@@ -31,11 +31,11 @@
     .single-mode .mode-face{border-color:#fff09a}.multi-mode .mode-face{border-color:#34dff0}
     @media(max-width:699px){
       #home.mode-home.screen.active{padding-bottom:5px}
-      .mode-home .showdown-stage{height:285px}
+      .mode-home .showdown-stage{height:clamp(285px,40dvh,350px)}
       .mode-home .showdown-main{width:112px;margin-left:-56px;top:0}.mode-home .showdown-left{width:92px;top:62px}.mode-home .showdown-right{width:89px;top:58px}.mode-home .showdown-dog{width:84px;top:129px;right:20px}
       .mode-home .showdown-stage .logo{top:106px;font-size:72px}.mode-home .showdown-card-splash{bottom:0}
       .mode-home .fly-two,.mode-home .fly-five{bottom:18px}
-      .mode-panel{flex:0 0 auto}
+      .mode-panel{flex:0 0 auto}.mode-link{min-height:clamp(142px,20dvh,178px)}
       .mode-home footer{display:block;margin:4px 0 0;font-size:7px}
     }
     @media(max-width:370px),(max-height:700px){
