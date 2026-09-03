@@ -524,3 +524,168 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @media(max-width:699px) and (max-height:720px){
   .bot-hand .scaled-card{--mini-card-scale:.375}
 }
+
+
+/* Full-screen Neon Card Burst for a validated Flip 7. */
+#bonusFlash{
+  inset:0!important;
+  left:0!important;
+  top:0!important;
+  width:auto!important;
+  height:auto!important;
+  transform:none!important;
+  opacity:0;
+  display:block;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:radial-gradient(circle at 50% 52%,rgba(24,222,255,.18) 0,rgba(232,35,167,.13) 28%,rgba(3,10,20,.2) 58%,transparent 78%);
+  box-shadow:none;
+  overflow:hidden;
+  isolation:isolate;
+  transition:none;
+}
+#bonusFlash.show{
+  opacity:1;
+  transform:none!important;
+  animation:flip7OverlayLife 3.2s ease-in-out both;
+}
+#bonusFlash .flip7-burst-scene{position:absolute;inset:0;overflow:hidden}
+#bonusFlash .flip7-burst-scene:before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:49%;
+  width:130vmax;
+  height:130vmax;
+  background:repeating-conic-gradient(from 0deg,transparent 0 7deg,rgba(32,228,255,.22) 8deg 9deg,transparent 10deg 17deg,rgba(255,54,181,.2) 18deg 19deg,transparent 20deg 29deg,rgba(255,214,52,.18) 30deg 31deg);
+  transform:translate(-50%,-50%) scale(.12);
+  filter:blur(1px);
+  animation:flip7Rays 3.2s cubic-bezier(.16,.78,.2,1) both;
+}
+#bonusFlash .flip7-burst-scene:after{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:48%;
+  width:18vmin;
+  height:18vmin;
+  border:4px solid #fff9;
+  border-radius:50%;
+  box-shadow:0 0 0 12px #22e5ff55,0 0 0 28px #ff38b733,0 0 55px 30px #5aeaff66;
+  animation:flip7Ring 3.2s ease-out both;
+}
+#bonusFlash .flip7-card-fan{position:absolute;inset:0;z-index:2}
+#bonusFlash .flip7-card{
+  --angle:0deg;
+  --radius:clamp(-160px,-20vw,-98px);
+  position:absolute;
+  left:50%;
+  top:40%;
+  width:clamp(48px,13vw,78px);
+  aspect-ratio:72/104;
+  display:grid;
+  place-items:center;
+  border:clamp(2px,.8vw,5px) solid #fff;
+  border-radius:clamp(8px,2.6vw,14px);
+  background:repeating-linear-gradient(135deg,rgba(255,255,255,.17) 0 7px,rgba(255,255,255,.03) 7px 14px),var(--card-color,#ff3ca6);
+  color:#fff;
+  font:900 clamp(25px,8vw,48px)/1 'Archivo Black',Inter,sans-serif;
+  text-shadow:0 3px 0 #0007;
+  box-shadow:0 7px 0 #060b13,0 12px 25px #000b,0 0 20px var(--card-glow,#ff4fb8);
+  opacity:0;
+  transform-origin:center center;
+  animation:flip7CardBurst 2.9s cubic-bezier(.16,.86,.2,1) both;
+}
+#bonusFlash .flip7-card:nth-child(1){--angle:-72deg;--card-color:#e9238d;--card-glow:#ff4fb8;animation-delay:.02s}
+#bonusFlash .flip7-card:nth-child(2){--angle:-48deg;--card-color:#147bc8;--card-glow:#35c9ff;animation-delay:.06s}
+#bonusFlash .flip7-card:nth-child(3){--angle:-24deg;--card-color:#08aaa7;--card-glow:#39fff1;animation-delay:.1s}
+#bonusFlash .flip7-card:nth-child(4){--angle:0deg;--card-color:#ed287e;--card-glow:#ff5cc5;animation-delay:.14s}
+#bonusFlash .flip7-card:nth-child(5){--angle:24deg;--card-color:#ed9815;--card-glow:#ffd54c;animation-delay:.18s}
+#bonusFlash .flip7-card:nth-child(6){--angle:48deg;--card-color:#7437d7;--card-glow:#b779ff;animation-delay:.22s}
+#bonusFlash .flip7-card:nth-child(7){--angle:72deg;--card-color:#ad6c12;--card-glow:#ffc832;animation-delay:.26s}
+#bonusFlash .flip7-main{
+  position:absolute;
+  z-index:4;
+  left:50%;
+  top:45%;
+  transform:translate(-50%,-50%);
+  color:#ff2f9b;
+  font:900 clamp(165px,43vw,300px)/.72 'Archivo Black',Impact,sans-serif;
+  -webkit-text-stroke:clamp(5px,1.7vw,11px) #fff;
+  paint-order:stroke fill;
+  text-shadow:0 clamp(10px,2vw,18px) 0 #851058,0 0 16px #fff,0 0 42px #ff39b6,0 0 82px #28e5ff;
+  animation:flip7MainHit 3.05s cubic-bezier(.18,.9,.2,1.18) both;
+}
+#bonusFlash .flip7-title,
+#bonusFlash .flip7-round,
+#bonusFlash .flip7-points{
+  position:absolute;
+  z-index:5;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  text-align:center;
+  white-space:nowrap;
+  font-family:'Archivo Black',Impact,sans-serif;
+  font-weight:900;
+  line-height:.9;
+  opacity:0;
+}
+#bonusFlash .flip7-title{
+  top:61%;
+  color:#fff;
+  font-size:clamp(51px,14.5vw,92px);
+  -webkit-text-stroke:clamp(2px,.9vw,6px) #d21472;
+  paint-order:stroke fill;
+  text-shadow:0 7px 0 #781044,0 0 19px #ff51be;
+  animation:flip7CopyHit 2.55s .34s cubic-bezier(.18,.9,.2,1.14) both;
+}
+#bonusFlash .flip7-round{
+  top:70%;
+  color:#fff;
+  font-size:clamp(25px,7.8vw,48px);
+  -webkit-text-stroke:clamp(1px,.55vw,3px) #d21472;
+  paint-order:stroke fill;
+  letter-spacing:.02em;
+  text-shadow:0 4px 0 #781044,0 0 14px #ff51be;
+  animation:flip7CopyHit 2.3s .58s cubic-bezier(.18,.9,.2,1.14) both;
+}
+#bonusFlash .flip7-points{
+  top:76%;
+  color:#ffd642;
+  font-size:clamp(62px,18vw,116px);
+  -webkit-text-stroke:clamp(2px,.7vw,5px) #fff5ae;
+  paint-order:stroke fill;
+  text-shadow:0 7px 0 #a65000,0 0 18px #fff3a0,0 0 34px #ffac20;
+  animation:flip7CopyHit 2.08s .78s cubic-bezier(.18,.9,.2,1.14) both;
+}
+@keyframes flip7OverlayLife{0%{opacity:0}5%,88%{opacity:1}100%{opacity:0}}
+@keyframes flip7Rays{0%{opacity:0;transform:translate(-50%,-50%) rotate(-18deg) scale(.08)}18%{opacity:.9}100%{opacity:0;transform:translate(-50%,-50%) rotate(32deg) scale(1.05)}}
+@keyframes flip7Ring{0%{opacity:0;transform:translate(-50%,-50%) scale(.1)}14%{opacity:1}72%{opacity:.42;transform:translate(-50%,-50%) scale(5.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(7)}}
+@keyframes flip7CardBurst{
+  0%,7%{opacity:0;transform:translate(-50%,-50%) rotate(0) translateY(0) scale(.08)}
+  27%,86%{opacity:1;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(var(--radius)) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateY(calc(var(--radius) - 8px)) scale(1.04)}
+}
+@keyframes flip7MainHit{
+  0%,9%{opacity:0;transform:translate(-50%,-50%) rotate(-16deg) scale(.08)}
+  27%{opacity:1;transform:translate(-50%,-50%) rotate(2deg) scale(1.12)}
+  38%,86%{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-54%) scale(.94)}
+}
+@keyframes flip7CopyHit{
+  0%{opacity:0;transform:translateX(-50%) scale(1.55)}
+  15%,86%{opacity:1;transform:translateX(-50%) scale(1)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.96)}
+}
+@media(prefers-reduced-motion:reduce){
+  #bonusFlash.show,
+  #bonusFlash .flip7-burst-scene:before,
+  #bonusFlash .flip7-burst-scene:after,
+  #bonusFlash .flip7-card,
+  #bonusFlash .flip7-main,
+  #bonusFlash .flip7-title,
+  #bonusFlash .flip7-round,
+  #bonusFlash .flip7-points{animation-timing-function:linear!important}
+}
