@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-03-expanded-startup-art-v6';
+const CACHE_NAME='flip-rush-7-v2026-09-03-expanded-startup-art-v7';
 const APP_SHELL = [
   './',
   './index.html',
