@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-03-compact-hand-v3';
+const CACHE_NAME='flip-rush-7-v2026-09-03-restored-player-seats-v4';
 const APP_SHELL = [
   './',
   './index.html',
