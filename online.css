@@ -473,3 +473,54 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @keyframes avatarAngry{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-3deg)}75%{transform:translateX(4px) rotate(3deg)}}
 @keyframes avatarShocked{0%,100%{transform:scale(1) rotate(0)}45%{transform:scale(1.13) rotate(-2deg)}70%{transform:scale(1.07) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.avatar-portrait.turn-active,.avatar-portrait.avatar-excited,.avatar-portrait.avatar-angry,.avatar-portrait.turn-active.avatar-shocked{animation:none}}
+
+
+/* Opponent cards are canonical card faces scaled as complete units. */
+.bot-hand .scaled-card{
+  --mini-card-scale:.6666667;
+  position:relative;
+  width:calc(72px * var(--mini-card-scale));
+  height:calc(104px * var(--mini-card-scale));
+  flex:0 0 auto;
+  margin-left:calc(-24px * var(--mini-card-scale));
+  overflow:visible;
+  animation:dealSmall .3s ease-out;
+}
+.bot-hand .scaled-card:first-child{margin-left:0}
+#game .bot-hand .scaled-card>.card{
+  position:absolute!important;
+  inset:0 auto auto 0!important;
+  width:72px!important;
+  height:104px!important;
+  min-width:72px!important;
+  margin:0!important;
+  border-width:4px!important;
+  border-radius:13px!important;
+  font-size:40px!important;
+  padding:0!important;
+  transform:scale(var(--mini-card-scale))!important;
+  transform-origin:top left!important;
+  animation:none!important;
+}
+#game .bot-hand .scaled-card>.card.action{
+  font:900 13px/normal Inter,sans-serif!important;
+  padding:6px!important;
+  overflow:visible!important;
+  overflow-wrap:normal!important;
+}
+#game .bot-hand .scaled-card>.card.mod{font-size:27px!important}
+#game .bot-hand .scaled-card>.card.mult{font-size:31px!important}
+#game .bot-hand .scaled-card>.card:before,
+#game .bot-hand .scaled-card>.card:after{display:block!important}
+@media(max-height:740px){
+  .bot-hand .scaled-card{--mini-card-scale:.5833333}
+}
+@media(min-width:700px){
+  .bot-hand .scaled-card{--mini-card-scale:.8055556}
+}
+@media(max-width:699px){
+  .bot-hand .scaled-card{--mini-card-scale:.4722222}
+}
+@media(max-width:699px) and (max-height:720px){
+  .bot-hand .scaled-card{--mini-card-scale:.375}
+}

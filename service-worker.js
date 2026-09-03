@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-03-opponent-card-text-v8';
+const CACHE_NAME='flip-rush-7-v2026-09-03-proportional-cards-v9';
 const APP_SHELL = [
   './',
   './index.html',

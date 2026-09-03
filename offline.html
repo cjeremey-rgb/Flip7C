@@ -453,6 +453,58 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
   #game .my-avatar-badge{top:-78px;width:76px;height:76px}
   #game .my-avatar-badge .avatar-portrait{width:76px;height:76px}
 }
+
+
+/* Opponent cards are canonical card faces scaled as complete units. */
+.bot-hand .scaled-card{
+  --mini-card-scale:.6666667;
+  position:relative;
+  width:calc(72px * var(--mini-card-scale));
+  height:calc(104px * var(--mini-card-scale));
+  flex:0 0 auto;
+  margin-left:calc(-24px * var(--mini-card-scale));
+  overflow:visible;
+  animation:dealSmall .3s ease-out;
+}
+.bot-hand .scaled-card:first-child{margin-left:0}
+#game .bot-hand .scaled-card>.card{
+  position:absolute!important;
+  inset:0 auto auto 0!important;
+  width:72px!important;
+  height:104px!important;
+  min-width:72px!important;
+  margin:0!important;
+  border-width:4px!important;
+  border-radius:13px!important;
+  font-size:40px!important;
+  padding:0!important;
+  transform:scale(var(--mini-card-scale))!important;
+  transform-origin:top left!important;
+  animation:none!important;
+}
+#game .bot-hand .scaled-card>.card.action{
+  font:900 13px/normal Inter,sans-serif!important;
+  padding:6px!important;
+  overflow:visible!important;
+  overflow-wrap:normal!important;
+}
+#game .bot-hand .scaled-card>.card.mod{font-size:27px!important}
+#game .bot-hand .scaled-card>.card.mult{font-size:31px!important}
+#game .bot-hand .scaled-card>.card:before,
+#game .bot-hand .scaled-card>.card:after{display:block!important}
+@media(max-height:740px){
+  .bot-hand .scaled-card{--mini-card-scale:.5833333}
+}
+@media(min-width:700px){
+  .bot-hand .scaled-card{--mini-card-scale:.8055556}
+}
+@media(max-width:699px){
+  .bot-hand .scaled-card{--mini-card-scale:.4722222}
+}
+@media(max-width:699px) and (max-height:720px){
+  .bot-hand .scaled-card{--mini-card-scale:.375}
+}
+
 </style>
 <link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
@@ -922,7 +974,8 @@ function displayCards(cards){return [...cards].sort((a,b)=>displayCardRank(a)-di
 function splitDisplayCards(cards){const sorted=displayCards(cards);return{numbers:sorted.filter(c=>c.t==='n'),other:sorted.filter(c=>c.t!=='n')}}
 function fitOfflineRow(row,reservePreview=false,maxScale=1){if(!row)return;const count=row.children.length;if(!count){row.style.removeProperty('--hand-scale');return}const preview=document.getElementById('scorePreview'),rr=row.getBoundingClientRect(),pr=preview?.getBoundingClientRect(),reserve=reservePreview&&pr?Math.max(0,rr.right-pr.left+6):0,available=Math.max(1,row.clientWidth-16-reserve),baseWidth=window.matchMedia('(min-width:700px)').matches?84:72,stepRatio=.78,baseSpan=baseWidth*(1+(count-1)*stepRatio),scale=Math.min(maxScale,1,available/baseSpan);row.style.setProperty('--hand-scale',String(scale))}
 function fitOfflineHand(){const area=$('myArea'),hand=area?.querySelector('.hand');if(!hand)return;const other=hand.querySelector('.hand-other'),numbers=hand.querySelector('.hand-numbers'),rows=[other,numbers].filter(row=>row&&row.children.length),mobile=window.matchMedia('(max-width:699px)').matches,baseHeight=window.matchMedia('(min-width:700px)').matches?121:104,usableHeight=area.clientHeight-8,fitHeight=(usableHeight-Math.max(0,rows.length-1)*5)/(Math.max(1,rows.length)*baseHeight),verticalScale=mobile&&rows.length&&area.clientHeight>0?Math.max(.12,Math.min(1,fitHeight)):1;fitOfflineRow(other,false,verticalScale);fitOfflineRow(numbers,true,verticalScale)}
-function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second');return `<div class="card face ${cls}"><strong>${c.v}</strong></div>`}
+function cardHtml(c){let cls=c.t==='n'?`number n${c.v}`:c.t==='m'?(c.v==='x2'?'mult':'mod'):'action '+(c.v==='FREEZE'?'freeze':c.v==='FLIP 3'?'flip3':'second'),label=c.t==='n'?c.v:c.t==='m'?(c.v==='x2'?'BOOST':'BONUS'):'ACTION';return `<div class="card face ${cls}" data-label="${label}">${c.v}</div>`}
+function scaledCardHtml(c){return `<div class="scaled-card">${cardHtml(c)}</div>`}
 function renderOfflineDiscardPile(){const root=$('discardVisual');if(!root)return;$('discardCount').textContent=discard.length;root.innerHTML=discard.length?cardHtml(discard[discard.length-1]):'<div class="discard-empty">DISCARD</div>'}
 function offlineFlipThreeAnchor(index){if(index===me)return $('myArea');return document.querySelector(`.bot-seat[data-player-index="${index}"]`)||$('table')}
 function placeOfflineFlipThreeCard(card,anchor){if(!card||!anchor)return;const rect=anchor.getBoundingClientRect(),width=card.offsetWidth||68,height=card.offsetHeight||98;card.style.left=Math.max(4,Math.min(innerWidth-width-4,rect.left+(rect.width-width)/2))+'px';card.style.top=Math.max(4,Math.min(innerHeight-height-4,rect.top+(rect.height-height)/2))+'px'}
@@ -933,7 +986,7 @@ function offlineStatus(){if(activeActionTransfer){const a=activeActionTransfer,l
 function render(){$('deckCount').textContent=deck.length;renderOfflineDiscardPile();$('roomCode').value='OFFLINE';$('status').classList.toggle('hidden',!running);$('status').innerHTML=offlineStatus();
  const turnId=running?players[current]?.id:'';
  $('players').innerHTML=players.map((p,i)=>`<div class="player ${i===current?'turn':''} ${p.bust?'busted':''} ${p.frozen?'frozen':''}"><div class="player-copy"><b>${p.name}${p.bot?' 🤖':''}</b><small>${p.bust?'BUST':p.frozen?'FROZEN':p.bonusAwarded?'7-CARD +15':p.banked?'BANKED':value(p)+' this round'}</small></div><strong>${p.score}</strong></div>`).join('');
- $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}" data-player-index="${i}"><div class="bot-seat-head"><div class="seat-avatar">${avatarPortraitMarkup(bp,turnId)}</div><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(cardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
+ $('botTable').innerHTML=players.map((bp,i)=>({bp,i})).filter(x=>x.i!==me).map(({bp,i})=>`<div class="bot-seat ${i===current?'turn':''} ${bp.bust?'busted':''} ${bp.banked?'banked':''} ${bp.frozen?'frozen':''} ${(bp.bust||bp.banked||bp.frozen)?'has-result':''}" data-player-index="${i}"><div class="bot-seat-head"><div class="seat-avatar">${avatarPortraitMarkup(bp,turnId)}</div><b>${bp.name} 🤖</b><small>${bp.bust?'BUST':bp.frozen?'FROZEN':bp.bonusAwarded?'7-CARD +15':bp.banked?'HOLD':value(bp)+' pts'}</small></div><div class="bot-hand">${displayCards(bp.cards).map(scaledCardHtml).join('')}</div>${bp.bust?'<div class="result-overlay bust">BUST</div>':bp.frozen?'<div class="result-overlay frozen">FROZEN</div>':bp.banked?'<div class="result-overlay hold">HOLD</div>':''}</div>`).join('');
  const p=players[me],split=p?splitDisplayCards(p.cards):{numbers:[],other:[]},scoreHtml=`<div id="scorePreview" class="score-preview"><small>ROUND VALUE</small><b>${p?value(p):0}</b></div>`;$('myArea').className='my-area '+((p&&(p.bust||p.banked||p.frozen))?'has-result':'');$('myArea').innerHTML=p?`<div class="hand"><div class="hand-row hand-other">${split.other.map(cardHtml).join('')}</div><div class="hand-row hand-numbers">${split.numbers.map(cardHtml).join('')}</div></div>${scoreHtml}${p.bust?'<div class="result-overlay bust">BUST</div>':p.frozen?'<div class="result-overlay frozen">FROZEN</div>':p.banked?'<div class="result-overlay hold">HOLD</div>':''}`:scoreHtml;
  $('myAvatarBadge').innerHTML=p?avatarPortraitMarkup(p,turnId):'';
  const mine=running&&current===me&&isRoundActive(p);document.body.classList.toggle('my-turn',mine);if(mine&&!activeActionTransfer&&!activeFlipThree)$('status').innerHTML='<span class="pulse"></span><b>YOUR DECISION — FLIP OR HOLD</b><small>It is your turn</small>';$('hit').disabled=!mine;$('stay').disabled=!mine;$('round').textContent=round;fitOfflineHand();requestAnimationFrame(fitOfflineHand);syncOfflineFlipThreeTransfer();syncOfflineActionTransfer();
