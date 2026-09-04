@@ -748,7 +748,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 #modal[data-mode="winner"] .modal-card{background:radial-gradient(circle at 50% 48%,rgba(255,34,179,.12),transparent 42%),linear-gradient(180deg,rgba(2,12,24,.08),rgba(2,8,16,.38))}
 #modal[data-mode="winner"] .modal-card::before{opacity:.38;background:repeating-conic-gradient(from -7deg at 50% 48%,rgba(38,229,255,.28) 0 1.5deg,transparent 1.5deg 10deg,rgba(255,41,173,.19) 10deg 11deg,transparent 11deg 18deg)}
 #modal[data-mode="winner"] .modal-card::after{top:49%;width:min(105vw,680px);opacity:.72}
-.winner-celebration{position:relative;display:block;width:min(100%,760px);height:100%;padding:max(6px,env(safe-area-inset-top)) 0 max(8px,env(safe-area-inset-bottom));overflow:hidden}
+.winner-celebration{position:relative;display:block;width:min(100%,760px);height:100%;padding:max(6px,env(safe-area-inset-top)) 0 max(8px,env(safe-area-inset-bottom));overflow:hidden;transform:translateY(-.75in)}
 .winner-hero{position:relative;flex:none;width:100%;max-width:none;height:auto;min-height:0;aspect-ratio:1312/1199;margin:19dvh auto 0}
 .winner-card-fan{z-index:4;inset:0;background:url('winner-burst-frame.webp') center/contain no-repeat;filter:drop-shadow(0 12px 18px rgba(0,0,0,.5));animation:winner-burst-art-in .78s cubic-bezier(.18,.9,.22,1.2) both}
 .winner-card{display:none!important}
