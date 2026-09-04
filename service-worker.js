@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-04-neon-winner-v14';
+const CACHE_NAME='flip-rush-7-v2026-09-04-neon-winner-v15';
 const APP_SHELL = [
   './',
   './index.html',
