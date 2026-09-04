@@ -1198,7 +1198,16 @@ function showSevenBonus(p){const flash=$('bonusFlash');if(!flash||!p)return;flas
 function launchConfetti(){const box=$('confetti');box.innerHTML='';for(let i=0;i<70;i++){const c=document.createElement('i');c.className='confetti-piece';c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.8)+'s';c.style.background=['#ffdd42','#ff4f8b','#32e5cb','#74dfff','#ffffff'][i%5];box.appendChild(c)}setTimeout(()=>box.innerHTML='',3600)}
 function fitWinnerName(){
  const label=document.querySelector('#modal[data-mode="winner"] .winner-name');if(!label)return;
- const fit=()=>{label.style.fontSize='';const maximum=parseFloat(getComputedStyle(label).fontSize)||64,available=Math.max(1,label.clientWidth-12);label.style.fontSize=maximum+'px';if(label.scrollWidth<=available)return;let low=6,high=maximum;for(let i=0;i<12;i++){const size=(low+high)/2;label.style.fontSize=size+'px';if(label.scrollWidth<=available)low=size;else high=size}label.style.fontSize=Math.max(6,low-.5)+'px'};
+ const fit=()=>{
+  label.style.fontSize='';
+  const maximum=parseFloat(getComputedStyle(label).fontSize)||64,available=Math.max(1,label.clientWidth-12);
+  const probe=label.cloneNode(true);probe.setAttribute('aria-hidden','true');
+  Object.assign(probe.style,{position:'absolute',left:'-10000px',top:'0',width:'max-content',maxWidth:'none',overflow:'visible',textOverflow:'clip',visibility:'hidden',pointerEvents:'none',animation:'none',fontSize:maximum+'px'});
+  label.parentElement.appendChild(probe);
+  const naturalWidth=probe.getBoundingClientRect().width;probe.remove();
+  const fitted=naturalWidth>available?maximum*available/naturalWidth:maximum;
+  label.style.fontSize=Math.max(12,Math.min(maximum,fitted*.99))+'px'
+ };
  requestAnimationFrame(fit);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit)
 }
 function showWinner(winner){

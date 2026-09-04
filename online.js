@@ -180,7 +180,16 @@ function confetti(){const root=$('confetti'),colors=['#32e5cb','#ffdd42','#ff4f8
 function showSevenBonus(player){const flash=$('bonusFlash');if(!flash||!player)return;flash.innerHTML='<div class="flip7-burst-scene"><div class="flip7-card-fan"><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i></div><div class="flip7-main">7</div><div class="flip7-title">FLIP 7!</div><div class="flip7-round">ROUND ENDS</div><div class="flip7-points">+15</div></div>';flash.setAttribute('aria-label',esc(player.name)+' reached Flip 7. Round ends. Plus 15 points.');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');confetti();tone(680,.12,'triangle');setTimeout(()=>tone(860,.12,'triangle'),110);setTimeout(()=>tone(1080,.24,'triangle'),235);haptic([18,45,26]);setTimeout(()=>flash.classList.remove('show'),3200)}
 function fitWinnerName(){
  const label=document.querySelector('#modal[data-mode="winner"] .winner-name');if(!label)return;
- const fit=()=>{label.style.fontSize='';const maximum=parseFloat(getComputedStyle(label).fontSize)||64,available=Math.max(1,label.clientWidth-12);label.style.fontSize=maximum+'px';if(label.scrollWidth<=available)return;let low=6,high=maximum;for(let i=0;i<12;i++){const size=(low+high)/2;label.style.fontSize=size+'px';if(label.scrollWidth<=available)low=size;else high=size}label.style.fontSize=Math.max(6,low-.5)+'px'};
+ const fit=()=>{
+  label.style.fontSize='';
+  const maximum=parseFloat(getComputedStyle(label).fontSize)||64,available=Math.max(1,label.clientWidth-12);
+  const probe=label.cloneNode(true);probe.setAttribute('aria-hidden','true');
+  Object.assign(probe.style,{position:'absolute',left:'-10000px',top:'0',width:'max-content',maxWidth:'none',overflow:'visible',textOverflow:'clip',visibility:'hidden',pointerEvents:'none',animation:'none',fontSize:maximum+'px'});
+  label.parentElement.appendChild(probe);
+  const naturalWidth=probe.getBoundingClientRect().width;probe.remove();
+  const fitted=naturalWidth>available?maximum*available/naturalWidth:maximum;
+  label.style.fontSize=Math.max(12,Math.min(maximum,fitted*.99))+'px'
+ };
  requestAnimationFrame(fit);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit)
 }
 function showWinnerPopup(s){
