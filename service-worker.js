@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-03-neon-winner-v12';
+const CACHE_NAME='flip-rush-7-v2026-09-04-neon-winner-v13';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './Flip-Rush-7-Single-Player.html',
   './online.html',
   './online.css',
+  './winner-burst-frame.webp',
   './online.js',
   './avatar-reactions.css',
   './avatar-reactions.js',

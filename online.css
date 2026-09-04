@@ -743,4 +743,26 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @media(max-height:700px){.winner-celebration{gap:1px}.winner-hero{flex-basis:245px;min-height:205px}.winner-standings{padding:6px 10px;max-height:132px}.winner-score-row{min-height:23px;padding:1px}.winner-game-over{font-size:42px}.winner-name{font-size:32px}#modal[data-mode="winner"] .winner-play-again{min-height:50px;margin-top:5px}}
 @media(prefers-reduced-motion:reduce){#modal[data-mode="winner"] .modal-card::before,#modal[data-mode="winner"] .modal-card::after,.winner-card,.winner-avatar,.winner-crown,.winner-game-over,.winner-name,.winner-standings,#modal[data-mode="winner"] .winner-play-again{animation:none!important}}
 
-
+/* Art-backed winner composition: match the approved crowned card-burst mockup. */
+#modal[data-mode="winner"]{background:rgba(1,6,13,.5);backdrop-filter:blur(1px) brightness(.7)}
+#modal[data-mode="winner"] .modal-card{background:radial-gradient(circle at 50% 48%,rgba(255,34,179,.12),transparent 42%),linear-gradient(180deg,rgba(2,12,24,.08),rgba(2,8,16,.38))}
+#modal[data-mode="winner"] .modal-card::before{opacity:.38;background:repeating-conic-gradient(from -7deg at 50% 48%,rgba(38,229,255,.28) 0 1.5deg,transparent 1.5deg 10deg,rgba(255,41,173,.19) 10deg 11deg,transparent 11deg 18deg)}
+#modal[data-mode="winner"] .modal-card::after{top:49%;width:min(105vw,680px);opacity:.72}
+.winner-celebration{position:relative;display:block;width:min(100%,760px);height:100%;padding:max(6px,env(safe-area-inset-top)) 0 max(8px,env(safe-area-inset-bottom));overflow:hidden}
+.winner-hero{position:relative;flex:none;width:100%;max-width:none;height:auto;min-height:0;aspect-ratio:1312/1199;margin:19dvh auto 0}
+.winner-card-fan{z-index:4;inset:0;background:url('winner-burst-frame.webp') center/contain no-repeat;filter:drop-shadow(0 12px 18px rgba(0,0,0,.5));animation:winner-burst-art-in .78s cubic-bezier(.18,.9,.22,1.2) both}
+.winner-card{display:none!important}
+.winner-avatar{z-index:3;left:50%;top:45.4%;bottom:auto;width:44.6%;border:0;outline:0;box-shadow:none;transform:translateX(-50%);animation:winner-avatar-art-in .72s .16s cubic-bezier(.18,.9,.22,1.15) both}
+.winner-avatar img{width:100%;height:100%;object-fit:cover}
+.winner-crown{display:none!important}
+.winner-game-over{z-index:6;margin-top:-9vw;font-size:clamp(45px,14vw,96px);line-height:.86;-webkit-text-stroke:clamp(2px,.8vw,5px) #f12696;text-shadow:0 5px 0 #8c0b51,0 10px 0 #26091e,0 0 28px rgba(255,42,160,.78)}
+.winner-name{z-index:6;width:96%;max-width:96%;margin:clamp(5px,.7dvh,10px) auto 0;font-size:clamp(40px,15.5vw,108px);line-height:.92;-webkit-text-stroke:clamp(1px,.55vw,4px) #fff2a0;text-shadow:0 4px 0 #d33a08,0 9px 0 #6d0b16,0 0 24px rgba(255,197,26,.82)}
+.winner-standings{z-index:6;width:min(66%,460px);max-height:clamp(116px,19dvh,210px);margin:clamp(12px,1.5dvh,18px) auto 0;padding:clamp(7px,1.15dvh,12px) clamp(10px,2.4vw,18px);border-color:#32eaff;background:linear-gradient(160deg,rgba(7,17,47,.97),rgba(4,8,29,.98));box-shadow:0 0 0 3px rgba(255,39,190,.78),inset 0 0 22px rgba(36,214,232,.14),0 0 26px rgba(255,36,190,.48)}
+.winner-standings-title{font-size:clamp(12px,3.8vw,20px);letter-spacing:.07em}
+.winner-score-row{grid-template-columns:28px minmax(0,1fr) auto;min-height:27px;font-size:clamp(12px,3.25vw,16px)}
+#modal[data-mode="winner"] .winner-play-again{z-index:6;width:min(56%,410px);min-height:clamp(56px,7.3dvh,72px);margin:clamp(12px,1.4dvh,17px) auto 0;border-color:#ff74d0!important;border-radius:clamp(19px,4.5vw,27px)!important;background:linear-gradient(180deg,#e72ec4,#82068e)!important;box-shadow:0 5px 0 #520658,0 0 0 4px #59eaff,0 0 30px rgba(255,45,197,.88)!important;font-size:clamp(19px,5.4vw,29px)!important}
+.winner-waiting{width:min(66%,460px);margin:clamp(12px,1.4dvh,17px) auto 0}
+@keyframes winner-burst-art-in{from{opacity:0;transform:translateY(50px) scale(.58)}to{opacity:1;transform:none}}
+@keyframes winner-avatar-art-in{from{opacity:0;transform:translateX(-50%) scale(.55)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@media(max-height:760px){.winner-hero{width:min(92%,560px);margin-top:9dvh}.winner-game-over{margin-top:-8vw;font-size:clamp(40px,12vw,72px)}.winner-name{font-size:clamp(34px,13vw,82px)}.winner-standings{width:min(72%,430px);max-height:128px;margin-top:7px;padding:6px 10px}.winner-score-row{min-height:23px;padding:1px}.winner-standings-title{font-size:12px}#modal[data-mode="winner"] .winner-play-again{width:min(64%,380px);min-height:50px;margin-top:8px;font-size:18px!important}}
+@media(prefers-reduced-motion:reduce){.winner-card-fan{animation:none!important}.winner-avatar{animation:none!important}}
