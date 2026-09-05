@@ -8,6 +8,8 @@
   const FROST_TEXTURE_URL = 'frost-whiteout.webp?v=20260901-deep-freezer';
   const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
+  const FREEZE_SOUND_URL = 'freeze-sfx.mp3?v=20260905-approved-v1';
+  const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -15,6 +17,7 @@
   let frostTexturePreload = null;
   let bustArtworkPreload = null;
   let secondChanceArtworkPreload = null;
+  let freezeSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -23,6 +26,16 @@
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return seed / 4294967296;
   };
+
+  function playFreezeSound() {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = freezeSoundPreload ? freezeSoundPreload.cloneNode(true) : new Audio(FREEZE_SOUND_URL);
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    } catch {}
+  }
 
   function createSurface(effect, type) {
     const canvas = document.createElement('canvas');
@@ -628,6 +641,7 @@
     effect.className = `screen-effect ${type === 'freeze' ? 'freeze-screen-effect' : type === 'flip3' ? 'flip3-screen-effect' : type === 'secondChance' ? 'second-chance-screen-effect' : 'shatter-screen-effect'}`;
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
+    if (type === 'freeze') playFreezeSound();
     if (type === 'bust') {
       // Render the exact user-approved artwork. The black source background is
       // removed by screen blending so only the approved BUST and crack artwork
@@ -739,6 +753,14 @@
       frostTexturePreload.decoding = 'async';
       frostTexturePreload.src = FROST_TEXTURE_URL;
       frostTexturePreload.decode?.().catch(() => {});
+    }
+    if (!freezeSoundPreload) {
+      try {
+        freezeSoundPreload = new Audio(FREEZE_SOUND_URL);
+        freezeSoundPreload.preload = 'auto';
+        freezeSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        freezeSoundPreload.load();
+      } catch {}
     }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
