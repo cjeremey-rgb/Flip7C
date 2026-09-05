@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-original-card-beep-v33';
+const CACHE_NAME='flip-rush-7-v2026-09-05-card-beep-priority-v34';
 const APP_SHELL = [
   './',
   './index.html',

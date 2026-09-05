@@ -18,7 +18,16 @@
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   const CARD_FLIP_TONE_FREQUENCY = 680;
   const CARD_FLIP_TONE_DURATION = 0.08;
-  const CARD_FLIP_TONE_GAIN = 0.0125;
+  const CARD_FLIP_TONE_GAIN = 0.025;
+  const PRIORITY_SOUND_WINDOWS = Object.freeze({
+    freeze: FREEZE_EFFECT_MS,
+    bust: EFFECT_MS,
+    flip3: FLIP3_EFFECT_MS,
+    secondChance: SECOND_CHANCE_EFFECT_MS,
+    hold: 900,
+    flip7: 3300,
+    winner: 9000
+  });
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -34,6 +43,8 @@
   let flip7SoundPreload = null;
   let winnerSoundPreload = null;
   let cardFlipToneContext = null;
+  let cardFlipSuppressedUntil = 0;
+  const activeCardFlipTones = new Set();
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -44,9 +55,25 @@
   };
 
   const soundVolume = (volumeScale = 1) => SCREEN_EFFECT_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
+
+  function stopCardFlipTones() {
+    for (const tone of activeCardFlipTones) {
+      try { tone.oscillator.stop(); } catch {}
+      try { tone.oscillator.disconnect(); } catch {}
+      try { tone.gain.disconnect(); } catch {}
+    }
+    activeCardFlipTones.clear();
+  }
+
+  function prioritizeEffectSound(type) {
+    cardFlipSuppressedUntil = Math.max(cardFlipSuppressedUntil, Date.now() + (PRIORITY_SOUND_WINDOWS[type] || 500));
+    stopCardFlipTones();
+  }
+
   function playCardFlipSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
+      if (Date.now() < cardFlipSuppressedUntil) return;
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
       if (!cardFlipToneContext || cardFlipToneContext.state === 'closed') cardFlipToneContext = new AudioContextClass();
@@ -63,6 +90,13 @@
       gain.gain.exponentialRampToValueAtTime(Math.max(.00001, gainValue * .02), start + CARD_FLIP_TONE_DURATION);
       oscillator.connect(gain);
       gain.connect(cardFlipToneContext.destination);
+      const activeTone = { oscillator, gain };
+      activeCardFlipTones.add(activeTone);
+      oscillator.onended = () => {
+        activeCardFlipTones.delete(activeTone);
+        try { oscillator.disconnect(); } catch {}
+        try { gain.disconnect(); } catch {}
+      };
       oscillator.start(start);
       oscillator.stop(start + CARD_FLIP_TONE_DURATION);
     } catch {}
@@ -171,13 +205,16 @@
 
   function playSound(type, volumeScale = 1) {
     if (type === 'cardFlip') playCardFlipSound(volumeScale);
-    else if (type === 'freeze') playFreezeSound(volumeScale);
+    else {
+      prioritizeEffectSound(type);
+      if (type === 'freeze') playFreezeSound(volumeScale);
     else if (type === 'bust') playBustSound(volumeScale);
     else if (type === 'flip3') playFlip3Sound(volumeScale);
     else if (type === 'secondChance') playSecondChanceSound(volumeScale);
     else if (type === 'hold') playHoldSound(volumeScale);
     else if (type === 'flip7') playFlip7Sound(volumeScale);
-    else if (type === 'winner') playWinnerSound(volumeScale);
+      else if (type === 'winner') playWinnerSound(volumeScale);
+    }
   }
 
   function createSurface(effect, type) {
