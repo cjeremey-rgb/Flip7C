@@ -15,9 +15,10 @@
   const HOLD_SOUND_URL = 'hold-sfx.mp3?v=20260905-real-service-bell-v1';
   const FLIP7_SOUND_URL = 'flip7-sfx.mp3?v=20260905-clean-crowd-v1';
   const WINNER_SOUND_URL = 'winner-sfx.mp3?v=20260905-cinematic-crowd-v1';
-  const CARD_FLIP_SOUND_URL = 'card-flip-sfx.mp3?v=20260905-quiet-keyboard-tap-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
-  const CARD_FLIP_SOUND_VOLUME = 0.11;
+  const CARD_FLIP_TONE_FREQUENCY = 680;
+  const CARD_FLIP_TONE_DURATION = 0.08;
+  const CARD_FLIP_TONE_GAIN = 0.0125;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -32,7 +33,7 @@
   let holdSoundPreload = null;
   let flip7SoundPreload = null;
   let winnerSoundPreload = null;
-  let cardFlipSoundPreload = null;
+  let cardFlipToneContext = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -43,15 +44,27 @@
   };
 
   const soundVolume = (volumeScale = 1) => SCREEN_EFFECT_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
-  const cardFlipVolume = (volumeScale = 1) => CARD_FLIP_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
-
   function playCardFlipSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
-      const sound = cardFlipSoundPreload ? cardFlipSoundPreload.cloneNode(true) : new Audio(CARD_FLIP_SOUND_URL);
-      sound.volume = cardFlipVolume(volumeScale);
-      sound.currentTime = 0;
-      sound.play().catch(() => {});
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!cardFlipToneContext || cardFlipToneContext.state === 'closed') cardFlipToneContext = new AudioContextClass();
+      if (cardFlipToneContext.state === 'suspended') cardFlipToneContext.resume().catch(() => {});
+      const scale = clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
+      const gainValue = CARD_FLIP_TONE_GAIN * scale;
+      if (!gainValue) return;
+      const start = cardFlipToneContext.currentTime;
+      const oscillator = cardFlipToneContext.createOscillator();
+      const gain = cardFlipToneContext.createGain();
+      oscillator.type = 'triangle';
+      oscillator.frequency.value = CARD_FLIP_TONE_FREQUENCY;
+      gain.gain.setValueAtTime(gainValue, start);
+      gain.gain.exponentialRampToValueAtTime(Math.max(.00001, gainValue * .02), start + CARD_FLIP_TONE_DURATION);
+      oscillator.connect(gain);
+      gain.connect(cardFlipToneContext.destination);
+      oscillator.start(start);
+      oscillator.stop(start + CARD_FLIP_TONE_DURATION);
     } catch {}
   }
 
@@ -945,14 +958,6 @@
         winnerSoundPreload.load();
       } catch {}
     }
-    if (!cardFlipSoundPreload) {
-      try {
-        cardFlipSoundPreload = new Audio(CARD_FLIP_SOUND_URL);
-        cardFlipSoundPreload.preload = 'auto';
-        cardFlipSoundPreload.volume = CARD_FLIP_SOUND_VOLUME;
-        cardFlipSoundPreload.load();
-      } catch {}
-    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -972,7 +977,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload, flip7SoundPreload, winnerSoundPreload, cardFlipSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload, flip7SoundPreload, winnerSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;
@@ -990,6 +995,11 @@
         sound.volume = volume;
       }
     }
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass && (!cardFlipToneContext || cardFlipToneContext.state === 'closed')) cardFlipToneContext = new AudioContextClass();
+      if (cardFlipToneContext?.state === 'suspended') cardFlipToneContext.resume().catch(() => {});
+    } catch {}
   }
 
   globalThis.RealisticScreenEffects = { show, playSound, prewarm: prewarmFrost };
