@@ -35,89 +35,91 @@
     return seed / 4294967296;
   };
 
-  function playFreezeSound() {
+  const soundVolume = (volumeScale = 1) => SCREEN_EFFECT_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
+
+  function playFreezeSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = freezeSoundPreload ? freezeSoundPreload.cloneNode(true) : new Audio(FREEZE_SOUND_URL);
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.volume = soundVolume(volumeScale);
       sound.currentTime = 0;
       sound.play().catch(() => {});
     } catch {}
   }
 
-  function playBustSound() {
+  function playBustSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = bustSoundPreload || new Audio(BUST_SOUND_URL);
       bustSoundPreload = sound;
       sound.pause();
       sound.currentTime = 0;
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.volume = soundVolume(volumeScale);
       sound.play().catch(() => {
         try {
           bustSoundPreload = new Audio(BUST_SOUND_URL);
           bustSoundPreload.preload = 'auto';
-          bustSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          bustSoundPreload.volume = soundVolume(volumeScale);
           bustSoundPreload.play().catch(() => {});
         } catch {}
       });
     } catch {}
   }
 
-  function playSecondChanceSound() {
+  function playSecondChanceSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = secondChanceSoundPreload || new Audio(SECOND_CHANCE_SOUND_URL);
       secondChanceSoundPreload = sound;
       sound.pause();
       sound.currentTime = 0;
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.volume = soundVolume(volumeScale);
       sound.play().catch(() => {
         try {
           secondChanceSoundPreload = new Audio(SECOND_CHANCE_SOUND_URL);
           secondChanceSoundPreload.preload = 'auto';
-          secondChanceSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          secondChanceSoundPreload.volume = soundVolume(volumeScale);
           secondChanceSoundPreload.play().catch(() => {});
         } catch {}
       });
     } catch {}
   }
 
-  function playFlip3Sound() {
+  function playFlip3Sound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = flip3SoundPreload || new Audio(FLIP3_SOUND_URL);
       flip3SoundPreload = sound;
       sound.pause();
       sound.currentTime = 0;
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.volume = soundVolume(volumeScale);
       sound.play().catch(() => {
         try {
           flip3SoundPreload = new Audio(FLIP3_SOUND_URL);
           flip3SoundPreload.preload = 'auto';
-          flip3SoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          flip3SoundPreload.volume = soundVolume(volumeScale);
           flip3SoundPreload.play().catch(() => {});
         } catch {}
       });
     } catch {}
   }
 
-  function playHoldSound() {
+  function playHoldSound(volumeScale = 1) {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = holdSoundPreload ? holdSoundPreload.cloneNode(true) : new Audio(HOLD_SOUND_URL);
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.volume = soundVolume(volumeScale);
       sound.currentTime = 0;
       sound.play().catch(() => {});
     } catch {}
   }
 
-  function playSound(type) {
-    if (type === 'freeze') playFreezeSound();
-    else if (type === 'bust') playBustSound();
-    else if (type === 'flip3') playFlip3Sound();
-    else if (type === 'secondChance') playSecondChanceSound();
-    else if (type === 'hold') playHoldSound();
+  function playSound(type, volumeScale = 1) {
+    if (type === 'freeze') playFreezeSound(volumeScale);
+    else if (type === 'bust') playBustSound(volumeScale);
+    else if (type === 'flip3') playFlip3Sound(volumeScale);
+    else if (type === 'secondChance') playSecondChanceSound(volumeScale);
+    else if (type === 'hold') playHoldSound(volumeScale);
   }
 
   function createSurface(effect, type) {
