@@ -9,7 +9,7 @@
   const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
   const FREEZE_SOUND_URL = 'freeze-sfx.mp3?v=20260905-approved-v1';
-  const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-approved-v1';
+  const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-timing-v2';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
@@ -42,10 +42,19 @@
   function playBustSound() {
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
-      const sound = bustSoundPreload ? bustSoundPreload.cloneNode(true) : new Audio(BUST_SOUND_URL);
-      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      const sound = bustSoundPreload || new Audio(BUST_SOUND_URL);
+      bustSoundPreload = sound;
+      sound.pause();
       sound.currentTime = 0;
-      sound.play().catch(() => {});
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.play().catch(() => {
+        try {
+          bustSoundPreload = new Audio(BUST_SOUND_URL);
+          bustSoundPreload.preload = 'auto';
+          bustSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          bustSoundPreload.play().catch(() => {});
+        } catch {}
+      });
     } catch {}
   }
 
@@ -642,6 +651,9 @@
     else artwork.decode?.().then(startApprovedArtwork).catch(() => {});
   }
   function show(type) {
+    // Start the impact before building the visual overlay. The trimmed file's
+    // glass transient begins about 50 ms later, aligned with the first crack.
+    if (type === 'bust') playBustSound();
     clearTimeout(effectTimer);
     clearTimeout(shockTimer);
     cancelAnimationFrame(effectFrame);
@@ -654,7 +666,6 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     if (type === 'freeze') playFreezeSound();
-    if (type === 'bust') playBustSound();
     if (type === 'bust') {
       // Render the exact user-approved artwork. The black source background is
       // removed by screen blending so only the approved BUST and crack artwork
@@ -797,6 +808,31 @@
     }
   }
 
+  let effectSoundsUnlocked = false;
+  function unlockEffectSounds() {
+    if (effectSoundsUnlocked) return;
+    effectSoundsUnlocked = true;
+    prewarmFrost();
+    for (const sound of [freezeSoundPreload, bustSoundPreload]) {
+      if (!sound) continue;
+      const volume = sound.volume;
+      sound.volume = 0;
+      sound.currentTime = 0;
+      const attempt = sound.play();
+      if (attempt?.then) {
+        attempt.then(() => {
+          sound.pause();
+          sound.currentTime = 0;
+          sound.volume = volume;
+        }).catch(() => { sound.volume = volume; });
+      } else {
+        sound.pause();
+        sound.currentTime = 0;
+        sound.volume = volume;
+      }
+    }
+  }
+
   globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
   const queueFrostPreload = () => {
     if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });
@@ -804,4 +840,7 @@
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', queueFrostPreload, { once: true });
   else queueFrostPreload();
+  document.addEventListener('pointerdown', unlockEffectSounds, { once: true, capture: true });
+  document.addEventListener('touchstart', unlockEffectSounds, { once: true, capture: true, passive: true });
+  document.addEventListener('keydown', unlockEffectSounds, { once: true, capture: true });
 })();
