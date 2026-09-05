@@ -853,7 +853,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
 <script src="avatar-reactions.js?v=20260902-evie-avatar-v1"></script>
-<script src="screen-effects.js?v=20260905-celebration-audio-v1"></script>
+<script src="screen-effects.js?v=20260905-card-flip-audio-v1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const ReactionUI=globalThis.AvatarReactions;
@@ -1127,7 +1127,7 @@ async function resolveFlip3(sourceIndex,flipCard){
  const queued=[];
  for(let n=1;n<=3&&running&&isRoundActive(target);n++){
   const c=takeCard();if(!c){await finishOfflineFlipThree(flipCard);endRound('The draw pile and discard pile were exhausted.');return}
-  target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();await wait(c.t==='a'?1000:350);
+  target.cards.push(c);log(target.name+' flips card '+n+' of 3: '+c.v);render();playScreenEffectSound('cardFlip',targetIndex===me?1:.25);await wait(c.t==='a'?1000:350);
   if(c.t==='n'){
    const result=await resolveNumberCard(targetIndex,c,{fromFlipThree:true});
    if(result==='bust'){discardQueuedActions(target,queued);await finishOfflineFlipThree(flipCard);if(active().length===0)endRound('All players are out of the round.');return}
@@ -1166,7 +1166,7 @@ async function resolveNumberCard(i,c,options={}){
 async function drawFor(i){
  const p=players[i];if(!running||!isRoundActive(p))return null;
  const c=takeCard();if(!c){endRound('The draw pile and discard pile were exhausted.');return null}
- p.cards.push(c);if(c.t!=='n')setAvatarEmotion(p,c.t==='a'?'shocked':'excited');log(p.name+' drew '+c.v);render();
+ p.cards.push(c);if(c.t!=='n')setAvatarEmotion(p,c.t==='a'?'shocked':'excited');log(p.name+' drew '+c.v);render();playScreenEffectSound('cardFlip',i===me?1:.25);
  if(c.t==='a')await wait(1000);
  if(c.t==='n')await resolveNumberCard(i,c);
  else if(c.t==='a'&&c.v==='SECOND CHANCE')await resolveSecondChance(i,c);

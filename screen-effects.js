@@ -15,7 +15,9 @@
   const HOLD_SOUND_URL = 'hold-sfx.mp3?v=20260905-real-service-bell-v1';
   const FLIP7_SOUND_URL = 'flip7-sfx.mp3?v=20260905-clean-crowd-v1';
   const WINNER_SOUND_URL = 'winner-sfx.mp3?v=20260905-cinematic-crowd-v1';
+  const CARD_FLIP_SOUND_URL = 'card-flip-sfx.mp3?v=20260905-clean-flick-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
+  const CARD_FLIP_SOUND_VOLUME = 0.30;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
@@ -30,6 +32,7 @@
   let holdSoundPreload = null;
   let flip7SoundPreload = null;
   let winnerSoundPreload = null;
+  let cardFlipSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -40,6 +43,17 @@
   };
 
   const soundVolume = (volumeScale = 1) => SCREEN_EFFECT_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
+  const cardFlipVolume = (volumeScale = 1) => CARD_FLIP_SOUND_VOLUME * clamp(Number.isFinite(volumeScale) ? volumeScale : 1);
+
+  function playCardFlipSound(volumeScale = 1) {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = cardFlipSoundPreload ? cardFlipSoundPreload.cloneNode(true) : new Audio(CARD_FLIP_SOUND_URL);
+      sound.volume = cardFlipVolume(volumeScale);
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    } catch {}
+  }
 
   function playFreezeSound(volumeScale = 1) {
     try {
@@ -143,7 +157,8 @@
   }
 
   function playSound(type, volumeScale = 1) {
-    if (type === 'freeze') playFreezeSound(volumeScale);
+    if (type === 'cardFlip') playCardFlipSound(volumeScale);
+    else if (type === 'freeze') playFreezeSound(volumeScale);
     else if (type === 'bust') playBustSound(volumeScale);
     else if (type === 'flip3') playFlip3Sound(volumeScale);
     else if (type === 'secondChance') playSecondChanceSound(volumeScale);
@@ -930,6 +945,14 @@
         winnerSoundPreload.load();
       } catch {}
     }
+    if (!cardFlipSoundPreload) {
+      try {
+        cardFlipSoundPreload = new Audio(CARD_FLIP_SOUND_URL);
+        cardFlipSoundPreload.preload = 'auto';
+        cardFlipSoundPreload.volume = CARD_FLIP_SOUND_VOLUME;
+        cardFlipSoundPreload.load();
+      } catch {}
+    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -949,7 +972,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload, flip7SoundPreload, winnerSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload, flip7SoundPreload, winnerSoundPreload, cardFlipSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;

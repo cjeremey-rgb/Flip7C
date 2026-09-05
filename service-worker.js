@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-single-card-animation-v30';
+const CACHE_NAME='flip-rush-7-v2026-09-05-card-flip-audio-v31';
 const APP_SHELL = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const APP_SHELL = [
   './hold-sfx.mp3',
   './flip7-sfx.mp3',
   './winner-sfx.mp3',
+  './card-flip-sfx.mp3',
   './bust-approved-exact.webp',
   './second-chance-guardian-approved.webp',
   './avatar-1.webp',
