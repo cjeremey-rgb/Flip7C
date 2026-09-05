@@ -10,6 +10,7 @@
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
   const FREEZE_SOUND_URL = 'freeze-sfx.mp3?v=20260905-approved-v1';
   const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-timing-v2';
+  const FLIP3_SOUND_URL = 'flip3-sfx.mp3?v=20260905-tada-card-fan-v1';
   const SECOND_CHANCE_SOUND_URL = 'second-chance-sfx.mp3?v=20260905-metal-shield-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
@@ -21,6 +22,7 @@
   let secondChanceArtworkPreload = null;
   let freezeSoundPreload = null;
   let bustSoundPreload = null;
+  let flip3SoundPreload = null;
   let secondChanceSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
@@ -74,6 +76,25 @@
           secondChanceSoundPreload.preload = 'auto';
           secondChanceSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
           secondChanceSoundPreload.play().catch(() => {});
+        } catch {}
+      });
+    } catch {}
+  }
+
+  function playFlip3Sound() {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = flip3SoundPreload || new Audio(FLIP3_SOUND_URL);
+      flip3SoundPreload = sound;
+      sound.pause();
+      sound.currentTime = 0;
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.play().catch(() => {
+        try {
+          flip3SoundPreload = new Audio(FLIP3_SOUND_URL);
+          flip3SoundPreload.preload = 'auto';
+          flip3SoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          flip3SoundPreload.play().catch(() => {});
         } catch {}
       });
     } catch {}
@@ -688,6 +709,7 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     if (type === 'freeze') playFreezeSound();
+    if (type === 'flip3') playFlip3Sound();
     if (type === 'bust') {
       // Render the exact user-approved artwork. The black source background is
       // removed by screen blending so only the approved BUST and crack artwork
@@ -824,6 +846,14 @@
         secondChanceSoundPreload.load();
       } catch {}
     }
+    if (!flip3SoundPreload) {
+      try {
+        flip3SoundPreload = new Audio(FLIP3_SOUND_URL);
+        flip3SoundPreload.preload = 'auto';
+        flip3SoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        flip3SoundPreload.load();
+      } catch {}
+    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -843,7 +873,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload, secondChanceSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;
