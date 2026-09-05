@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-remote-half-volume-v27';
+const CACHE_NAME='flip-rush-7-v2026-09-05-remote-quarter-volume-v28';
 const APP_SHELL = [
   './',
   './index.html',
