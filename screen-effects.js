@@ -100,6 +100,13 @@
     } catch {}
   }
 
+  function playSound(type) {
+    if (type === 'freeze') playFreezeSound();
+    else if (type === 'bust') playBustSound();
+    else if (type === 'flip3') playFlip3Sound();
+    else if (type === 'secondChance') playSecondChanceSound();
+  }
+
   function createSurface(effect, type) {
     const canvas = document.createElement('canvas');
     const width = Math.max(1, effect.clientWidth || innerWidth);
@@ -893,7 +900,7 @@
     }
   }
 
-  globalThis.RealisticScreenEffects = { show, prewarm: prewarmFrost };
+  globalThis.RealisticScreenEffects = { show, playSound, prewarm: prewarmFrost };
   const queueFrostPreload = () => {
     if ('requestIdleCallback' in globalThis) requestIdleCallback(prewarmFrost, { timeout: 1800 });
     else setTimeout(prewarmFrost, 250);

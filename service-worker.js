@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-flip3-audio-v23';
+const CACHE_NAME='flip-rush-7-v2026-09-05-shared-animation-audio-v24';
 const APP_SHELL = [
   './',
   './index.html',
