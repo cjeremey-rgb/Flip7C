@@ -42,7 +42,7 @@
       .mode-home .showdown-stage{height:235px;min-height:235px;flex:0 0 235px}.mode-home .showdown-main{width:88px;margin-left:-44px}.mode-home .showdown-left{width:72px;top:52px}.mode-home .showdown-right{width:70px;top:49px}.mode-home .showdown-dog{width:66px;top:105px}.mode-home .showdown-stage .logo{top:83px;font-size:60px}.mode-home .showdown-card-splash{bottom:0;height:53px;transform:translateX(-50%) scale(.78);transform-origin:center bottom}.mode-home .fly-two,.mode-home .fly-five{bottom:18px}.mode-link{min-height:124px}.mode-art{height:64px}.mode-face{width:58px;height:58px}.mode-face.left,.mode-face.right{width:49px;height:49px}}
   </style>
 </head>
-<body>
+<body data-pregame-music="active">
 <div class="ambient"><i></i><i></i><i></i></div>
 <div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
 <div id="seasonBadge" class="season-badge"></div>
@@ -76,6 +76,7 @@
     <footer>Choose a mode to start playing</footer>
   </section>
 </main>
+<script src="pregame-music.js?v=20260905-neon-circuit-v1"></script>
 <script>
 function applyFlipRushTheme(){
  const params=new URLSearchParams(location.search);let theme=(params.get('theme')||'neon').toLowerCase();

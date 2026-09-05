@@ -752,7 +752,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 </style>
 <link rel="stylesheet" href="avatar-reactions.css?v=20260902-avatar-reactions-v1">
 </head>
-<body>
+<body data-pregame-music="active">
 <div class="ambient"><i></i><i></i><i></i></div><div id="seasonalLayer" class="seasonal-layer" aria-hidden="true"></div>
 <div id="connection" class="connection hidden">RECONNECTING…</div>
 <main>
@@ -854,6 +854,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
 <script src="avatar-reactions.js?v=20260902-evie-avatar-v1"></script>
 <script src="screen-effects.js?v=20260905-card-beep-priority-v1"></script>
+<script src="pregame-music.js?v=20260905-neon-circuit-v1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const ReactionUI=globalThis.AvatarReactions;
@@ -927,7 +928,7 @@ if(d.length!==94)throw new Error('Deck construction error: expected 94 cards, fo
 return shuffle(d)}
 function shuffle(a){for(let i=a.length-1;i;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function newPlayer(id,name,bot=false,style='balanced',avatar=''){return{id,name,bot,style,avatar,cards:[],nums:new Set(),score:0,banked:false,bust:false,second:false,frozen:false,bonusAwarded:false}}
-function startOffline(){let name=$('name').value.trim()||'You';localStorage.fr7name=name;localStorage.fr7avatar=selectedAvatar;players=[newPlayer('local',name,false,'balanced',selectedAvatar),newPlayer('nova','Nova',true,'cautious','avatar-nova'),newPlayer('ace','Ace',true,'bold','avatar-ace')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;offlineRenderedCards.clear();showGame();requestAnimationFrame(()=>setTimeout(newRound,0))}
+function startOffline(){globalThis.FlipRushPregameMusic?.sync(false);let name=$('name').value.trim()||'You';localStorage.fr7name=name;localStorage.fr7avatar=selectedAvatar;players=[newPlayer('local',name,false,'balanced',selectedAvatar),newPlayer('nova','Nova',true,'cautious','avatar-nova'),newPlayer('ace','Ace',true,'bold','avatar-ace')];me=0;running=true;gameOver=false;round=1;dealerIndex=players.length-1;deck=makeDeck();discard=[];activeFlipThree=null;activeActionTransfer=null;offlineRenderedCards.clear();showGame();requestAnimationFrame(()=>setTimeout(newRound,0))}
 function showGame(){$('home').classList.remove('active');$('game').classList.add('active');$('start').classList.add('hidden');$('next').classList.add('hidden');$('hit').classList.remove('hidden');$('stay').classList.remove('hidden');}
 function replenishDeck(){if(!deck.length&&discard.length){deck=shuffle(discard.splice(0));log('The discard pile was shuffled into a new draw pile.')}}
 function takeCard(){replenishDeck();return deck.pop()||null}
@@ -1262,7 +1263,7 @@ $('react').onclick=()=>{$('phraseTray').classList.add('hidden');restoreOfflineRe
 $('reactionTray').onclick=event=>{const button=event.target.closest('button');if(!button)return;if(button.id==='phraseMenuBtn'){openOfflinePhraseTray();return}const emoji=button.dataset.emoji;if(!emoji)return;$('reactionTray').classList.add('hidden');showOfflineReaction(emoji)};
 $('phraseTray').onclick=event=>{const button=event.target.closest('button[data-phrase]');if(!button)return;$('phraseTray').classList.add('hidden');showOfflinePhrase(button.dataset.phrase)};
 $('howBtn').onclick=()=>alert('Offline practice uses the official Flip 7 rules. Draw unique number cards, stay to bank your points, and avoid duplicates. A Second Chance only protects against a duplicate number; you may hold only one, and an extra must be given to another active player without one or discarded if nobody is eligible. Freeze and Flip 3 may target any active player, including yourself. During Flip 3, all three revealed cards count; Second Chance resolves immediately, while Freeze and Flip 3 cards wait until the sequence is complete. Seven unique number cards immediately end the round and earn +15. If the highest score at 200 or more is tied, everyone plays another full round.');
-$('soundBtn').onclick=()=>alert('Sound is available in the hosted multiplayer build.');$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
+$('soundBtn').onclick=()=>{const enabled=localStorage.fr7sound==='off';localStorage.fr7sound=enabled?'on':'off';$('soundBtn').textContent=enabled?'♪':'×';globalThis.FlipRushPregameMusic?.soundPreferenceChanged()};$('soundBtn').textContent=localStorage.fr7sound==='off'?'×':'♪';$('share').onclick=()=>alert('This download is an offline phone test. Online invitations require a hosted server.');
 window.addEventListener('resize',()=>{fitOfflineHand();syncOfflineFlipThreeTransfer();syncOfflineActionTransfer()});
 </script>
 
