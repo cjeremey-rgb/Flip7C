@@ -15,9 +15,9 @@
   const HOLD_SOUND_URL = 'hold-sfx.mp3?v=20260905-real-service-bell-v1';
   const FLIP7_SOUND_URL = 'flip7-sfx.mp3?v=20260905-clean-crowd-v1';
   const WINNER_SOUND_URL = 'winner-sfx.mp3?v=20260905-cinematic-crowd-v1';
-  const CARD_FLIP_SOUND_URL = 'card-flip-sfx.mp3?v=20260905-clean-flick-v1';
+  const CARD_FLIP_SOUND_URL = 'card-flip-sfx.mp3?v=20260905-quiet-keyboard-tap-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
-  const CARD_FLIP_SOUND_VOLUME = 0.30;
+  const CARD_FLIP_SOUND_VOLUME = 0.11;
   let effectTimer = 0;
   let effectFrame = 0;
   let shockTimer = 0;
