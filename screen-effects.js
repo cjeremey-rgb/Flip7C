@@ -9,6 +9,7 @@
   const BUST_OVERLAY_URL = 'bust-approved-exact.webp?v=20260901-approved-mockup-v5';
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
   const FREEZE_SOUND_URL = 'freeze-sfx.mp3?v=20260905-approved-v1';
+  const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-approved-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
@@ -18,6 +19,7 @@
   let bustArtworkPreload = null;
   let secondChanceArtworkPreload = null;
   let freezeSoundPreload = null;
+  let bustSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -31,6 +33,16 @@
     try {
       if (localStorage.getItem('fr7sound') === 'off') return;
       const sound = freezeSoundPreload ? freezeSoundPreload.cloneNode(true) : new Audio(FREEZE_SOUND_URL);
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    } catch {}
+  }
+
+  function playBustSound() {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = bustSoundPreload ? bustSoundPreload.cloneNode(true) : new Audio(BUST_SOUND_URL);
       sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
       sound.currentTime = 0;
       sound.play().catch(() => {});
@@ -642,6 +654,7 @@
     effect.setAttribute('aria-hidden', 'true');
     document.body.appendChild(effect);
     if (type === 'freeze') playFreezeSound();
+    if (type === 'bust') playBustSound();
     if (type === 'bust') {
       // Render the exact user-approved artwork. The black source background is
       // removed by screen blending so only the approved BUST and crack artwork
@@ -760,6 +773,14 @@
         freezeSoundPreload.preload = 'auto';
         freezeSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
         freezeSoundPreload.load();
+      } catch {}
+    }
+    if (!bustSoundPreload) {
+      try {
+        bustSoundPreload = new Audio(BUST_SOUND_URL);
+        bustSoundPreload.preload = 'auto';
+        bustSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        bustSoundPreload.load();
       } catch {}
     }
     if (!bustArtworkPreload) {
