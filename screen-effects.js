@@ -12,6 +12,7 @@
   const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-timing-v2';
   const FLIP3_SOUND_URL = 'flip3-sfx.mp3?v=20260905-tada-card-fan-v1';
   const SECOND_CHANCE_SOUND_URL = 'second-chance-sfx.mp3?v=20260905-metal-shield-v1';
+  const HOLD_SOUND_URL = 'hold-sfx.mp3?v=20260905-real-service-bell-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
@@ -24,6 +25,7 @@
   let bustSoundPreload = null;
   let flip3SoundPreload = null;
   let secondChanceSoundPreload = null;
+  let holdSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -100,11 +102,22 @@
     } catch {}
   }
 
+  function playHoldSound() {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = holdSoundPreload ? holdSoundPreload.cloneNode(true) : new Audio(HOLD_SOUND_URL);
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.currentTime = 0;
+      sound.play().catch(() => {});
+    } catch {}
+  }
+
   function playSound(type) {
     if (type === 'freeze') playFreezeSound();
     else if (type === 'bust') playBustSound();
     else if (type === 'flip3') playFlip3Sound();
     else if (type === 'secondChance') playSecondChanceSound();
+    else if (type === 'hold') playHoldSound();
   }
 
   function createSurface(effect, type) {
@@ -861,6 +874,14 @@
         flip3SoundPreload.load();
       } catch {}
     }
+    if (!holdSoundPreload) {
+      try {
+        holdSoundPreload = new Audio(HOLD_SOUND_URL);
+        holdSoundPreload.preload = 'auto';
+        holdSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        holdSoundPreload.load();
+      } catch {}
+    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -880,7 +901,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;

@@ -853,7 +853,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
 <script src="avatar-reactions.js?v=20260902-evie-avatar-v1"></script>
-<script src="screen-effects.js?v=20260905-shared-animation-audio-v1"></script>
+<script src="screen-effects.js?v=20260905-hold-audio-v1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const ReactionUI=globalThis.AvatarReactions;
@@ -1191,10 +1191,10 @@ function botShouldStay(p){
 function turnLoop(){
  if(!running)return;if(active().length===0){endRound();return}
  let p=players[current];if(!p||!isRoundActive(p)){nextTurn();return}
- if(p.bot){const botIndex=current;setTimeout(async()=>{if(!running||current!==botIndex)return;p=players[botIndex];if(!p||!isRoundActive(p)){nextTurn();return}if(botShouldStay(p)){p.banked=true;setAvatarEmotion(p,'excited');log(p.name+' decides to hold with '+value(p)+' points');render();nextTurn()}else{log(p.name+' chooses to flip');await drawFor(botIndex);render();if(running)nextTurn()}},850+Math.floor(Math.random()*650))}
+ if(p.bot){const botIndex=current;setTimeout(async()=>{if(!running||current!==botIndex)return;p=players[botIndex];if(!p||!isRoundActive(p)){nextTurn();return}if(botShouldStay(p)){p.banked=true;setAvatarEmotion(p,'excited');log(p.name+' decides to hold with '+value(p)+' points');playScreenEffectSound('hold');render();nextTurn()}else{log(p.name+' chooses to flip');await drawFor(botIndex);render();if(running)nextTurn()}},850+Math.floor(Math.random()*650))}
 }
 async function hit(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;$('hit').disabled=true;$('stay').disabled=true;await drawFor(current);if(running)nextTurn()}
-function stay(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;players[current].banked=true;setAvatarEmotion(players[current],'excited');log(players[current].name+' stays with '+value(players[current]));render();nextTurn()}
+function stay(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;players[current].banked=true;setAvatarEmotion(players[current],'excited');log(players[current].name+' stays with '+value(players[current]));playScreenEffectSound('hold');render();nextTurn()}
 function showSevenBonus(p){const flash=$('bonusFlash');if(!flash||!p)return;flash.innerHTML='<div class="flip7-burst-scene"><div class="flip7-card-fan"><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i></div><div class="flip7-main">7</div><div class="flip7-title">FLIP 7!</div><div class="flip7-round">ROUND ENDS</div><div class="flip7-points">+15</div></div>';flash.setAttribute('aria-label',p.name+' reached Flip 7. Round ends. Plus 15 points.');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');launchConfetti();setTimeout(()=>flash.classList.remove('show'),3200)}
 function launchConfetti(){const box=$('confetti');box.innerHTML='';for(let i=0;i<70;i++){const c=document.createElement('i');c.className='confetti-piece';c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.8)+'s';c.style.background=['#ffdd42','#ff4f8b','#32e5cb','#74dfff','#ffffff'][i%5];box.appendChild(c)}setTimeout(()=>box.innerHTML='',3600)}
 function fitWinnerName(){
