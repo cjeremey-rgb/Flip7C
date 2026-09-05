@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-remote-quarter-volume-v28';
+const CACHE_NAME='flip-rush-7-v2026-09-05-celebration-audio-v29';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,8 @@ const APP_SHELL = [
   './flip3-sfx.mp3',
   './second-chance-sfx.mp3',
   './hold-sfx.mp3',
+  './flip7-sfx.mp3',
+  './winner-sfx.mp3',
   './bust-approved-exact.webp',
   './second-chance-guardian-approved.webp',
   './avatar-1.webp',

@@ -853,7 +853,7 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 <div id="phrasePop" class="phrase-pop" aria-live="polite"></div>
 <div id="toast"></div><div id="bonusFlash"></div><div id="confetti"></div>
 <script src="avatar-reactions.js?v=20260902-evie-avatar-v1"></script>
-<script src="screen-effects.js?v=20260905-remote-half-volume-v2"></script>
+<script src="screen-effects.js?v=20260905-celebration-audio-v1"></script>
 <script>
 const $=id=>document.getElementById(id);
 const ReactionUI=globalThis.AvatarReactions;
@@ -1195,7 +1195,7 @@ function turnLoop(){
 }
 async function hit(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;$('hit').disabled=true;$('stay').disabled=true;await drawFor(current);if(running)nextTurn()}
 function stay(){if(!running||players[current].bot||current!==me||!isRoundActive(players[current]))return;players[current].banked=true;setAvatarEmotion(players[current],'excited');log(players[current].name+' stays with '+value(players[current]));playScreenEffectSound('hold');render();nextTurn()}
-function showSevenBonus(p){const flash=$('bonusFlash');if(!flash||!p)return;flash.innerHTML='<div class="flip7-burst-scene"><div class="flip7-card-fan"><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i></div><div class="flip7-main">7</div><div class="flip7-title">FLIP 7!</div><div class="flip7-round">ROUND ENDS</div><div class="flip7-points">+15</div></div>';flash.setAttribute('aria-label',p.name+' reached Flip 7. Round ends. Plus 15 points.');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');launchConfetti();setTimeout(()=>flash.classList.remove('show'),3200)}
+function showSevenBonus(p){const flash=$('bonusFlash');if(!flash||!p)return;flash.innerHTML='<div class="flip7-burst-scene"><div class="flip7-card-fan"><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i><i class="flip7-card"><span>7</span></i></div><div class="flip7-main">7</div><div class="flip7-title">FLIP 7!</div><div class="flip7-round">ROUND ENDS</div><div class="flip7-points">+15</div></div>';flash.setAttribute('aria-label',p.name+' reached Flip 7. Round ends. Plus 15 points.');flash.classList.remove('show');void flash.offsetWidth;flash.classList.add('show');launchConfetti();playScreenEffectSound('flip7',players.indexOf(p)===me?1:.25);setTimeout(()=>flash.classList.remove('show'),3200)}
 function launchConfetti(){const box=$('confetti');box.innerHTML='';for(let i=0;i<70;i++){const c=document.createElement('i');c.className='confetti-piece';c.style.left=Math.random()*100+'%';c.style.animationDelay=(Math.random()*.8)+'s';c.style.background=['#ffdd42','#ff4f8b','#32e5cb','#74dfff','#ffffff'][i%5];box.appendChild(c)}setTimeout(()=>box.innerHTML='',3600)}
 function fitWinnerName(){
  const label=document.querySelector('#modal[data-mode="winner"] .winner-name');if(!label)return;
@@ -1217,7 +1217,7 @@ function showWinner(winner){
  const winnerImage=avatarSource(winner,'excited'),cards=Array.from({length:7},()=>'<span class="winner-card">7</span>').join('');
  const scoreRows=standings.map((p,i)=>{const source=avatarSource(p,p.id===winner.id?'excited':'normal');return `<div class="winner-score-row ${p.id===winner.id?'is-winner':''}"><span class="winner-score-rank">${i+1}</span><span class="winner-score-person">${source?`<img src="${source}" alt="">`:`<span class="winner-score-initial">${safe((p.name||'?').charAt(0).toUpperCase())}</span>`}<span class="winner-score-person-name">${safe(p.name)}</span></span><strong class="winner-score-value">${p.score}</strong></div>`}).join('');
  $('modalBody').innerHTML=`<div class="winner-celebration"><div class="winner-hero"><div class="winner-card-fan" aria-hidden="true">${cards}</div><div class="winner-crown" aria-hidden="true"></div><div class="winner-avatar">${winnerImage?`<img src="${winnerImage}" alt="">`:safe((winner.name||'?').charAt(0).toUpperCase())}</div></div><div class="winner-game-over">GAME OVER</div><div class="winner-name">${safe(winner.name)} WINS!</div><div class="winner-standings"><div class="winner-standings-title">FINAL SCORES</div>${scoreRows}</div><button class="menu-action play-again winner-play-again" onclick="location.reload()" aria-label="Play another game">↻ PLAY AGAIN</button></div>`;
- $('modal').dataset.mode='winner';$('modal').classList.remove('hidden');fitWinnerName();launchConfetti();
+ $('modal').dataset.mode='winner';$('modal').classList.remove('hidden');fitWinnerName();playScreenEffectSound('winner',players.indexOf(winner)===me?1:.25);launchConfetti();
 }
 function endRound(reason='Round complete.'){
  if(!running)return;running=false;

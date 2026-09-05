@@ -13,6 +13,8 @@
   const FLIP3_SOUND_URL = 'flip3-sfx.mp3?v=20260905-tada-card-fan-v1';
   const SECOND_CHANCE_SOUND_URL = 'second-chance-sfx.mp3?v=20260905-metal-shield-v1';
   const HOLD_SOUND_URL = 'hold-sfx.mp3?v=20260905-real-service-bell-v1';
+  const FLIP7_SOUND_URL = 'flip7-sfx.mp3?v=20260905-clean-crowd-v1';
+  const WINNER_SOUND_URL = 'winner-sfx.mp3?v=20260905-cinematic-crowd-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
@@ -26,6 +28,8 @@
   let flip3SoundPreload = null;
   let secondChanceSoundPreload = null;
   let holdSoundPreload = null;
+  let flip7SoundPreload = null;
+  let winnerSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -114,12 +118,38 @@
     } catch {}
   }
 
+  function playFlip7Sound(volumeScale = 1) {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = flip7SoundPreload || new Audio(FLIP7_SOUND_URL);
+      flip7SoundPreload = sound;
+      sound.pause();
+      sound.currentTime = 0;
+      sound.volume = soundVolume(volumeScale);
+      sound.play().catch(() => {});
+    } catch {}
+  }
+
+  function playWinnerSound(volumeScale = 1) {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = winnerSoundPreload || new Audio(WINNER_SOUND_URL);
+      winnerSoundPreload = sound;
+      sound.pause();
+      sound.currentTime = 0;
+      sound.volume = soundVolume(volumeScale);
+      sound.play().catch(() => {});
+    } catch {}
+  }
+
   function playSound(type, volumeScale = 1) {
     if (type === 'freeze') playFreezeSound(volumeScale);
     else if (type === 'bust') playBustSound(volumeScale);
     else if (type === 'flip3') playFlip3Sound(volumeScale);
     else if (type === 'secondChance') playSecondChanceSound(volumeScale);
     else if (type === 'hold') playHoldSound(volumeScale);
+    else if (type === 'flip7') playFlip7Sound(volumeScale);
+    else if (type === 'winner') playWinnerSound(volumeScale);
   }
 
   function createSurface(effect, type) {
@@ -884,6 +914,22 @@
         holdSoundPreload.load();
       } catch {}
     }
+    if (!flip7SoundPreload) {
+      try {
+        flip7SoundPreload = new Audio(FLIP7_SOUND_URL);
+        flip7SoundPreload.preload = 'auto';
+        flip7SoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        flip7SoundPreload.load();
+      } catch {}
+    }
+    if (!winnerSoundPreload) {
+      try {
+        winnerSoundPreload = new Audio(WINNER_SOUND_URL);
+        winnerSoundPreload.preload = 'auto';
+        winnerSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        winnerSoundPreload.load();
+      } catch {}
+    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -903,7 +949,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, flip3SoundPreload, secondChanceSoundPreload, holdSoundPreload, flip7SoundPreload, winnerSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;
