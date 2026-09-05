@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-second-chance-sound-v21';
+const CACHE_NAME='flip-rush-7-v2026-09-05-animation-audio-test-v22';
 const APP_SHELL = [
   './',
   './index.html',
