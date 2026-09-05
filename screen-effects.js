@@ -10,6 +10,7 @@
   const SECOND_CHANCE_OVERLAY_URL = 'second-chance-guardian-approved.webp?v=20260902-approved-mockup-v2';
   const FREEZE_SOUND_URL = 'freeze-sfx.mp3?v=20260905-approved-v1';
   const BUST_SOUND_URL = 'bust-sfx.mp3?v=20260905-timing-v2';
+  const SECOND_CHANCE_SOUND_URL = 'second-chance-sfx.mp3?v=20260905-metal-shield-v1';
   const SCREEN_EFFECT_SOUND_VOLUME = 0.38;
   let effectTimer = 0;
   let effectFrame = 0;
@@ -20,6 +21,7 @@
   let secondChanceArtworkPreload = null;
   let freezeSoundPreload = null;
   let bustSoundPreload = null;
+  let secondChanceSoundPreload = null;
 
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => { value = clamp(value); return value * value * (3 - 2 * value); };
@@ -53,6 +55,25 @@
           bustSoundPreload.preload = 'auto';
           bustSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
           bustSoundPreload.play().catch(() => {});
+        } catch {}
+      });
+    } catch {}
+  }
+
+  function playSecondChanceSound() {
+    try {
+      if (localStorage.getItem('fr7sound') === 'off') return;
+      const sound = secondChanceSoundPreload || new Audio(SECOND_CHANCE_SOUND_URL);
+      secondChanceSoundPreload = sound;
+      sound.pause();
+      sound.currentTime = 0;
+      sound.volume = SCREEN_EFFECT_SOUND_VOLUME;
+      sound.play().catch(() => {
+        try {
+          secondChanceSoundPreload = new Audio(SECOND_CHANCE_SOUND_URL);
+          secondChanceSoundPreload.preload = 'auto';
+          secondChanceSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+          secondChanceSoundPreload.play().catch(() => {});
         } catch {}
       });
     } catch {}
@@ -608,6 +629,7 @@
     const startApprovedArtwork = () => {
       if (started || !artwork.naturalWidth || !effect.isConnected) return;
       started = true;
+      playSecondChanceSound();
       artwork.style.opacity = '1';
       if (artwork.animate) {
         artwork.animate([
@@ -794,6 +816,14 @@
         bustSoundPreload.load();
       } catch {}
     }
+    if (!secondChanceSoundPreload) {
+      try {
+        secondChanceSoundPreload = new Audio(SECOND_CHANCE_SOUND_URL);
+        secondChanceSoundPreload.preload = 'auto';
+        secondChanceSoundPreload.volume = SCREEN_EFFECT_SOUND_VOLUME;
+        secondChanceSoundPreload.load();
+      } catch {}
+    }
     if (!bustArtworkPreload) {
       bustArtworkPreload = new Image();
       bustArtworkPreload.decoding = 'async';
@@ -813,7 +843,7 @@
     if (effectSoundsUnlocked) return;
     effectSoundsUnlocked = true;
     prewarmFrost();
-    for (const sound of [freezeSoundPreload, bustSoundPreload]) {
+    for (const sound of [freezeSoundPreload, bustSoundPreload, secondChanceSoundPreload]) {
       if (!sound) continue;
       const volume = sound.volume;
       sound.volume = 0;

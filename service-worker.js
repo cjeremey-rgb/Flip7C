@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-bust-timing-v20';
+const CACHE_NAME='flip-rush-7-v2026-09-05-second-chance-sound-v21';
 const APP_SHELL = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ const APP_SHELL = [
   './frost-whiteout.webp',
   './freeze-sfx.mp3',
   './bust-sfx.mp3',
+  './second-chance-sfx.mp3',
   './bust-approved-exact.webp',
   './second-chance-guardian-approved.webp',
   './avatar-1.webp',
