@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-05-neon-circuit-music-v35';
+const CACHE_NAME='flip-rush-7-v2026-09-06-seamless-pregame-music-v36';
 const APP_SHELL = [
   './',
   './index.html',
