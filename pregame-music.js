@@ -2,6 +2,7 @@
   const STORAGE_KEY = 'fr7PregameMusicStateV2';
   const TRACK_URL = 'neon-circuit.mp3?v=20260905-neon-circuit-v1';
   const VOLUME = 0.26;
+  const GAME_START_FADE_MS = 1400;
   const NAVIGATION_WINDOW_MS = 5000;
   const params = new URLSearchParams(location.search);
   const mode = document.body.dataset.pregameMusic || 'off';
@@ -43,6 +44,8 @@
 
   let wanted = initialWanted();
   let lastSavedSecond = -1;
+  let fadeFrame = 0;
+  let fadingOut = false;
   const audio = new Audio(TRACK_URL);
   audio.preload = 'auto';
   audio.loop = true;
@@ -80,19 +83,56 @@
     try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ position, savedAt: Date.now() })); } catch {}
   }
 
+  function cancelFade(restoreVolume = true) {
+    if (fadeFrame) cancelAnimationFrame(fadeFrame);
+    fadeFrame = 0;
+    fadingOut = false;
+    if (restoreVolume) audio.volume = VOLUME;
+  }
+
   function pause() {
+    cancelFade();
     if (!audio.paused) audio.pause();
     savePosition();
   }
 
+  function fadeOutForGameStart() {
+    if (fadingOut) return;
+    if (audio.paused) {
+      audio.volume = VOLUME;
+      savePosition();
+      return;
+    }
+    fadingOut = true;
+    const started = performance.now();
+    const startingVolume = audio.volume;
+    const frame = now => {
+      const progress = Math.min(1, (now - started) / GAME_START_FADE_MS);
+      audio.volume = startingVolume * (1 - progress);
+      if (progress < 1 && fadingOut) {
+        fadeFrame = requestAnimationFrame(frame);
+        return;
+      }
+      if (!fadingOut) return;
+      audio.pause();
+      audio.volume = VOLUME;
+      fadingOut = false;
+      fadeFrame = 0;
+      savePosition();
+    };
+    fadeFrame = requestAnimationFrame(frame);
+  }
+
   function play() {
     if (!wanted || !soundEnabled() || document.visibilityState === 'hidden') return;
+    cancelFade();
     audio.play().catch(() => {});
   }
 
   function sync(active) {
     wanted = Boolean(active);
     if (wanted && soundEnabled()) play();
+    else if (!wanted && soundEnabled()) fadeOutForGameStart();
     else pause();
   }
 

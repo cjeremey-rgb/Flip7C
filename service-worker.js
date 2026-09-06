@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-06-visible-only-pregame-music-v37';
+const CACHE_NAME='flip-rush-7-v2026-09-06-game-start-fade-v38';
 const APP_SHELL = [
   './',
   './index.html',
