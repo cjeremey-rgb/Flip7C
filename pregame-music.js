@@ -117,10 +117,12 @@
     }
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') savePosition();
+    if (document.visibilityState === 'hidden') pause();
     else play();
   });
-  window.addEventListener('pagehide', savePosition);
+  document.addEventListener('freeze', pause);
+  window.addEventListener('pagehide', pause);
+  window.addEventListener('pageshow', play);
 
   const api = { play, pause, sync, save: savePosition, soundPreferenceChanged };
   globalThis.FlipRushPregameMusic = api;
