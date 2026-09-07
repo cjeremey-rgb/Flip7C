@@ -1,0 +1,76 @@
+/* Lobby/gameplay safety overrides for large multiplayer rooms. Loaded last. */
+
+/* Never allow a responsive gameplay rule to resurrect an element that the game
+   has deliberately marked hidden. This keeps the card table out of the lobby. */
+#game .table.hidden,
+#game #table.hidden,
+body.large-room #game .table.hidden,
+body.large-room #game #table.hidden {
+  display:none!important;
+}
+
+@media (max-width:699px){
+  /* Large lobbies must remain scrollable, but leave enough room for the host's
+     START GAME control above Android's system navigation bar. */
+  body.large-room #game.screen.active{
+    padding-bottom:180px!important;
+  }
+
+  body.large-room #game #actions{
+    position:fixed!important;
+    z-index:1200!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:max(var(--bottom-ui-inset),72px)!important;
+    width:auto!important;
+    margin:0!important;
+    padding:8px!important;
+    transform:none!important;
+    background:#07101df5!important;
+    border:1px solid #27445a!important;
+    border-radius:18px!important;
+    box-shadow:0 10px 30px #000c!important;
+  }
+
+  body.large-room #game #start:not(.hidden){
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    grid-column:2/4!important;
+    min-height:62px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex-direction:column!important;
+  }
+
+  /* During gameplay, retain the natural vertical room layout. */
+  body.large-room #game #table:not(.hidden){
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
+
+@media (min-width:700px){
+  /* Desktop controls must sit inside the viewport regardless of document height. */
+  #game #actions{
+    position:fixed!important;
+    z-index:1200!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:12px!important;
+    width:min(960px,calc(100vw - 32px))!important;
+    margin:0!important;
+    transform:translateX(-50%)!important;
+  }
+  #game #hit:not(.hidden),
+  #game #stay:not(.hidden),
+  #game #start:not(.hidden),
+  #game #next:not(.hidden){
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
