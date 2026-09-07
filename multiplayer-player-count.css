@@ -1,0 +1,94 @@
+/* Multiplayer player-count responsive layout.
+   Three total players (you + two opponents) remains the compact one-screen phone layout.
+   Four or more total players switch to a vertically scrollable table so every seat stays readable. */
+
+@media (max-width:699px){
+  /* Three-player game: keep the existing one-screen presentation. */
+  body:has(#game.screen.active):not(:has(#botTable .bot-seat:nth-child(3))){
+    overflow:hidden;
+  }
+  body:has(#game.screen.active):not(:has(#botTable .bot-seat:nth-child(3))) main,
+  body:has(#game.screen.active):not(:has(#botTable .bot-seat:nth-child(3))) #game.screen.active{
+    height:calc(100dvh - var(--android-nav-reserve));
+    min-height:0;
+    overflow:hidden;
+  }
+  body:has(#game.screen.active):not(:has(#botTable .bot-seat:nth-child(3))) #game .bot-table{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  /* Four+ total players: three or more opponent seats exist. */
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)){
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    overscroll-behavior-y:auto!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) main{
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game.screen.active{
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+    padding-bottom:calc(112px + var(--bottom-ui-inset))!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .players{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    flex:0 0 auto!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .table{
+    height:auto!important;
+    min-height:0!important;
+    flex:0 0 auto!important;
+    overflow:visible!important;
+    padding-bottom:26px!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .bot-table{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    width:100%!important;
+    margin-bottom:18px!important;
+    overflow:visible!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .bot-seat{
+    height:auto!important;
+    min-height:118px!important;
+    overflow:hidden!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .bot-hand{
+    position:static!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:53px!important;
+    overflow:visible!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .card-piles{
+    margin:6px 0 16px!important;
+    height:auto!important;
+    min-height:98px!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .my-zone{
+    height:auto!important;
+    min-height:132px!important;
+    flex:0 0 auto!important;
+    margin-top:14px!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .my-area{
+    height:auto!important;
+    min-height:132px!important;
+    overflow:visible!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .my-area .player-hand-row{
+    flex-shrink:0!important;
+  }
+  body:has(#game.screen.active):has(#botTable .bot-seat:nth-child(3)) #game .bottom-dock{
+    position:fixed!important;
+  }
+}

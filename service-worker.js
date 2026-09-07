@@ -1,4 +1,4 @@
-const CACHE_NAME='flip-rush-7-v2026-09-06-game-start-fade-v38';
+const CACHE_NAME='flip-rush-7-v2026-09-06-player-count-layout-v39';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './Flip-Rush-7-Single-Player.html',
   './online.html',
   './online.css',
+  './multiplayer-player-count.css',
   './winner-burst-frame.webp',
   './online.js',
   './avatar-reactions.css',
