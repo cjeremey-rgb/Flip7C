@@ -1,17 +1,35 @@
 (() => {
-  // Multiplayer-only player-count layout. Keeping this separate lets the
-  // three-player game stay compact while larger rooms become scrollable.
-  if (/online\.html$/i.test(location.pathname)) {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'multiplayer-player-count.css?v=20260906-v1';
-    document.head.appendChild(link);
-  }
+  // Load the multiplayer layout correction after the main game styles so its
+  // overrides actually win the cascade.
+  const ensureLayoutFix = () => {
+    if (!document.querySelector('link[data-multiplayer-layout-fix]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './multiplayer-layout-fix.css?v=20260906-layout-v2';
+      link.dataset.multiplayerLayoutFix = '1';
+      document.head.appendChild(link);
+    }
+  };
+
+  const syncRoomSizeClass = () => {
+    const players = document.getElementById('players');
+    const count = players ? players.children.length : 0;
+    const large = count >= 4;
+    document.documentElement.classList.toggle('large-room', large);
+    document.body.classList.toggle('large-room', large);
+  };
+
+  ensureLayoutFix();
+  window.addEventListener('DOMContentLoaded', () => {
+    ensureLayoutFix();
+    syncRoomSizeClass();
+    const players = document.getElementById('players');
+    if (players) new MutationObserver(syncRoomSizeClass).observe(players, { childList: true });
+  });
 
   if (!('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js', { scope: './' }).then(registration => {
-      // Check for updated website code whenever the installed app is opened.
       registration.update().catch(() => {});
     }).catch(() => {});
   });

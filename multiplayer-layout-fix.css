@@ -1,3 +1,150 @@
-/* Multiplayer responsive layout correction — 2026-09-06 */
-@media (min-width:700px){#game.screen.active{padding-bottom:104px!important}#game .bottom-dock{position:fixed!important;z-index:220!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;margin:0!important;padding:0!important;background:linear-gradient(180deg,rgba(7,16,29,0),rgba(7,16,29,.96) 22%,rgba(7,16,29,.99) 100%)!important}#game .bottom-dock .actions{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;width:min(980px,100%)!important;max-width:980px!important;margin:0 auto!important;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))!important;display:grid!important;grid-template-columns:48px 1.45fr 1fr!important;gap:9px!important;background:#07101dea!important;border-top:1px solid #22384b!important;border-radius:22px 22px 0 0!important;transform:none!important}#game .bottom-dock .decision,#game .bottom-dock .react-btn{visibility:visible!important}}
-@media (max-width:699px){html:has(#game.screen.active #players .player:nth-child(4)),body:has(#game.screen.active #players .player:nth-child(4)){height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important}body:has(#game.screen.active #players .player:nth-child(4)) main{height:auto!important;min-height:100dvh!important;overflow:visible!important}body:has(#game.screen.active #players .player:nth-child(4)) #game.screen.active{display:block!important;height:auto!important;min-height:100dvh!important;overflow:visible!important;padding-bottom:calc(92px + var(--bottom-ui-inset))!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .players{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;overflow:visible!important;height:auto!important;max-height:none!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .table{display:flex!important;flex-direction:column!important;height:auto!important;min-height:0!important;overflow:visible!important;padding:12px 8px 24px!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .bot-table{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:auto!important;gap:8px!important;width:100%!important;height:auto!important;overflow:visible!important;margin-bottom:14px!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .bot-seat{position:relative!important;height:auto!important;min-height:132px!important;overflow:hidden!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .bot-seat-head{grid-template-columns:60px minmax(0,1fr)!important;min-height:60px!important;column-gap:7px!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .seat-avatar,body:has(#game.screen.active #players .player:nth-child(4)) #game .seat-avatar .avatar-portrait{width:60px!important;height:60px!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .bot-hand{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;height:auto!important;min-height:56px!important;padding:3px 6px 6px!important;overflow:visible!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .card-piles{flex:0 0 auto!important;height:auto!important;min-height:106px!important;margin:8px 0 14px!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .my-zone{position:relative!important;height:auto!important;min-height:150px!important;flex:0 0 auto!important;margin-top:8px!important;overflow:visible!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .my-area{height:auto!important;min-height:145px!important;overflow:visible!important}body:has(#game.screen.active #players .player:nth-child(4)) #game .bottom-dock{position:fixed!important;left:0!important;right:0!important;bottom:var(--bottom-ui-inset)!important;z-index:220!important}}
+/* Multiplayer responsive layout correction v2 */
+
+/* Desktop/tablet: keep the active game controls on screen at all times. */
+@media (min-width:700px){
+  #game.screen.active{padding-bottom:110px!important;}
+  #game .bottom-dock{display:block!important;position:static!important;margin:0!important;padding:0!important;}
+  #game #actions{
+    position:fixed!important;
+    z-index:999!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:0!important;
+    width:min(980px,calc(100vw - 24px))!important;
+    max-width:980px!important;
+    margin:0!important;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))!important;
+    transform:translateX(-50%)!important;
+    display:grid!important;
+    grid-template-columns:54px minmax(180px,1.5fr) minmax(150px,1fr)!important;
+    gap:10px!important;
+    background:#07101df2!important;
+    border:1px solid #27445a!important;
+    border-bottom:0!important;
+    border-radius:22px 22px 0 0!important;
+    box-shadow:0 -14px 36px #0009!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  #game #actions > button:not(.hidden){display:flex!important;visibility:visible!important;opacity:1!important;min-height:64px!important;}
+  #game #actions > button.hidden{display:none!important;}
+}
+
+/* 4+ total players on a phone: use a naturally tall page that can scroll. */
+@media (max-width:699px){
+  html.large-room,
+  body.large-room{
+    height:auto!important;
+    min-height:100%!important;
+    max-height:none!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    touch-action:pan-y!important;
+    overscroll-behavior-y:auto!important;
+  }
+  body.large-room main{
+    height:auto!important;
+    min-height:100dvh!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  body.large-room #game.screen.active{
+    position:relative!important;
+    inset:auto!important;
+    display:block!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding-bottom:calc(104px + var(--bottom-ui-inset))!important;
+  }
+  body.large-room #game .players{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  body.large-room #game .table{
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding:12px 8px 22px!important;
+  }
+  body.large-room #game .bot-table{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;
+    grid-auto-rows:minmax(148px,auto)!important;
+    gap:8px!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:0 0 12px!important;
+  }
+  body.large-room #game .bot-seat{
+    position:relative!important;
+    inset:auto!important;
+    width:auto!important;
+    height:auto!important;
+    min-height:148px!important;
+    max-height:none!important;
+    overflow:hidden!important;
+  }
+  body.large-room #game .bot-hand{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:62px!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding:4px 6px 8px!important;
+  }
+  body.large-room #game .card-piles{
+    position:relative!important;
+    inset:auto!important;
+    flex:0 0 auto!important;
+    height:auto!important;
+    min-height:112px!important;
+    margin:8px 0 12px!important;
+  }
+  body.large-room #game .my-zone{
+    position:relative!important;
+    inset:auto!important;
+    flex:0 0 auto!important;
+    height:auto!important;
+    min-height:170px!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin-top:6px!important;
+  }
+  body.large-room #game .my-area{
+    position:relative!important;
+    height:auto!important;
+    min-height:165px!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  body.large-room #game .bottom-dock{
+    display:block!important;
+    position:static!important;
+  }
+  body.large-room #game #actions{
+    position:fixed!important;
+    z-index:999!important;
+    left:0!important;
+    right:0!important;
+    bottom:var(--bottom-ui-inset)!important;
+    width:100%!important;
+    margin:0!important;
+    transform:none!important;
+  }
+}
