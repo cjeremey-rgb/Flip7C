@@ -1,0 +1,8 @@
+/* Remove the wasted vertical gap between opponent avatar and cards.
+   Keep current card sizing/overlap; simply use the space directly below the avatar. */
+body.large-room #game .bot-seat-head{margin-bottom:0!important;}
+body.large-room #game .bot-hand{
+  align-items:flex-start!important;
+  padding-top:0!important;
+  margin-top:-2px!important;
+}
