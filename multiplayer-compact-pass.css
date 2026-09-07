@@ -1,0 +1,135 @@
+/* Compact 4+ player polish. Does not change multiplayer scrolling mechanics. */
+
+/* Winner screen owns the full viewport: gameplay controls are unnecessary. */
+body.winner-open #game .bottom-dock{
+  display:none!important;
+}
+body.winner-open #game.screen.active{
+  padding-bottom:24px!important;
+}
+body.winner-open #modal .modal-card{
+  max-height:calc(100dvh - 28px)!important;
+}
+body.winner-open #modal .winner-play-again{
+  margin-bottom:max(12px,env(safe-area-inset-bottom,0px))!important;
+}
+
+/* A real two-row hand needs enough physical height for two cards plus spacing.
+   This lets the existing fit code keep card size/location natural instead of
+   shrinking both rows to squeeze into the former 180px zone. */
+#game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)){
+  --hand-zone-height:224px!important;
+  height:var(--hand-zone-height)!important;
+  min-height:var(--hand-zone-height)!important;
+  flex-basis:var(--hand-zone-height)!important;
+}
+#game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)) .my-area{
+  height:auto!important;
+  min-height:220px!important;
+  overflow:visible!important;
+  padding-bottom:8px!important;
+}
+#game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)) .player-hand-row{
+  flex-shrink:0!important;
+}
+@media(min-width:700px){
+  #game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)){
+    --hand-zone-height:258px!important;
+  }
+  #game .my-zone:has(.hand-other:not(:empty)):has(.hand-numbers:not(:empty)) .my-area{
+    min-height:254px!important;
+  }
+}
+
+/* 4+ players: compact only the information density. The existing large-room
+   vertical scrolling and fixed action dock are intentionally untouched. */
+body.large-room #game .status{
+  margin:6px 0 5px!important;
+  padding:5px 7px!important;
+}
+body.large-room #game .status b{font-size:10px!important;}
+body.large-room #game .status small{font-size:7px!important;margin-top:1px!important;}
+
+body.large-room #game .players{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:4px!important;
+  padding:2px 0 6px!important;
+}
+body.large-room #game .player{
+  min-width:0!important;
+  height:44px!important;
+  min-height:44px!important;
+  padding:4px 6px!important;
+  border-radius:11px!important;
+}
+body.large-room #game .player .name{
+  font-size:8px!important;
+  line-height:10px!important;
+  padding-right:8px!important;
+}
+body.large-room #game .player .score{
+  font-size:18px!important;
+  line-height:18px!important;
+}
+body.large-room #game .player small{
+  display:block!important;
+  font-size:6px!important;
+  line-height:7px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+body.large-room #game .player .dot{
+  width:5px!important;
+  height:5px!important;
+  right:5px!important;
+  top:5px!important;
+}
+
+body.large-room #game .bot-table{
+  grid-auto-rows:minmax(118px,auto)!important;
+  gap:6px!important;
+}
+body.large-room #game .bot-seat{
+  min-height:118px!important;
+  padding:5px!important;
+  border-radius:12px!important;
+}
+body.large-room #game .bot-seat-head{
+  grid-template-columns:52px minmax(0,1fr)!important;
+  min-height:52px!important;
+  column-gap:6px!important;
+  margin-bottom:3px!important;
+}
+body.large-room #game .seat-avatar,
+body.large-room #game .seat-avatar .avatar-portrait{
+  width:52px!important;
+  height:52px!important;
+}
+body.large-room #game .seat-identity b{
+  font-size:9px!important;
+}
+body.large-room #game .bot-seat-head>small{
+  font-size:6px!important;
+}
+body.large-room #game .bot-hand{
+  min-height:50px!important;
+  padding:0 4px 4px!important;
+}
+body.large-room #game .bot-hand .card{
+  width:30px!important;
+  height:43px!important;
+  font-size:15px!important;
+  margin-left:-9px!important;
+}
+body.large-room #game .bot-hand .card.action{font-size:5px!important;}
+body.large-room #game .bot-hand .card.mod{font-size:9px!important;}
+
+@media(min-width:700px){
+  body.large-room #game .players{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  body.large-room #game .bot-table{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
