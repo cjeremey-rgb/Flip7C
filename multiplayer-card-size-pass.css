@@ -8,16 +8,22 @@ body.large-room #game .bot-table{
 body.large-room #game .bot-seat{
   min-height:178px!important;
   overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+body.large-room #game .bot-seat-head{
+  flex:0 0 auto!important;
 }
 body.large-room #game .bot-hand{
-  min-height:112px!important;
+  flex:1 1 auto!important;
+  min-height:0!important;
   height:auto!important;
   overflow:visible!important;
   display:flex!important;
-  align-items:flex-start!important;
+  align-items:center!important;
   justify-content:flex-start!important;
-  padding:0 6px 10px!important;
-  margin-top:-8px!important;
+  padding:0 6px 4px!important;
+  margin-top:0!important;
 }
 
 /* Normal large-room opponent card size. */
@@ -70,7 +76,7 @@ body.large-room #game .bot-hand:has(.card:nth-child(10)) .card.action{font-size:
 @media(min-width:700px){
   body.large-room #game .bot-table{grid-auto-rows:minmax(190px,auto)!important;}
   body.large-room #game .bot-seat{min-height:190px!important;}
-  body.large-room #game .bot-hand{min-height:122px!important;margin-top:-8px!important;}
+  body.large-room #game .bot-hand{flex:1 1 auto!important;min-height:0!important;margin-top:0!important;}
   body.large-room #game .bot-hand .card{
     height:96px!important;
     min-width:calc(96px * 72 / 104)!important;
