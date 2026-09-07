@@ -1,0 +1,21 @@
+/* Keep opponent cards at the same physical aspect ratio in compact 4+ player rooms.
+   Base card ratio is 72 x 104, so width is derived from height instead of
+   independently squeezing the two dimensions. */
+body.large-room #game .bot-hand .card{
+  height:46px!important;
+  width:auto!important;
+  aspect-ratio:72 / 104!important;
+  min-width:calc(46px * 72 / 104)!important;
+  flex:0 0 auto!important;
+  font-size:15px!important;
+  margin-left:-9px!important;
+}
+body.large-room #game .bot-hand .card:first-child{margin-left:0!important;}
+body.large-room #game .bot-hand .card.action{font-size:5px!important;}
+body.large-room #game .bot-hand .card.mod{font-size:9px!important;}
+@media(min-width:700px){
+  body.large-room #game .bot-hand .card{
+    height:50px!important;
+    min-width:calc(50px * 72 / 104)!important;
+  }
+}
