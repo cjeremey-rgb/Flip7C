@@ -1,0 +1,77 @@
+/* Larger opponent cards for 4+ player rooms.
+   Cards keep the normal 72:104 ratio, overlap like the main hand,
+   and progressively shrink only as the hand gets crowded. */
+
+body.large-room #game .bot-table{
+  grid-auto-rows:minmax(178px,auto)!important;
+}
+body.large-room #game .bot-seat{
+  min-height:178px!important;
+  overflow:hidden!important;
+}
+body.large-room #game .bot-hand{
+  min-height:102px!important;
+  height:auto!important;
+  overflow:visible!important;
+  display:flex!important;
+  align-items:flex-end!important;
+  padding:2px 6px 8px!important;
+}
+
+/* Normal large-room opponent card size. */
+body.large-room #game .bot-hand .card{
+  height:88px!important;
+  width:auto!important;
+  aspect-ratio:72 / 104!important;
+  min-width:calc(88px * 72 / 104)!important;
+  max-width:none!important;
+  flex:0 0 auto!important;
+  margin-left:-14px!important;
+  transform:none!important;
+  font-size:30px!important;
+}
+body.large-room #game .bot-hand .card:first-child{margin-left:0!important;}
+body.large-room #game .bot-hand .card.action{font-size:10px!important;}
+body.large-room #game .bot-hand .card.mod{font-size:18px!important;}
+
+/* Shrink progressively as more cards are added, but never distort them. */
+body.large-room #game .bot-hand:has(.card:nth-child(4)) .card{
+  height:80px!important;
+  min-width:calc(80px * 72 / 104)!important;
+  margin-left:-16px!important;
+  font-size:27px!important;
+}
+body.large-room #game .bot-hand:has(.card:nth-child(6)) .card{
+  height:70px!important;
+  min-width:calc(70px * 72 / 104)!important;
+  margin-left:-17px!important;
+  font-size:23px!important;
+}
+body.large-room #game .bot-hand:has(.card:nth-child(8)) .card{
+  height:62px!important;
+  min-width:calc(62px * 72 / 104)!important;
+  margin-left:-18px!important;
+  font-size:20px!important;
+}
+body.large-room #game .bot-hand:has(.card:nth-child(10)) .card{
+  height:54px!important;
+  min-width:calc(54px * 72 / 104)!important;
+  margin-left:-18px!important;
+  font-size:17px!important;
+}
+
+body.large-room #game .bot-hand:has(.card:nth-child(4)) .card.action{font-size:9px!important;}
+body.large-room #game .bot-hand:has(.card:nth-child(6)) .card.action{font-size:8px!important;}
+body.large-room #game .bot-hand:has(.card:nth-child(8)) .card.action{font-size:7px!important;}
+body.large-room #game .bot-hand:has(.card:nth-child(10)) .card.action{font-size:6px!important;}
+
+@media(min-width:700px){
+  body.large-room #game .bot-table{grid-auto-rows:minmax(190px,auto)!important;}
+  body.large-room #game .bot-seat{min-height:190px!important;}
+  body.large-room #game .bot-hand{min-height:112px!important;}
+  body.large-room #game .bot-hand .card{
+    height:96px!important;
+    min-width:calc(96px * 72 / 104)!important;
+    margin-left:-15px!important;
+  }
+}
