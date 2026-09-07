@@ -1,0 +1,40 @@
+name: Load opponent card ratio fix
+on:
+  push:
+    paths: ['multiplayer-card-ratio-fix.css']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load final card ratio stylesheet and bump cache
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('pwa-register.js'); s=p.read_text()
+          needle="    if (!document.querySelector('link[data-multiplayer-compact-pass]')) {"
+          insert="""    if (!document.querySelector('link[data-multiplayer-card-ratio-fix]')) {\n      const link = document.createElement('link'); link.rel='stylesheet'; link.href='./multiplayer-card-ratio-fix.css?v=20260906-ratio-v1'; link.dataset.multiplayerCardRatioFix='1'; document.head.appendChild(link);\n    }\n"""
+          if 'data-multiplayer-card-ratio-fix' not in s:
+              # Put it after compact pass block by inserting before closing ensureLayoutFix marker.
+              marker='  };\n  const syncRoomSizeClass='
+              s=s.replace(marker, insert+'  };\n  const syncRoomSizeClass=',1)
+          p.write_text(s)
+          sw=Path('service-worker.js'); t=sw.read_text()
+          t=t.replace("'./multiplayer-compact-pass.css'", "'./multiplayer-compact-pass.css','./multiplayer-card-ratio-fix.css'")
+          import re
+          t=re.sub(r"const CACHE_NAME='[^']+'", "const CACHE_NAME='flip-rush-7-v2026-09-06-card-ratio-v6'", t, count=1)
+          sw.write_text(t)
+          PY
+          node --check pwa-register.js
+          grep -q 'multiplayer-card-ratio-fix.css' pwa-register.js
+          grep -q 'multiplayer-card-ratio-fix.css' service-worker.js
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add pwa-register.js service-worker.js
+          git commit -m 'Load opponent card ratio fix' || exit 0
+          git push
