@@ -6,6 +6,7 @@
     if (!document.querySelector('link[data-multiplayer-card-size-pass]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./multiplayer-card-size-pass.css?v=20260906-size-v3'; link.dataset.multiplayerCardSizePass='1'; document.head.appendChild(link); }
     if (!document.querySelector('link[data-multiplayer-card-gap-fix]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./multiplayer-card-gap-fix.css?v=20260906-gap-v2'; link.dataset.multiplayerCardGapFix='1'; document.head.appendChild(link); }
     if (!document.querySelector('link[data-multiplayer-card-anchor-fix]')) { const link=document.createElement('link'); link.rel='stylesheet'; link.href='./multiplayer-card-anchor-fix.css?v=20260906-anchor-v1'; link.dataset.multiplayerCardAnchorFix='1'; document.head.appendChild(link); }
+    if (!document.querySelector('script[data-multiplayer-seat-order]')) { const script=document.createElement('script'); script.src='./multiplayer-seat-order.js?v=20260907-seat-v1'; script.dataset.multiplayerSeatOrder='1'; document.head.appendChild(script); }
   };
   const syncRoomSizeClass=()=>{const players=document.getElementById('players'),count=players?players.children.length:0,large=count>=4;document.documentElement.classList.toggle('large-room',large);document.body.classList.toggle('large-room',large)};
   const syncWinnerClass=()=>{const modal=document.getElementById('modal');document.body.classList.toggle('winner-open',Boolean(modal&&modal.dataset.mode==='winner'&&!modal.classList.contains('hidden')))};
