@@ -1,0 +1,101 @@
+name: Add multiplayer computer count selector
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-multiplayer-computer-count.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch multiplayer computer count
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              if new in text:
+                  return
+              if old not in text:
+                  raise SystemExit(f'Expected block not found in {path}')
+              p.write_text(text.replace(old, new, 1))
+
+          # ---------- server.js ----------
+          replace_once('server.js',
+          """function addComputerPlayer(room, name = 'Computer', style = 'balanced') {\n  const computerAvatar = name === 'Ace' ? 'avatar-ace' : 'avatar-nova';\n  const computer = makePlayer(`computer-${uid()}`, name, computerAvatar);\n  computer.computer = true;\n  computer.computerStyle = style;\n  room.players.push(computer);\n  room.log.push(`${computer.name} joined to complete the three-player table.`);\n  return computer;\n}\n""",
+          """function addComputerPlayer(room, name = 'Computer', style = 'balanced') {\n  const computerAvatar = name === 'Ace' ? 'avatar-ace' : 'avatar-nova';\n  const computer = makePlayer(`computer-${uid()}`, name, computerAvatar);\n  computer.computer = true;\n  computer.computerStyle = style;\n  room.players.push(computer);\n  room.log.push(`${computer.name} joined as a computer player.`);\n  return computer;\n}\n\nconst COMPUTER_PROFILES = [\n  { name: 'Nova', style: 'cautious' },\n  { name: 'Ace', style: 'bold' },\n  { name: 'Dash', style: 'balanced' },\n  { name: 'Pixel', style: 'cautious' },\n  { name: 'Blaze', style: 'bold' },\n  { name: 'Turbo', style: 'balanced' }\n];\n\nfunction requestedComputerCount(value) {\n  const number = Number.parseInt(value, 10);\n  return Number.isFinite(number) ? Math.max(0, Math.min(6, number)) : 0;\n}\n""")
+
+          replace_once('server.js',
+          """        code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,\n        players: [makePlayer(playerId, body.name || 'Host', body.avatar)], deck: makeDeck(), discard: [],\n""",
+          """        code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,\n        requestedComputers: requestedComputerCount(body.computerCount),\n        players: [makePlayer(playerId, body.name || 'Host', body.avatar)], deck: makeDeck(), discard: [],\n""")
+
+          replace_once('server.js',
+          """      if (room.players.length >= 9) return apiError(res, 'This room is full. Flip 7 supports up to 9 players.');\n""",
+          """      const reservedComputerSlots = room.requestedComputers || 0;\n      if (room.players.length >= 9 - reservedComputerSlots) return apiError(res, `This room is full. ${reservedComputerSlots} computer slot${reservedComputerSlots === 1 ? '' : 's'} reserved.`);\n""")
+
+          replace_once('server.js',
+          """    if (url.pathname === '/api/start') {\n      const humanCount = room.players.filter(candidate => !candidate.computer).length;\n      if (room.hostId !== playerId || room.phase !== 'lobby') return apiError(res, 'Only the host can start the game from the lobby.');\n      const computersNeeded = Math.max(0, 3 - humanCount);\n      const computerProfiles = computersNeeded === 2\n        ? [{ name: 'Nova', style: 'cautious' }, { name: 'Ace', style: 'bold' }]\n        : [{ name: 'Nova', style: 'cautious' }];\n      for (let index = 0; index < computersNeeded; index++) {\n        addComputerPlayer(room, computerProfiles[index].name, computerProfiles[index].style);\n      }\n      room.dealerIndex = room.players.length - 1;\n      startRound(room);\n""",
+          """    if (url.pathname === '/api/start') {\n      if (room.hostId !== playerId || room.phase !== 'lobby') return apiError(res, 'Only the host can start the game from the lobby.');\n      const computersNeeded = requestedComputerCount(room.requestedComputers);\n      if (room.players.length + computersNeeded > 9) return apiError(res, 'Too many players for the selected computer count.');\n      for (let index = 0; index < computersNeeded; index++) {\n        const profile = COMPUTER_PROFILES[index];\n        addComputerPlayer(room, profile.name, profile.style);\n      }\n      room.dealerIndex = room.players.length - 1;\n      startRound(room);\n""")
+
+          replace_once('server.js',
+          """    code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,\n""",
+          """    code: room.code, hostId: room.hostId, phase: room.phase, round: room.round, requestedComputers: room.requestedComputers || 0,\n""")
+
+          # ---------- online.html ----------
+          replace_once('online.html',
+          """      </fieldset>\n      <button id=\"create\" class=\"primary big\"><span>Create private room</span><small>Invite friends with a code</small></button>\n""",
+          """      </fieldset>\n      <label class=\"computer-count-field\">COMPUTER PLAYERS\n        <select id=\"computerCount\" aria-label=\"Number of computer players\">\n          <option value=\"0\" selected>0</option><option value=\"1\">1</option><option value=\"2\">2</option><option value=\"3\">3</option><option value=\"4\">4</option><option value=\"5\">5</option><option value=\"6\">6</option>\n        </select>\n        <small>Add 0–6 computer players for testing or mixed games.</small>\n      </label>\n      <button id=\"create\" class=\"primary big\"><span>Create private room</span><small>Invite friends with a code</small></button>\n""")
+
+          replace_once('online.html',
+          """  script.src = 'online.js?v=20260905-remote-quarter-volume-v22';\n""",
+          """  script.src = 'online.js?v=20260906-computer-count-v23';\n""")
+
+          # ---------- online.js ----------
+          replace_once('online.js',
+          """$('create').onclick=async()=>{try{const name=$('name').value.trim()||'Host',r=await api('create',{name,avatar:selectedAvatar});room=r.room;myId=r.playerId;localStorage.fr7room=room;localStorage.fr7pid=myId;localStorage.fr7name=name;enter();render(r.state);tone(520,.09)}catch(e){err.textContent=e.message}}\n""",
+          """$('create').onclick=async()=>{try{const name=$('name').value.trim()||'Host',computerCount=Math.max(0,Math.min(6,Number.parseInt($('computerCount')?.value||'0',10)||0)),r=await api('create',{name,avatar:selectedAvatar,computerCount});room=r.room;myId=r.playerId;localStorage.fr7room=room;localStorage.fr7pid=myId;localStorage.fr7name=name;enter();render(r.state);tone(520,.09)}catch(e){err.textContent=e.message}}\n""")
+
+          # ---------- online.css ----------
+          p=Path('online.css'); css=p.read_text()
+          marker='/* computer-count-selector-v1 */'
+          if marker not in css:
+              css += '''\n\n/* computer-count-selector-v1 */\n.computer-count-field{margin-top:14px}\n.computer-count-field select{width:100%;margin-top:8px;padding:13px 14px;border-radius:15px;border:1px solid #2f506c;background:#0b1b2a;color:#fff;font-weight:900;outline:none}\n.computer-count-field select:focus{border-color:var(--mint);box-shadow:0 0 0 3px #32e5cb1c}\n.computer-count-field small{display:block;margin-top:6px;color:var(--muted);font-size:9px;letter-spacing:0;text-transform:none}\n'''
+              p.write_text(css)
+
+          # ---------- service worker ----------
+          p=Path('service-worker.js'); sw=p.read_text()
+          sw=sw.replace("const CACHE_NAME='flip-rush-7-v2026-09-06-responsive-final-v4';", "const CACHE_NAME='flip-rush-7-v2026-09-06-computer-count-v5';")
+          p.write_text(sw)
+          PY
+
+          node --check server.js
+          node --check online.js
+          grep -q 'id="computerCount"' online.html
+          grep -q 'requestedComputers' server.js
+          grep -q 'COMPUTER_PROFILES' server.js
+
+      - name: Commit verified patch
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add server.js online.html online.js online.css service-worker.js
+          if git diff --cached --quiet; then
+            echo 'No changes needed.'
+            exit 0
+          fi
+          git commit -m 'Add selectable multiplayer computer players'
+          git push
