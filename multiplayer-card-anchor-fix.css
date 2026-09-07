@@ -1,0 +1,23 @@
+/* Final opponent-card vertical anchor: do not let the hand flex-grow.
+   The hand starts directly beneath the 52px avatar/header and reserves only
+   enough height for the largest opponent card. */
+body.large-room #game .bot-seat-head{margin-bottom:0!important;}
+body.large-room #game .bot-hand{
+  flex:0 0 92px!important;
+  height:92px!important;
+  min-height:92px!important;
+  max-height:92px!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  padding:2px 6px 2px!important;
+  margin:0!important;
+  overflow:visible!important;
+}
+@media(min-width:700px){
+  body.large-room #game .bot-hand{
+    flex-basis:100px!important;
+    height:100px!important;
+    min-height:100px!important;
+    max-height:100px!important;
+  }
+}
