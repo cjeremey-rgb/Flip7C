@@ -55,6 +55,12 @@
           <button type="button" class="avatar-choice" data-avatar="avatar-10" role="radio" aria-label="Evie dog avatar"><img src="avatar-10.webp" alt=""></button>
         </div>
       </fieldset>
+      <label class="computer-count-field">COMPUTER PLAYERS
+        <select id="computerCount" aria-label="Number of computer players">
+          <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        </select>
+        <small>Add 0–6 computer players for testing or mixed games.</small>
+      </label>
       <button id="create" class="primary big"><span>Create private room</span><small>Invite friends with a code</small></button>
       <div class="divider"><span>OR JOIN A ROOM</span></div>
       <div class="join"><input id="roomCode" maxlength="6" autocomplete="off" placeholder="ABC123"><button id="join">JOIN</button></div>
@@ -196,7 +202,7 @@ if (location.protocol === 'file:') {
   });
 } else {
   const script = document.createElement('script');
-  script.src = 'online.js?v=20260905-remote-quarter-volume-v22';
+  script.src = 'online.js?v=20260906-computer-count-v23';
   document.body.appendChild(script);
 }
 </script>

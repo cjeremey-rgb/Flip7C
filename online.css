@@ -766,3 +766,10 @@ body.shatter-impact main{will-change:transform,filter;animation:screenShock .42s
 @keyframes winner-avatar-art-in{from{opacity:0;transform:translateX(-50%) scale(.55)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 @media(max-height:760px){.winner-hero{width:min(92%,560px);margin:0 auto}.winner-game-over{margin-top:-8vw;font-size:clamp(40px,12vw,72px)}.winner-name{font-size:clamp(34px,13vw,82px)}.winner-standings{width:min(72%,430px);max-height:128px;margin-top:7px;padding:6px 10px}.winner-score-row{min-height:23px;padding:1px}.winner-standings-title{font-size:12px}#modal[data-mode="winner"] .winner-play-again{width:min(64%,380px);min-height:50px;margin-top:8px;font-size:18px!important}}
 @media(prefers-reduced-motion:reduce){.winner-card-fan{animation:none!important}.winner-avatar{animation:none!important}}
+
+
+/* computer-count-selector-v1 */
+.computer-count-field{margin-top:14px}
+.computer-count-field select{width:100%;margin-top:8px;padding:13px 14px;border-radius:15px;border:1px solid #2f506c;background:#0b1b2a;color:#fff;font-weight:900;outline:none}
+.computer-count-field select:focus{border-color:var(--mint);box-shadow:0 0 0 3px #32e5cb1c}
+.computer-count-field small{display:block;margin-top:6px;color:var(--muted);font-size:9px;letter-spacing:0;text-transform:none}

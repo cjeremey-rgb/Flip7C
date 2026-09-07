@@ -72,8 +72,22 @@ function addComputerPlayer(room, name = 'Computer', style = 'balanced') {
   computer.computer = true;
   computer.computerStyle = style;
   room.players.push(computer);
-  room.log.push(`${computer.name} joined to complete the three-player table.`);
+  room.log.push(`${computer.name} joined as a computer player.`);
   return computer;
+}
+
+const COMPUTER_PROFILES = [
+  { name: 'Nova', style: 'cautious' },
+  { name: 'Ace', style: 'bold' },
+  { name: 'Dash', style: 'balanced' },
+  { name: 'Pixel', style: 'cautious' },
+  { name: 'Blaze', style: 'bold' },
+  { name: 'Turbo', style: 'balanced' }
+];
+
+function requestedComputerCount(value) {
+  const number = Number.parseInt(value, 10);
+  return Number.isFinite(number) ? Math.max(0, Math.min(6, number)) : 0;
 }
 
 function calculateScore(player) {
@@ -757,7 +771,7 @@ function publicState(room) {
   room.reactions = (room.reactions || []).filter(reaction => now - reaction.at < 4500).slice(-12);
   room.phrases = (room.phrases || []).filter(message => now - message.at < 7000).slice(-12);
   return {
-    code: room.code, hostId: room.hostId, phase: room.phase, round: room.round,
+    code: room.code, hostId: room.hostId, phase: room.phase, round: room.round, requestedComputers: room.requestedComputers || 0,
     turnIndex: room.turnIndex, dealerIndex: room.dealerIndex,
     deckCount: room.deck.length, discardCount: room.discard.length,
     discardTop: room.discard.at(-1) || null,
@@ -802,6 +816,7 @@ const server = http.createServer(async (req, res) => {
       const playerId = uid();
       const room = {
         code, hostId: playerId, phase: 'lobby', round: 0, turnIndex: 0, dealerIndex: 0,
+        requestedComputers: requestedComputerCount(body.computerCount),
         players: [makePlayer(playerId, body.name || 'Host', body.avatar)], deck: makeDeck(), discard: [],
         heldSecondCards: new Map(), pendingAction: null, flow: null, flipThreeVisual: null, actionCardVisual: null,
         reactions: [], phrases: [], voiceSignals: new Map(),
@@ -815,7 +830,8 @@ const server = http.createServer(async (req, res) => {
       const room = rooms.get(code);
       if (!room) return apiError(res, 'Room not found.', 404);
       if (room.phase !== 'lobby') return apiError(res, 'Game already started.');
-      if (room.players.length >= 9) return apiError(res, 'This room is full. Flip 7 supports up to 9 players.');
+      const reservedComputerSlots = room.requestedComputers || 0;
+      if (room.players.length >= 9 - reservedComputerSlots) return apiError(res, `This room is full. ${reservedComputerSlots} computer slot${reservedComputerSlots === 1 ? '' : 's'} reserved.`);
       const playerId = uid();
       const joined = makePlayer(playerId, body.name, body.avatar);
       room.players.push(joined);
@@ -839,14 +855,12 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (url.pathname === '/api/start') {
-      const humanCount = room.players.filter(candidate => !candidate.computer).length;
       if (room.hostId !== playerId || room.phase !== 'lobby') return apiError(res, 'Only the host can start the game from the lobby.');
-      const computersNeeded = Math.max(0, 3 - humanCount);
-      const computerProfiles = computersNeeded === 2
-        ? [{ name: 'Nova', style: 'cautious' }, { name: 'Ace', style: 'bold' }]
-        : [{ name: 'Nova', style: 'cautious' }];
+      const computersNeeded = requestedComputerCount(room.requestedComputers);
+      if (room.players.length + computersNeeded > 9) return apiError(res, 'Too many players for the selected computer count.');
       for (let index = 0; index < computersNeeded; index++) {
-        addComputerPlayer(room, computerProfiles[index].name, computerProfiles[index].style);
+        const profile = COMPUTER_PROFILES[index];
+        addComputerPlayer(room, profile.name, profile.style);
       }
       room.dealerIndex = room.players.length - 1;
       startRound(room);
