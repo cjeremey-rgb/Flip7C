@@ -1,12 +1,19 @@
 (() => {
-  // Load the multiplayer layout correction after the main game styles so its
-  // overrides actually win the cascade.
+  // Load multiplayer layout corrections after the main game styles so their
+  // overrides win the cascade.
   const ensureLayoutFix = () => {
     if (!document.querySelector('link[data-multiplayer-layout-fix]')) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
       link.href = './multiplayer-layout-fix.css?v=20260906-layout-v2';
       link.dataset.multiplayerLayoutFix = '1';
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('link[data-multiplayer-lobby-safety]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './multiplayer-lobby-safety.css?v=20260906-lobby-v1';
+      link.dataset.multiplayerLobbySafety = '1';
       document.head.appendChild(link);
     }
   };
